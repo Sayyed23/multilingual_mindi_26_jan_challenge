@@ -1,0 +1,333 @@
+/**
+ * Review Form Component Styles
+ */
+
+.review-form-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  background: #ffffff;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.review-form-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.review-form-header h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.review-form-header p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.review-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Ratings Section */
+.ratings-section h3 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.rating-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.rating-item:last-child {
+  margin-bottom: 0;
+}
+
+.rating-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.rating-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.rating-description {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.rating-input {
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 0;
+}
+
+/* Comment Section */
+.comment-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.25rem;
+}
+
+.comment-description {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.comment-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 100px;
+  transition: border-color 0.2s ease;
+}
+
+.comment-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.comment-textarea.error {
+  border-color: #ef4444;
+}
+
+.comment-textarea.error:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.comment-textarea:disabled {
+  background-color: #f9fafb;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.comment-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.character-count {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+/* Options Section */
+.checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.checkbox-label input[type="checkbox"] {
+  margin-top: 0.125rem;
+  width: 1rem;
+  height: 1rem;
+  accent-color: #3b82f6;
+}
+
+.checkbox-label input[type="checkbox"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.checkbox-text {
+  font-weight: 500;
+  color: #374151;
+}
+
+.option-description {
+  margin: 0.25rem 0 0 1.5rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+/* Error Messages */
+.error-message {
+  font-size: 0.75rem;
+  color: #ef4444;
+  font-weight: 500;
+}
+
+.error-banner {
+  padding: 0.75rem;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 0.5rem;
+  color: #dc2626;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+}
+
+.btn-primary {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #2563eb;
+}
+
+.btn-primary:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background-color: #f9fafb;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: #f3f4f6;
+}
+
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .review-form-container {
+    padding: 1rem;
+    margin: 0;
+    border-radius: 0;
+  }
+  
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+  
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .comment-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .review-form-container {
+    background: #1f2937;
+  }
+  
+  .review-form-header h2,
+  .ratings-section h3 {
+    color: #f9fafb;
+  }
+  
+  .review-form-header p,
+  .rating-description,
+  .comment-description,
+  .option-description {
+    color: #9ca3af;
+  }
+  
+  .rating-item {
+    border-color: #374151;
+    background: #111827;
+  }
+  
+  .rating-label,
+  .comment-label,
+  .checkbox-text {
+    color: #d1d5db;
+  }
+  
+  .comment-textarea {
+    background: #111827;
+    border-color: #374151;
+    color: #f9fafb;
+  }
+  
+  .comment-textarea:focus {
+    border-color: #3b82f6;
+  }
+  
+  .comment-textarea:disabled {
+    background-color: #374151;
+    color: #9ca3af;
+  }
+  
+  .form-actions {
+    border-color: #374151;
+  }
+  
+  .btn-secondary {
+    background-color: #374151;
+    color: #d1d5db;
+    border-color: #4b5563;
+  }
+  
+  .btn-secondary:hover:not(:disabled) {
+    background-color: #4b5563;
+  }
+  
+  .error-banner {
+    background-color: #1f2937;
+    border-color: #374151;
+    color: #f87171;
+  }
+}

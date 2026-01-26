@@ -1,0 +1,293 @@
+/* Login Component Styles */
+
+.login-container {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 24px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.login-header h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.login-header p {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
+}
+
+/* Phone Form Styles */
+.phone-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.phone-input-container {
+  display: flex;
+  align-items: center;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.phone-input-container:focus-within {
+  border-color: #2196f3;
+}
+
+.country-code {
+  padding: 12px 16px;
+  background-color: #f5f5f5;
+  font-weight: 600;
+  color: #333;
+  border-right: 1px solid #e0e0e0;
+}
+
+.phone-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  color: #333;
+}
+
+.phone-input.invalid {
+  color: #f44336;
+}
+
+.phone-input::placeholder {
+  color: #999;
+}
+
+.error-text {
+  font-size: 12px;
+  color: #f44336;
+  margin-top: 4px;
+}
+
+/* OTP Form Styles */
+.otp-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.otp-header {
+  text-align: center;
+}
+
+.otp-header h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.otp-header p {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.otp-info {
+  text-align: center;
+  margin: 16px 0;
+}
+
+.timer {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.attempts-warning {
+  font-size: 12px;
+  color: #ff9800;
+  margin: 8px 0 0 0;
+  font-weight: 600;
+}
+
+/* Button Styles */
+.primary-button {
+  width: 100%;
+  padding: 14px 24px;
+  background-color: #2196f3;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+}
+
+.primary-button:hover:not(:disabled) {
+  background-color: #1976d2;
+  transform: translateY(-1px);
+}
+
+.primary-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.primary-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: #2196f3;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 4px 0;
+  transition: color 0.2s ease;
+}
+
+.link-button:hover:not(:disabled) {
+  color: #1976d2;
+}
+
+.link-button:disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Error Message */
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: #ffebee;
+  border: 1px solid #ffcdd2;
+  border-radius: 8px;
+  color: #c62828;
+  font-size: 14px;
+  margin-top: 16px;
+}
+
+.error-icon {
+  font-size: 16px;
+}
+
+/* Footer */
+.login-footer {
+  text-align: center;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.login-footer p {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+/* Mobile Responsive */
+@media (max-width: 480px) {
+  .login-container {
+    margin: 16px;
+    padding: 20px;
+  }
+  
+  .login-header h2 {
+    font-size: 24px;
+  }
+  
+  .phone-input-container {
+    flex-direction: column;
+  }
+  
+  .country-code {
+    border-right: none;
+    border-bottom: 1px solid #e0e0e0;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .login-container {
+    background: #2a2a2a;
+    color: #fff;
+  }
+  
+  .login-header h2,
+  .otp-header h3,
+  .input-group label {
+    color: #fff;
+  }
+  
+  .login-header p,
+  .otp-header p,
+  .timer,
+  .login-footer p {
+    color: #ccc;
+  }
+  
+  .phone-input-container {
+    border-color: #555;
+    background: #333;
+  }
+  
+  .country-code {
+    background-color: #444;
+    color: #fff;
+    border-color: #555;
+  }
+  
+  .phone-input {
+    background: transparent;
+    color: #fff;
+  }
+  
+  .phone-input::placeholder {
+    color: #888;
+  }
+  
+  .error-message {
+    background-color: #3a1a1a;
+    border-color: #5a2a2a;
+    color: #ff6b6b;
+  }
+  
+  .login-footer {
+    border-color: #555;
+  }
+}

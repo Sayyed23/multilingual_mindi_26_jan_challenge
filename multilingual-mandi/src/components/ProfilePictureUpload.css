@@ -1,0 +1,227 @@
+/* Profile Picture Upload Styles */
+.profile-picture-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.profile-picture-upload.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.picture-container {
+  position: relative;
+}
+
+.picture-display {
+  position: relative;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  border: 3px solid #e9ecef;
+}
+
+.profile-picture-upload.small .picture-display {
+  width: 80px;
+  height: 80px;
+}
+
+.profile-picture-upload.medium .picture-display {
+  width: 120px;
+  height: 120px;
+}
+
+.profile-picture-upload.large .picture-display {
+  width: 160px;
+  height: 160px;
+}
+
+.picture-display:hover:not(.disabled) {
+  transform: scale(1.05);
+  border-color: #3498db;
+}
+
+.profile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.profile-initials {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  font-weight: 600;
+  font-size: 1.5em;
+}
+
+.profile-picture-upload.small .profile-initials {
+  font-size: 1.2em;
+}
+
+.profile-picture-upload.large .profile-initials {
+  font-size: 2em;
+}
+
+.upload-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.upload-overlay-hover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  color: white;
+  font-size: 12px;
+  text-align: center;
+}
+
+.picture-display:hover .upload-overlay-hover {
+  opacity: 1;
+}
+
+.upload-icon {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.upload-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #ffffff40;
+  border-top: 2px solid #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.file-input {
+  display: none;
+}
+
+.picture-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.btn-upload,
+.btn-remove {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.btn-upload {
+  background: #3498db;
+  color: white;
+}
+
+.btn-upload:hover:not(:disabled) {
+  background: #2980b9;
+}
+
+.btn-upload:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+}
+
+.btn-remove {
+  background: #e74c3c;
+  color: white;
+}
+
+.btn-remove:hover:not(:disabled) {
+  background: #c0392b;
+}
+
+.btn-remove:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+}
+
+.upload-error {
+  background: #fdf2f2;
+  border: 1px solid #e74c3c;
+  color: #e74c3c;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  text-align: center;
+  max-width: 250px;
+}
+
+.upload-guidelines {
+  text-align: center;
+  color: #7f8c8d;
+  font-size: 11px;
+  line-height: 1.4;
+  max-width: 200px;
+}
+
+.upload-guidelines p {
+  margin: 2px 0;
+}
+
+/* Mobile Responsive */
+@media (max-width: 480px) {
+  .profile-picture-upload.medium .picture-display {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .profile-picture-upload.large .picture-display {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .picture-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .btn-upload,
+  .btn-remove {
+    min-width: 120px;
+  }
+  
+  .upload-guidelines {
+    font-size: 10px;
+  }
+}
