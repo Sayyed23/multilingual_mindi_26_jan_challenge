@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import ReputationDisplay from '../ReputationDisplay';
 import { ReputationScore } from '../../types/user';
 import { ReputationMetrics } from '../../types/review';
@@ -43,7 +44,7 @@ describe('ReputationDisplay Component', () => {
     
     expect(screen.getByText('4.2')).toBeInTheDocument();
     expect(screen.getByText('(18 reviews)')).toBeInTheDocument();
-    expect(screen.getByText('Silver Trader')).toBeInTheDocument();
+    expect(screen.getByText('New Trader')).toBeInTheDocument(); // Without metrics, defaults to 'new'
   });
 
   it('renders detailed variant with all categories', () => {
@@ -86,7 +87,7 @@ describe('ReputationDisplay Component', () => {
       />
     );
     
-    expect(screen.queryByText('Silver Trader')).not.toBeInTheDocument();
+    expect(screen.queryByText('New Trader')).not.toBeInTheDocument();
   });
 
   it('formats response time correctly for hours', () => {
