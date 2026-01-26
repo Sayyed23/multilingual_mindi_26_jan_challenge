@@ -29,6 +29,16 @@ export interface PriceMetadata {
   festivalSeason?: boolean;
   transportCost?: number;
   storageAvailable?: boolean;
+  // Freshness indicators
+  isStale?: boolean;
+  ageInHours?: number;
+  freshnessIndicator?: 'fresh' | 'aging' | 'stale';
+  // Additional metadata fields
+  minPrice?: number;
+  maxPrice?: number;
+  state?: string;
+  district?: string;
+  market?: string;
 }
 
 export interface PriceEntry {
@@ -60,12 +70,17 @@ export interface PriceRange {
     upper: number;
     confidence: number;
   };
+  confidenceInterval?: {
+    lower: number;
+    upper: number;
+    level: number; // e.g., 0.95 for 95% confidence
+  };
   sampleSize: number;
   lastUpdated: Date;
 }
 
 export interface PriceQuery {
-  commodity: string;
+  commodity?: string;
   location?: {
     latitude: number;
     longitude: number;
