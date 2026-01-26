@@ -37,7 +37,7 @@ export interface AudioRecordingOptions {
 }
 
 class VoiceService {
-  private recognition: SpeechRecognition | null = null;
+  private recognition: any | null = null;
   private synthesis: SpeechSynthesis | null = null;
   private mediaRecorder: MediaRecorder | null = null;
   private audioStream: MediaStream | null = null;
@@ -198,9 +198,9 @@ class VoiceService {
         this.recognition.lang = languageMap[options.language] || 'en-US';
       }
 
-      let timeoutId: NodeJS.Timeout | null = null;
+      let timeoutId: number | null = null;
       if (options.timeout) {
-        timeoutId = setTimeout(() => {
+        timeoutId = window.setTimeout(() => {
           this.stopVoiceRecognition();
           reject(new Error('Voice recognition timeout'));
         }, options.timeout);
@@ -210,8 +210,8 @@ class VoiceService {
         this.isListening = true;
       };
 
-      this.recognition.onresult = (event: SpeechRecognitionEvent) => {
-        if (timeoutId) clearTimeout(timeoutId);
+      this.recognition.onresult = (event: any) => {
+        if (timeoutId) window.clearTimeout(timeoutId);
         
         const result = event.results[event.results.length - 1];
         const transcript = result[0].transcript;
@@ -236,8 +236,8 @@ class VoiceService {
         }
       };
 
-      this.recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-        if (timeoutId) clearTimeout(timeoutId);
+      this.recognition.onerror = (event: any) => {
+        if (timeoutId) window.clearTimeout(timeoutId);
         this.isListening = false;
         reject(new Error(`Speech recognition error: ${event.error}`));
       };

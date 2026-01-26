@@ -64,17 +64,54 @@ const HistoricalTrendDisplay: React.FC<HistoricalTrendDisplayProps> = ({
     return '#dc3545';
   };
 
-  // Calculate price range for chart scaling
+  // Calculate price range for chart scaling with safety guards
   const prices = trend.dataPoints.map(point => point.price);
+  
+  // Handle empty data points
+  if (prices.length === 0) {
+    return (
+      <div className="historical-trend-display">
+        <div className="trend-header">
+          <h3>📈 Historical Price Trend</h3>
+          <p>{commodityName} - Last {trend.period === '30d' ? '30 days' : trend.period}</p>
+        </div>
+        <div className="no-data-message">
+          <p>📊 No historical data available for this period.</p>
+        </div>
+      </div>
+    );
+  }
+
   const minPrice = Math.min(...prices);
   const maxPrice = Math.max(...prices);
   const priceRange = maxPrice - minPrice;
-  const chartMin = Math.max(0, minPrice - priceRange * 0.1);
-  const chartMax = maxPrice + priceRange * 0.1;
-  const chartRange = chartMax - chartMin;
+  
+  // Handle case where all prices are identical (priceRange = 0)
+  let chartMin: number;
+  let chartMax: number;
+  let chartRange: number;
+  
+  if (priceRange === 0) {
+    // All prices are the same, create a small range around the price
+    const delta = Math.max(minPrice * 0.1, 100); // 10% of price or minimum 100
+    chartMin = Math.max(0, minPrice - delta);
+    chartMax = maxPrice + delta;
+    chartRange = chartMax - chartMin;
+  } else {
+    // Normal case with price variation
+    chartMin = Math.max(0, minPrice - priceRange * 0.1);
+    chartMax = maxPrice + priceRange * 0.1;
+    chartRange = chartMax - chartMin;
+  }
 
   const getPointHeight = (price: number) => {
-    return ((price - chartMin) / chartRange) * 100;
+    // Ensure chartRange is never zero to avoid division by zero
+    if (chartRange === 0) {
+      return 50; // Return middle position (50%) when no variation
+    }
+    const height = ((price - chartMin) / chartRange) * 100;
+    // Clamp the result between 0 and 100 to ensure bounded percentage
+    return Math.max(0, Math.min(100, height));
   };
 
   // Group data points by week for better visualization
@@ -167,29 +204,47 @@ const HistoricalTrendDisplay: React.FC<HistoricalTrendDisplayProps> = ({
               <rect width="100" height="100" fill="url(#grid)" />
               
               {/* Price line */}
-              <polyline
-                fill="none"
-                stroke="#007bff"
-                strokeWidth="2"
-                points={trend.dataPoints.map((point, index) => 
-                  `${(index / (trend.dataPoints.length - 1)) * 100},${100 - getPointHeight(point.price)}`
-                ).join(' ')}
-              />
+              {trend.dataPoints.length > 1 ? (
+                <polyline
+                  fill="none"
+                  stroke="#007bff"
+                  strokeWidth="2"
+                  points={trend.dataPoints.map((point, index) => {
+                    const xPos = (index / (trend.dataPoints.length - 1)) * 100;
+                    return `${xPos},${100 - getPointHeight(point.price)}`;
+                  }).join(' ')}
+                />
+              ) : (
+                // Single point - draw a horizontal line
+                <line
+                  x1="10"
+                  y1={100 - getPointHeight(trend.dataPoints[0].price)}
+                  x2="90"
+                  y2={100 - getPointHeight(trend.dataPoints[0].price)}
+                  stroke="#007bff"
+                  strokeWidth="2"
+                  strokeDasharray="5,5"
+                />
+              )}
               
               {/* Data points */}
-              {trend.dataPoints.map((point, index) => (
-                <circle
-                  key={index}
-                  cx={(index / (trend.dataPoints.length - 1)) * 100}
-                  cy={100 - getPointHeight(point.price)}
-                  r="1.5"
-                  fill="#007bff"
-                  className="data-point"
-                >
-                  <title>{formatDate(point.date)}: {formatPrice(point.price)}</title>
-                </circle>
-              ))}
-            </svg>
+              {trend.dataPoints.map((point, index) => {
+                const xPos = trend.dataPoints.length > 1 
+                  ? (index / (trend.dataPoints.length - 1)) * 100 
+                  : 50; // Center single point
+                return (
+                  <circle
+                    key={index}
+                    cx={xPos}
+                    cy={100 - getPointHeight(point.price)}
+                    r="1.5"
+                    fill="#007bff"
+                    className="data-point"
+                  >
+                    <title>{formatDate(point.date)}: {formatPrice(point.price)}</title>
+                  </circle>
+                );
+              })}            </svg>
           </div>
         </div>
         

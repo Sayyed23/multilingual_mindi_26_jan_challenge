@@ -3,11 +3,15 @@
  * Supports Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 6.1, 6.2, 6.3, 6.4, 6.5
  */
 
-import { Location } from './user';
-
 export type PriceSource = 'agmarknet' | 'vendor_submission' | 'predicted' | 'manual';
 export type MarketTrend = 'rising' | 'falling' | 'stable' | 'volatile';
 export type DemandLevel = 'low' | 'medium' | 'high' | 'very_high';
+
+export interface GeoLocation {
+  latitude: number;
+  longitude: number;
+  radius?: number; // km, default 50
+}
 
 export interface PriceLocation {
   mandiName: string;
@@ -81,11 +85,7 @@ export interface PriceRange {
 
 export interface PriceQuery {
   commodity?: string;
-  location?: {
-    latitude: number;
-    longitude: number;
-    radius?: number; // km, default 50
-  };
+  location?: GeoLocation;
   dateRange?: {
     start: Date;
     end: Date;
@@ -139,12 +139,7 @@ export interface PriceAlert {
   targetPrice: number;
   condition: 'above' | 'below' | 'equals';
   tolerance: number; // percentage
-  location?: {
-    latitude: number;
-    longitude: number;
-    radius?: number;
-  };
-  radius?: number; // km
+  location?: GeoLocation;
   isActive: boolean;
   createdAt: Date;
   triggeredAt?: Date;

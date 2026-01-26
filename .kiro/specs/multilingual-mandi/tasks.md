@@ -113,14 +113,14 @@ This implementation plan breaks down the Multilingual Mandi PWA into manageable 
     - **Property 6: Price Validation**
     - **Validates: Requirements 2.1, 2.2, 2.3, 2.5**
 
-  - [-] 4.4 Build price verification scanner
+  - [x] 4.4 Build price verification scanner
     - Create price comparison UI components
     - Implement price verification logic
     - Build historical price trend display
     - Add negotiation strategy suggestions
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
 
-  - [~] 4.5 Connect price service to Prices page
+  - [x] 4.5 Connect price service to Prices page
     - Replace static price data with dynamic service calls
     - Implement search and filtering functionality
     - Add real-time price updates

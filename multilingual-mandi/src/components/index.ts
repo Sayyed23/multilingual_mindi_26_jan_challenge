@@ -23,3 +23,14 @@ export { default as TransactionHistory } from './TransactionHistory';
 
 // Price Analysis Components
 export { default as PriceAnalysis } from './PriceAnalysis';
+
+// Price Verification Scanner Components
+export { default as PriceVerificationScanner } from './PriceVerificationScanner';
+export { default as PriceComparisonChart } from './PriceComparisonChart';
+export { default as HistoricalTrendDisplay } from './HistoricalTrendDisplay';
+export { default as NegotiationStrategySuggestions } from './NegotiationStrategySuggestions';
+
+// Enhanced Price Components
+export { default as PriceCard } from './PriceCard';
+export { default as PriceFilters } from './PriceFilters';
+export { default as RealTimeUpdates } from './RealTimeUpdates';

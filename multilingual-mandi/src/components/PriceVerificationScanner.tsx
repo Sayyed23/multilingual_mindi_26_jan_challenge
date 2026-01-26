@@ -4,9 +4,9 @@
  * Supports Requirements: 6.1, 6.2, 6.3, 6.4, 6.5
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { priceService } from '../services/priceService';
-import { PriceVerification, PriceTrend, PriceData } from '../types/price';
+import { PriceVerification, PriceTrend } from '../types/price';
 import PriceComparisonChart from './PriceComparisonChart';
 import HistoricalTrendDisplay from './HistoricalTrendDisplay';
 import NegotiationStrategySuggestions from './NegotiationStrategySuggestions';
@@ -46,13 +46,7 @@ const PriceVerificationScanner: React.FC<PriceVerificationScannerProps> = ({
     { id: 'oil', name: 'Cooking Oil' }
   ];
 
-  useEffect(() => {
-    if (commodityId && quotedPrice) {
-      loadHistoricalTrend();
-    }
-  }, [commodityId]);
-
-  const loadHistoricalTrend = async () => {
+  const loadHistoricalTrend = useCallback(async () => {
     if (!commodityId) return;
 
     try {
@@ -61,7 +55,13 @@ const PriceVerificationScanner: React.FC<PriceVerificationScannerProps> = ({
     } catch (err) {
       console.error('Failed to load historical trend:', err);
     }
-  };
+  }, [commodityId, location]);
+
+  useEffect(() => {
+    if (commodityId) {
+      loadHistoricalTrend();
+    }
+  }, [commodityId, loadHistoricalTrend]);
 
   const handleVerifyPrice = async () => {
     if (!commodityId || !quotedPrice || isNaN(Number(quotedPrice))) {
@@ -198,9 +198,15 @@ const PriceVerificationScanner: React.FC<PriceVerificationScannerProps> = ({
                 value={commodityName}
                 onChange={(e) => {
                   setCommodityName(e.target.value);
-                  setCommodityId(e.target.value.toLowerCase().replace(/\s+/g, '-'));
-                }}
-                className="commodity-input"
+                  setCommodityId(
+                    e.target.value
+                      .toLowerCase()
+                      .trim()
+                      .replace(/[^a-z0-9\s-]/g, '')
+                      .replace(/\s+/g, '-')
+                      .replace(/-+/g, '-')
+                  );
+                }}                className="commodity-input"
               />
             </div>
           </div>

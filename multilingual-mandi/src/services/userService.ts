@@ -11,6 +11,7 @@ import {
   BusinessInfo,
   Location 
 } from '../types/user';
+import { GeoLocation } from '../types/price';
 import { 
   GetUserResponse,
   UpdateUserRequest,
@@ -160,11 +161,7 @@ class UserService {
   async searchUsers(query: {
     name?: string;
     userType?: string;
-    location?: {
-      latitude: number;
-      longitude: number;
-      radius: number;
-    };
+    location?: GeoLocation;
     verified?: boolean;
     limit?: number;
     offset?: number;
@@ -180,7 +177,7 @@ class UserService {
     if (query.location) {
       searchParams.append('lat', query.location.latitude.toString());
       searchParams.append('lng', query.location.longitude.toString());
-      searchParams.append('radius', query.location.radius.toString());
+      searchParams.append('radius', (query.location.radius || 50).toString());
     }
 
     const response = await this.makeRequest<{ users: UserProfile[] }>(`/users/search?${searchParams}`);

@@ -16,7 +16,8 @@ import {
   PriceSource,
   MarketTrend,
   DemandLevel,
-  PriceLocation
+  PriceLocation,
+  GeoLocation
 } from '../types/price';
 import { Commodity } from '../types/commodity';
 import { ApiResponse } from '../types/api';
@@ -138,7 +139,7 @@ class PriceService {
    * Get price range and statistics for a commodity
    * Requirement 2.2: Display fair price range with confidence intervals
    */
-  async getPriceRange(commodityId: string, location?: { latitude: number; longitude: number; radius?: number }): Promise<PriceRange> {
+  async getPriceRange(commodityId: string, location?: GeoLocation): Promise<PriceRange> {
     await this.initialize();
 
     const query: PriceQuery = {
@@ -296,7 +297,7 @@ class PriceService {
   async verifyPriceQuote(
     commodityId: string,
     quotedPrice: number,
-    location?: { latitude: number; longitude: number; radius?: number }
+    location?: GeoLocation
   ): Promise<PriceVerification> {
     await this.initialize();
 
@@ -353,7 +354,7 @@ class PriceService {
   async getPriceTrend(
     commodityId: string,
     period: '24h' | '7d' | '30d' | '90d' | '1y' = '30d',
-    location?: { latitude: number; longitude: number; radius?: number }
+    location?: GeoLocation
   ): Promise<PriceTrend> {
     await this.initialize();
 
@@ -443,7 +444,7 @@ class PriceService {
    */
   async getMarketContext(
     commodityId: string,
-    location?: { latitude: number; longitude: number; radius?: number }
+    location?: GeoLocation
   ): Promise<MarketContext> {
     await this.initialize();
 
@@ -592,7 +593,7 @@ class PriceService {
   async getAdvancedPriceTrend(
     commodityId: string,
     period: '24h' | '7d' | '30d' | '90d' | '1y' = '30d',
-    location?: { latitude: number; longitude: number; radius?: number }
+    location?: GeoLocation
   ): Promise<PriceTrend & {
     movingAverages: { ma7: number; ma14: number; ma30: number };
     volatilityIndex: number;
@@ -717,7 +718,7 @@ class PriceService {
     targetPrice: number,
     condition: 'above' | 'below' | 'equals',
     tolerance: number = 5, // percentage
-    location?: { latitude: number; longitude: number; radius?: number }
+    location?: GeoLocation
   ): Promise<PriceAlert> {
     const alertId = `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
@@ -728,8 +729,7 @@ class PriceService {
       targetPrice,
       condition,
       tolerance,
-      location,
-      radius: location?.radius || 50,
+      location: location ? { ...location, radius: location.radius || 50 } : undefined,
       isActive: true,
       createdAt: new Date(),
       notificationSent: false
@@ -1091,7 +1091,7 @@ class PriceService {
 
   private async getComparableMarkets(
     commodityId: string,
-    location?: { latitude: number; longitude: number; radius?: number },
+    location?: GeoLocation,
     limit: number = 5
   ): Promise<PriceData[]> {
     const query: PriceQuery = {
@@ -1284,7 +1284,7 @@ class PriceService {
     return supplyMap[demandLevel];
   }
 
-  private async getNearbyMarkets(location?: { latitude: number; longitude: number; radius?: number }): Promise<PriceLocation[]> {
+  private async getNearbyMarkets(location?: GeoLocation): Promise<PriceLocation[]> {
     // This would typically query a database of market locations
     // For demo purposes, return some sample markets
     
@@ -1315,7 +1315,7 @@ class PriceService {
 
   private async getHistoricalAverages(
     commodityId: string,
-    location?: { latitude: number; longitude: number; radius?: number }
+    location?: GeoLocation
   ): Promise<{ '7d': number; '30d': number; '90d': number; '1y': number }> {
     // This would typically query historical data
     // For demo purposes, return calculated averages
@@ -1357,7 +1357,7 @@ class PriceService {
     return commodityName.toLowerCase().replace(/\s+/g, '-');
   }
 
-  private isWithinRadius(item: PriceData, location: { latitude: number; longitude: number; radius?: number }): boolean {
+  private isWithinRadius(item: PriceData, location: GeoLocation): boolean {
     // For demo purposes, assume all items are within radius
     // In production, this would calculate actual distance
     return true;

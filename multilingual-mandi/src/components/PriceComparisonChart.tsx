@@ -43,9 +43,9 @@ const PriceComparisonChart: React.FC<PriceComparisonChartProps> = ({
   const chartRange = chartMax - chartMin;
 
   const getBarWidth = (price: number) => {
+    if (chartRange === 0) return 100; // All prices equal, show full width
     return ((price - chartMin) / chartRange) * 100;
   };
-
   const getBarColor = (price: number, isQuoted: boolean = false) => {
     if (isQuoted) return '#007bff';
     
@@ -57,11 +57,14 @@ const PriceComparisonChart: React.FC<PriceComparisonChartProps> = ({
     return '#17a2b8'; // Slightly low - cyan
   };
 
+  // Calculate displayed count (max 5 markets)
+  const displayedCount = Math.min(comparableMarkets.length, 5);
+
   return (
     <div className="price-comparison-chart">
       <div className="chart-header">
         <h3>📊 Price Comparison</h3>
-        <p>Compare quoted price with {comparableMarkets.length} nearby markets</p>
+        <p>Compare quoted price with {displayedCount} nearby markets</p>
       </div>
 
       <div className="chart-container">
@@ -164,6 +167,10 @@ const PriceComparisonChart: React.FC<PriceComparisonChartProps> = ({
           <div className="legend-color" style={{ backgroundColor: '#17a2b8' }}></div>
           <span>Below Average</span>
         </div>
+        <div className="legend-item">
+          <div className="legend-color" style={{ backgroundColor: '#6f42c1' }}></div>
+          <span>Very Low</span>
+        </div>
       </div>
 
       {/* Summary Statistics */}
@@ -181,8 +188,8 @@ const PriceComparisonChart: React.FC<PriceComparisonChartProps> = ({
           <span>{formatPrice(maxPrice - minPrice)}</span>
         </div>
         <div className="summary-item">
-          <label>Markets Compared</label>
-          <span>{comparableMarkets.length}</span>
+          <label>Markets Displayed</label>
+          <span>{displayedCount}</span>
         </div>
       </div>
     </div>
