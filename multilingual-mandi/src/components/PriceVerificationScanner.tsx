@@ -8,8 +8,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { priceService } from '../services/priceService';
 import { PriceVerification, PriceTrend } from '../types/price';
 import PriceComparisonChart from './PriceComparisonChart';
-import HistoricalTrendDisplay from './HistoricalTrendDisplay';
-import NegotiationStrategySuggestions from './NegotiationStrategySuggestions';
+import HistoricalTrendDisplay from './HistoricalTrendDisplay.tsx';
+import NegotiationStrategySuggestions from './NegotiationStrategySuggestions.tsx';
 import './PriceVerificationScanner.css';
 
 interface PriceVerificationScannerProps {
