@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { priceService } from '../services/priceService';
 import { PriceData, PriceQuery } from '../types/price';
 import PriceAnalysis from '../components/PriceAnalysis';
@@ -6,9 +6,14 @@ import PriceVerificationScanner from '../components/PriceVerificationScanner';
 import PriceFilters from '../components/PriceFilters';
 import PriceCard from '../components/PriceCard';
 import RealTimeUpdates from '../components/RealTimeUpdates';
+import SearchInterface from '../components/SearchInterface';
+import AuthContext from '../contexts/AuthContext';
 import { usePriceData } from '../hooks/usePriceData';
 
 const Prices: React.FC = () => {
+  const authContext = useContext(AuthContext);
+  const user = authContext?.user;
+  
   // Use the custom hook for price data management
   const {
     priceData,
@@ -162,25 +167,17 @@ const Prices: React.FC = () => {
       <div className="page-content">
         {/* Enhanced Search Section */}
         <div className="search-section">
-          <div className="search-input-container">
-            <input 
-              type="text" 
-              placeholder="Search commodities (e.g., wheat, rice, onion)..." 
-              className="search-input"
-              value={searchTerm}
-              onChange={(e) => handleSearch(e.target.value)}
-              onKeyPress={handleKeyPress}
-              disabled={loading}
-            />
-            <button 
-              className="refresh-button" 
-              onClick={refresh}
-              disabled={loading}
-              title="Refresh data"
-            >
-              {loading ? '🔄' : '↻'}
-            </button>
-          </div>
+          <SearchInterface
+            onCommoditySelect={(commodity) => {
+              // Update filters to show selected commodity
+              setFilters({
+                commodity: commodity.commodity.name
+              });
+            }}
+            searchType="commodities"
+            language={user?.preferredLanguage || 'en'}
+            className="prices-search"
+          />
         </div>
 
         {/* Advanced Filters */}

@@ -1,67 +1,31 @@
 import React, { Suspense, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import BottomNavigation from './BottomNavigation';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorBoundary from './ErrorBoundary';
 import AuthModal from './AuthModal';
+
+import GlobalHeader from './layout/GlobalHeader';
+import GlobalFooter from './layout/GlobalFooter';
+import './layout/Layout.css';
 
 const Layout: React.FC = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
-  };
-
   return (
     <div className="app-layout">
       <ErrorBoundary>
-        {/* Header */}
-        <header className="app-header">
-          <div className="header-content">
-            <div className="header-left">
-              <h1 className="app-title">Multilingual Mandi</h1>
-            </div>
-            
-            <div className="header-right">
-              {isAuthenticated && user ? (
-                <div className="user-menu">
-                  <span className="user-greeting">
-                    Hello, {user.name}
-                  </span>
-                  <button
-                    onClick={handleLogout}
-                    className="logout-button"
-                    title="Logout"
-                  >
-                    Logout
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setShowAuthModal(true)}
-                  className="login-button"
-                >
-                  Login
-                </button>
-              )}
-            </div>
-          </div>
-        </header>
+        <GlobalHeader />
 
-        <main className="main-content">
+        <main className="main-content" style={{ minHeight: 'calc(100vh - 72px)', display: 'flex', flexDirection: 'column' }}>
           <Suspense fallback={<LoadingSpinner message="Loading page..." />}>
             <Outlet />
           </Suspense>
         </main>
-        
-        <BottomNavigation />
-        
+
+        <GlobalFooter />
+
         <AuthModal
           isOpen={showAuthModal}
           onClose={() => setShowAuthModal(false)}

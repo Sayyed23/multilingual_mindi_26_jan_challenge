@@ -85,10 +85,11 @@ const UserTypeSelector: React.FC<UserTypeSelectorProps> = ({
                   checked={selectedType === option.type}
                   onChange={() => onTypeChange(option.type)}
                   disabled={disabled}
+                  aria-label={option.type}
                 />
               </div>
             </div>
-            
+
             <div className="option-features">
               <ul>
                 {option.features.map((feature, index) => (

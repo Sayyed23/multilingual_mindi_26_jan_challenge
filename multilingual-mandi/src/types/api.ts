@@ -85,7 +85,7 @@ export interface RefreshTokenResponse {
 }
 
 // User API Types
-export interface CreateUserRequest extends UserRegistration {}
+export interface CreateUserRequest extends UserRegistration { }
 
 export interface CreateUserResponse {
   user: User;
@@ -96,7 +96,7 @@ export interface CreateUserResponse {
   };
 }
 
-export interface UpdateUserRequest extends UserUpdate {}
+export interface UpdateUserRequest extends UserUpdate { }
 
 export interface GetUserResponse {
   user: User;
@@ -135,8 +135,9 @@ export interface SearchCommoditiesRequest extends CommoditySearchFilter, Paginat
 }
 
 export interface SearchCommoditiesResponse {
-  results: CommoditySearchResult[];
-  suggestions?: string[];
+  results: import('../types/commodity').CommoditySearchResult[];
+  total: number;
+  suggestions: string[];
   filters: {
     categories: string[];
     locations: string[];
@@ -145,7 +146,7 @@ export interface SearchCommoditiesResponse {
 }
 
 // Price API Types
-export interface GetPricesRequest extends PriceQuery, PaginationRequest {}
+export interface GetPricesRequest extends PriceQuery, PaginationRequest { }
 
 export interface GetPricesResponse {
   prices: PriceData[];
@@ -154,7 +155,7 @@ export interface GetPricesResponse {
   lastUpdated: Date;
 }
 
-export interface SubmitPriceRequest extends PriceSubmission {}
+export interface SubmitPriceRequest extends PriceSubmission { }
 
 export interface SubmitPriceResponse {
   priceId: string;
@@ -173,7 +174,7 @@ export interface VerifyPriceRequest {
   };
 }
 
-export interface VerifyPriceResponse extends PriceVerification {}
+export interface VerifyPriceResponse extends PriceVerification { }
 
 export interface GetPriceTrendRequest {
   commodityId: string;
@@ -185,7 +186,7 @@ export interface GetPriceTrendRequest {
   };
 }
 
-export interface GetPriceTrendResponse extends PriceTrend {}
+export interface GetPriceTrendResponse extends PriceTrend { }
 
 // Message API Types
 export interface SendMessageRequest {
@@ -286,7 +287,7 @@ export interface GetDealMetricsRequest {
   commodityId?: string;
 }
 
-export interface GetDealMetricsResponse extends DealMetrics {}
+export interface GetDealMetricsResponse extends DealMetrics { }
 
 // Negotiation API Types
 export interface StartNegotiationRequest {
@@ -338,13 +339,13 @@ export interface RespondToOfferResponse {
 }
 
 // Translation API Types
-export interface TranslateTextRequest extends TranslationRequest {}
+export interface TranslateTextRequest extends TranslationRequest { }
 
-export interface TranslateTextResponse extends TranslationResponse {}
+export interface TranslateTextResponse extends TranslationResponse { }
 
-export interface TranslateVoiceRequest extends VoiceTranslationRequest {}
+export interface TranslateVoiceRequest extends VoiceTranslationRequest { }
 
-export interface TranslateVoiceResponse extends VoiceTranslationResponse {}
+export interface TranslateVoiceResponse extends VoiceTranslationResponse { }
 
 export interface DetectLanguageRequest {
   text: string;

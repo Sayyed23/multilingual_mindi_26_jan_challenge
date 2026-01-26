@@ -94,36 +94,79 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
     }
   };
 
+  const validateField = (name: string, value: any): string => {
+    switch (name) {
+      case 'name':
+        if (!value || value.trim().length < 2) {
+          return 'Name must be at least 2 characters long';
+        }
+        if (value.length > 50) {
+          return 'Name must be less than 50 characters';
+        }
+        break;
+      case 'email':
+        if (value && value.trim()) {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(value)) {
+            return 'Please enter a valid email address';
+          }
+        }
+        break;
+      case 'location.address':
+        if (!value || value.trim().length < 10) {
+          return 'Address must be at least 10 characters long';
+        }
+        break;
+      case 'location.pincode':
+        if (!value || !/^\d{6}$/.test(value)) {
+          return 'Pincode must be 6 digits';
+        }
+        break;
+      case 'location.state':
+        if (!value) {
+          return 'Please select a state';
+        }
+        break;
+    }
+    return '';
+  };
+
+  const traverse = (obj: any, path: string) => {
+    return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+  }
+
+  const handleBlur = (field: string) => {
+    let value;
+    if (field.startsWith('location.')) {
+      value = traverse(formData, field);
+    } else {
+      value = formData[field as keyof UserUpdate];
+    }
+
+    const error = validateField(field, value);
+    setErrors(prev => ({
+      ...prev,
+      [field]: error
+    }));
+  };
+
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    // Name validation
-    if (!formData.name || formData.name.trim().length < 2) {
-      newErrors.name = 'Name must be at least 2 characters long';
-    } else if (formData.name.length > 50) {
-      newErrors.name = 'Name must be less than 50 characters';
-    }
-
-    // Email validation (optional)
-    if (formData.email && formData.email.trim()) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.email)) {
-        newErrors.email = 'Please enter a valid email address';
+    // Validate all fields
+    ['name', 'email', 'location.address', 'location.pincode', 'location.state'].forEach(field => {
+      let value;
+      if (field.startsWith('location.')) {
+        value = traverse(formData, field);
+      } else {
+        value = formData[field as keyof UserUpdate];
       }
-    }
 
-    // Location validation
-    if (!formData.location?.address || formData.location.address.trim().length < 10) {
-      newErrors['location.address'] = 'Address must be at least 10 characters long';
-    }
-
-    if (!formData.location?.pincode || !/^\d{6}$/.test(formData.location.pincode)) {
-      newErrors['location.pincode'] = 'Pincode must be 6 digits';
-    }
-
-    if (!formData.location?.state) {
-      newErrors['location.state'] = 'Please select a state';
-    }
+      const error = validateField(field, value);
+      if (error) {
+        newErrors[field] = error;
+      }
+    });
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -131,7 +174,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -174,11 +217,11 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
         <p>Please provide your basic information</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="form">
+      <form onSubmit={handleSubmit} className="form" noValidate>
         {/* Basic Information */}
         <div className="form-section">
           <h3>Basic Information</h3>
-          
+
           <div className="form-group">
             <label htmlFor="name">Full Name *</label>
             <input
@@ -188,6 +231,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
               onChange={(e) => handleInputChange('name', e.target.value)}
               className={errors.name ? 'error' : ''}
               placeholder="Enter your full name"
+              onBlur={() => handleBlur('name')}
               required
             />
             {errors.name && <span className="error-message">{errors.name}</span>}
@@ -202,6 +246,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
               onChange={(e) => handleInputChange('email', e.target.value)}
               className={errors.email ? 'error' : ''}
               placeholder="Enter your email address (optional)"
+              onBlur={() => handleBlur('email')}
             />
             {errors.email && <span className="error-message">{errors.email}</span>}
           </div>
@@ -226,7 +271,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
         {/* Location Information */}
         <div className="form-section">
           <h3>Location Information</h3>
-          
+
           <div className="form-group">
             <label htmlFor="address">Address *</label>
             <textarea
@@ -236,6 +281,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
               className={errors['location.address'] ? 'error' : ''}
               placeholder="Enter your complete address"
               rows={3}
+              onBlur={() => handleBlur('location.address')}
               required
             />
             {errors['location.address'] && (
@@ -254,6 +300,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                 className={errors['location.pincode'] ? 'error' : ''}
                 placeholder="123456"
                 maxLength={6}
+                onBlur={() => handleBlur('location.pincode')}
                 required
               />
               {errors['location.pincode'] && (
@@ -280,6 +327,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
               value={formData.location?.state || ''}
               onChange={(e) => handleInputChange('location.state', e.target.value)}
               className={errors['location.state'] ? 'error' : ''}
+              onBlur={() => handleBlur('location.state')}
               required
             >
               <option value="">Select State</option>

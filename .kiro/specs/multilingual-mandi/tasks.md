@@ -128,7 +128,7 @@ This implementation plan breaks down the Multilingual Mandi PWA into manageable 
     - _Requirements: 2.1, 7.1_
 
 - [ ] 5. Search and Discovery
-  - [ ] 5.1 Implement commodity and vendor search
+  - [x] 5.1 Implement commodity and vendor search
     - Create search service with text-based search
     - Build search UI with filters and results display
     - Implement multilingual search capabilities
@@ -142,7 +142,7 @@ This implementation plan breaks down the Multilingual Mandi PWA into manageable 
     - Build location-aware search results
     - _Requirements: 7.4, 7.5_
 
-  - [ ]* 5.3 Write property tests for search system
+  - [x]* 5.3 Write property tests for search system
     - **Property 15: Search Performance and Results**
     - **Property 16: Search Filtering and Fallbacks**
     - **Validates: Requirements 7.1, 7.2, 7.3, 7.4, 7.5**
@@ -272,6 +272,38 @@ This implementation plan breaks down the Multilingual Mandi PWA into manageable 
     - **Property 20: Accessibility Support**
     - **Validates: Requirements 9.1, 9.4, 9.5**
 
+- [ ] 10.5. Enhanced Home Dashboard Implementation
+  - [ ] 10.5.1 Build comprehensive dashboard widgets
+    - Create Quick Actions Widget with Check Price, Post Listing, Start Chat, My Deals buttons
+    - Implement Today's Market Snapshot with key commodity prices and trends
+    - Build Active Deals Widget showing latest 3 deals with "View All" navigation
+    - Create Recent Chats widget displaying latest 3 conversations
+    - Add Market Intelligence Card with festival alerts, weather warnings, and price forecasts
+    - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5_
+
+  - [ ] 10.5.2 Create specialized market intelligence pages
+    - Build Festival Forecast Analysis page with upcoming festival calendar and historical price patterns
+    - Implement Weather Impact page with current warnings, affected regions map, and sourcing recommendations
+    - Create Community Feed page with filtering options and post creation capabilities
+    - Add demand predictions and confidence scoring for festival forecasts
+    - _Requirements: 11.8, 11.9, 11.10, 12.1, 12.2, 12.3_
+
+  - [ ] 10.5.3 Implement Create New Listing workflow
+    - Build comprehensive listing creation form with commodity selection and quantity input
+    - Add AI-suggested pricing with market comparison data
+    - Implement photo upload functionality with image optimization
+    - Create quality grade selection with visual indicators
+    - Add availability date picker with calendar integration
+    - _Requirements: 11.7_
+
+  - [ ] 10.5.4 Build community features and content management
+    - Create community post creation and editing interface
+    - Implement content categorization (tips, news, success stories)
+    - Add user engagement features (likes, comments, shares)
+    - Build content moderation and reporting system
+    - Create expert insights and knowledge base integration
+    - _Requirements: 12.5, 12.6, 12.8_
+
 - [ ] 11. Analytics and Insights (MVP)
   - [ ] 11.1 Build basic vendor analytics
     - Create sales performance tracking
@@ -291,6 +323,29 @@ This implementation plan breaks down the Multilingual Mandi PWA into manageable 
     - **Property 21: Analytics and Insights**
     - **Property 22: Market Change Notifications**
     - **Validates: Requirements 10.1, 10.2, 10.3, 10.4, 10.5**
+
+- [ ] 11.5. Advanced Market Intelligence System
+  - [ ] 11.5.1 Implement festival forecasting engine
+    - Build festival calendar integration with regional variations
+    - Create historical price pattern analysis for festival periods
+    - Implement demand prediction algorithms with confidence scoring
+    - Add festival impact assessment for different commodity categories
+    - Build automated alert system for upcoming high-impact festivals
+    - _Requirements: 12.1, 12.2, 12.7_
+
+  - [ ] 11.5.2 Create weather impact analysis system
+    - Integrate weather API for real-time weather data
+    - Build affected regions mapping with geographic visualization
+    - Implement commodity-specific weather impact models
+    - Create sourcing recommendation engine based on weather disruptions
+    - Add supply chain risk assessment and mitigation suggestions
+    - _Requirements: 12.3, 12.4_
+
+  - [ ]* 11.5.3 Write property tests for market intelligence
+    - **Property 23: Festival Forecast Accuracy**
+    - **Property 24: Weather Impact Analysis**
+    - **Property 25: Market Intelligence Alerts**
+    - **Validates: Requirements 12.1, 12.2, 12.3, 12.4, 12.7**
 
 - [ ] 12. Integration Testing and Performance
   - [ ] 12.1 Implement comprehensive integration tests

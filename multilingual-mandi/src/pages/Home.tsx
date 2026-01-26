@@ -1,29 +1,47 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import DashboardHeader from '../components/dashboard/DashboardHeader';
+import Sidebar from '../components/dashboard/Sidebar';
+import QuickActions from '../components/dashboard/QuickActions';
+import MarketSnapshot from '../components/dashboard/MarketSnapshot';
+import ActiveNegotiations from '../components/dashboard/ActiveNegotiations';
+import MarketIntelligence from '../components/dashboard/MarketIntelligence';
+import RecentChats from '../components/dashboard/RecentChats';
+import { CommoditySearchResult } from '../types/commodity';
+import { UserProfile } from '../types/user';
+import '../components/dashboard/Dashboard.css';
 
 const Home: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleCommoditySelect = (commodity: CommoditySearchResult) => {
+    navigate(`/prices?commodity=${commodity.commodity.id}&name=${encodeURIComponent(commodity.commodity.name)}`);
+  };
+
+  const handleVendorSelect = (vendor: UserProfile) => {
+    navigate(`/chats?vendor=${vendor.userId}&name=${encodeURIComponent(vendor.name)}`);
+  };
+
   return (
-    <div className="page-container">
-      <div className="page-header">
-        <h1>मंडी</h1>
-        <p>Welcome to Multilingual Mandi</p>
-      </div>
-      <div className="page-content">
-        <div className="feature-grid">
-          <div className="feature-card">
-            <h3>Real-time Prices</h3>
-            <p>Get current market prices from 100+ mandis</p>
-          </div>
-          <div className="feature-card">
-            <h3>Multilingual Chat</h3>
-            <p>Communicate in 22+ Indian languages</p>
-          </div>
-          <div className="feature-card">
-            <h3>Smart Negotiations</h3>
-            <p>AI-powered negotiation assistance</p>
-          </div>
-          <div className="feature-card">
-            <h3>Deal Management</h3>
-            <p>Track your deals and transactions</p>
+    <div className="dashboard-container">
+      <Sidebar />
+      <div className="dashboard-content">
+        {/* Header removed in favor of GlobalHeader */}
+        <div className="main-scroll-area">
+          <QuickActions />
+
+          <div className="dashboard-grid">
+            <div className="left-column">
+              <MarketSnapshot />
+              <ActiveNegotiations />
+            </div>
+
+            <div className="right-column">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                <MarketIntelligence />
+                <RecentChats />
+              </div>
+            </div>
           </div>
         </div>
       </div>

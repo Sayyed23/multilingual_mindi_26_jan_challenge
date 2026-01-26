@@ -52,7 +52,7 @@ export const createMockUser = (overrides: Partial<User> = {}): User => {
 
   return {
     id: `user_${Math.random().toString(36).substr(2, 9)}`,
-    phoneNumber: `+91${Math.floor(Math.random() * 9000000000) + 1000000000}`,
+    phoneNumber: `+91${Math.floor(Math.random() * 4000000000) + 6000000000}`,
     name: randomName,
     email: `${randomName.toLowerCase().replace(' ', '.')}@example.com`,
     preferredLanguage: randomLanguage,
@@ -111,7 +111,7 @@ export const createMockUser = (overrides: Partial<User> = {}): User => {
 
 export const createMockCommodity = (overrides: Partial<Commodity> = {}): Commodity => {
   const randomCommodity = INDIAN_COMMODITIES[Math.floor(Math.random() * INDIAN_COMMODITIES.length)];
-  
+
   return {
     id: `commodity_${Math.random().toString(36).substr(2, 9)}`,
     name: randomCommodity,
@@ -152,7 +152,7 @@ export const createMockCommodity = (overrides: Partial<Commodity> = {}): Commodi
 export const createMockPriceEntry = (overrides: Partial<PriceEntry> = {}): PriceEntry => {
   const randomLocation = INDIAN_LOCATIONS[Math.floor(Math.random() * INDIAN_LOCATIONS.length)];
   const basePrice = Math.random() * 5000 + 1000; // 1000-6000 range
-  
+
   return {
     id: `price_${Math.random().toString(36).substr(2, 9)}`,
     commodityId: `commodity_${Math.random().toString(36).substr(2, 9)}`,
@@ -191,7 +191,7 @@ export const createMockMessage = (overrides: Partial<Message> = {}): Message => 
     'Is the quality good?',
     'When can you deliver?',
   ];
-  
+
   const hindiMessages = [
     'नमस्ते, मुझे चावल खरीदना है',
     'गेहूं का सबसे अच्छा भाव क्या है?',
@@ -199,11 +199,11 @@ export const createMockMessage = (overrides: Partial<Message> = {}): Message => 
     'क्या क्वालिटी अच्छी है?',
     'कब तक डिलीवरी हो सकती है?',
   ];
-  
+
   const isHindi = Math.random() > 0.5;
   const messageArray = isHindi ? hindiMessages : messages;
   const randomMessage = messageArray[Math.floor(Math.random() * messageArray.length)];
-  
+
   return {
     id: `message_${Math.random().toString(36).substr(2, 9)}`,
     conversationId: `conversation_${Math.random().toString(36).substr(2, 9)}`,
@@ -230,7 +230,7 @@ export const createMockMessage = (overrides: Partial<Message> = {}): Message => 
       filename: 'image.jpg',
       size: 1024,
       mimeType: 'image/jpeg',
-      metadata: { 
+      metadata: {
         dimensions: { width: 800, height: 600 }
       },
     }] : undefined,
@@ -249,7 +249,7 @@ export const createMockDeal = (overrides: Partial<Deal> = {}): Deal => {
   const randomCommodity = INDIAN_COMMODITIES[Math.floor(Math.random() * INDIAN_COMMODITIES.length)];
   const quantity = Math.floor(Math.random() * 100) + 10;
   const price = Math.floor(Math.random() * 5000) + 1000;
-  
+
   return {
     id: `deal_${Math.random().toString(36).substr(2, 9)}`,
     vendorId: `user_${Math.random().toString(36).substr(2, 9)}`,
@@ -309,7 +309,7 @@ export const createMockTranslationRequest = (overrides: Partial<TranslationReque
     'Can you deliver tomorrow?',
     'Is the quality good?',
   ];
-  
+
   return {
     text: texts[Math.floor(Math.random() * texts.length)],
     sourceLanguage: 'en',
@@ -368,8 +368,8 @@ export const createMockConversation = (messageCount: number = 5) => {
   const conversationId = `conversation_${Math.random().toString(36).substr(2, 9)}`;
   const user1 = createMockUser({ userType: 'vendor' });
   const user2 = createMockUser({ userType: 'buyer' });
-  
-  return Array.from({ length: messageCount }, (_, index) => 
+
+  return Array.from({ length: messageCount }, (_, index) =>
     createMockMessage({
       conversationId,
       senderId: index % 2 === 0 ? user1.id : user2.id,
@@ -382,8 +382,8 @@ export const createMockConversation = (messageCount: number = 5) => {
 // Helper to create realistic price history
 export const createMockPriceHistory = (commodityId: string, days: number = 30) => {
   const basePrice = Math.random() * 3000 + 2000;
-  
-  return Array.from({ length: days }, (_, index) => 
+
+  return Array.from({ length: days }, (_, index) =>
     createMockPriceEntry({
       commodityId,
       price: basePrice + (Math.random() - 0.5) * 500,

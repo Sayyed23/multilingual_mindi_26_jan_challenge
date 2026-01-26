@@ -91,6 +91,7 @@ export interface AuthUser {
   userType: UserType;
   isVerified: boolean;
   preferredLanguage: string;
+  profilePicture?: string; // Added for UI display
   accessToken: string;
   refreshToken: string;
 }

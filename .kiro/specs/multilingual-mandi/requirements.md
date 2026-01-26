@@ -126,6 +126,23 @@ The Multilingual Mandi is a Progressive Web App (PWA) designed to democratize lo
 4. WHEN users need help, THE PWA SHALL provide contextual assistance and tutorials
 5. THE PWA SHALL support both touch and voice interactions for accessibility
 
+### Requirement 11: Comprehensive Home Dashboard
+
+**User Story:** As a user, I want a comprehensive home dashboard that provides quick access to all key features and real-time market intelligence, so that I can efficiently manage my trading activities from a single screen.
+
+#### Acceptance Criteria
+
+1. WHEN a user accesses the home page, THE System SHALL display a dashboard with quick action widgets for Check Price, Post Listing, Start Chat, and My Deals
+2. THE System SHALL show Today's Market Snapshot with key commodity prices and trends, with links to full market reports and price alert settings
+3. WHEN displaying active deals, THE System SHALL show the latest 3 deals with quick access to view all deals
+4. WHEN showing recent chats, THE System SHALL display the latest 3 conversations with direct access to individual chats and all chats
+5. THE System SHALL provide a Market Intelligence Card showing festival alerts, weather warnings, and price forecasts with navigation to detailed pages
+6. THE System SHALL include an optional Community Feed showing vendor success stories, market news, and community posts
+7. WHEN users want to create new listings, THE System SHALL provide a comprehensive Create New Listing page with commodity selection, quantity, AI-suggested pricing, photo uploads, quality grading, and availability dates
+8. THE System SHALL offer specialized pages for Festival Forecast Analysis with upcoming festival calendar, historical price patterns, demand predictions, and reminder settings
+9. WHEN weather impacts occur, THE System SHALL provide a Weather Impact page with current warnings, affected regions map, commodity impact analysis, and sourcing recommendations
+10. THE System SHALL include a Community Feed page with filtering options for tips, news, and success stories, plus post creation capabilities
+
 ### Requirement 10: Data Analytics and Insights
 
 **User Story:** As a vendor, I want insights about my trading patterns and market trends, so that I can make better business decisions.
@@ -137,3 +154,18 @@ The Multilingual Mandi is a Progressive Web App (PWA) designed to democratize lo
 3. THE System SHALL identify optimal pricing opportunities based on historical data
 4. THE System SHALL alert vendors to seasonal demand patterns for their commodities
 5. WHEN market conditions change significantly, THE System SHALL notify relevant vendors with actionable recommendations
+
+### Requirement 12: Market Intelligence and Forecasting
+
+**User Story:** As a trader, I want access to comprehensive market intelligence including festival forecasts, weather impact analysis, and community insights, so that I can make informed business decisions and plan ahead.
+
+#### Acceptance Criteria
+
+1. WHEN accessing Festival Forecast Analysis, THE System SHALL display an upcoming festival calendar with historical price patterns and demand predictions for the next 6 months
+2. THE System SHALL provide confidence scores above 85% for festival-related price predictions based on 3+ years of historical data
+3. WHEN weather warnings are active, THE System SHALL display a Weather Impact page with real-time affected regions map and commodity-specific impact analysis
+4. THE System SHALL provide sourcing recommendations when weather disruptions affect more than 20% of supply regions
+5. WHEN users access the Community Feed, THE System SHALL display categorized content (tips, news, success stories) with user-generated posts and expert insights
+6. THE System SHALL allow users to create and share posts with photo uploads, categorization, and community engagement features
+7. WHEN market intelligence alerts are triggered, THE System SHALL provide actionable recommendations with specific next steps for users
+8. THE System SHALL maintain a knowledge base of successful trading strategies and market patterns accessible through the community features

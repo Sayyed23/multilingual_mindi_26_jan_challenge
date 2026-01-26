@@ -10,45 +10,61 @@ import { SupportedLanguage } from '../../types/translation';
 // Mock IndexedDB for property tests
 const mockIndexedDB = {
   open: jest.fn().mockImplementation(() => {
-    const request = {
+    const request: any = {
       onsuccess: null,
       onerror: null,
       result: {
         transaction: jest.fn().mockReturnValue({
           objectStore: jest.fn().mockReturnValue({
-            put: jest.fn().mockImplementation(() => ({
-              onsuccess: null,
-              onerror: null
-            })),
-            getAll: jest.fn().mockImplementation(() => ({
-              onsuccess: null,
-              onerror: null,
-              result: []
-            })),
-            index: jest.fn().mockReturnValue({
-              getAll: jest.fn().mockImplementation(() => ({
-                onsuccess: null,
-                onerror: null,
-                result: []
-              }))
+            put: jest.fn().mockImplementation(() => {
+              const req: any = { onsuccess: null, onerror: null };
+              setTimeout(() => { if (req.onsuccess) req.onsuccess({ target: req }); }, 0);
+              return req;
             }),
-            clear: jest.fn().mockImplementation(() => ({
-              onsuccess: null,
-              onerror: null
-            })),
-            add: jest.fn().mockImplementation(() => ({
-              onsuccess: null,
-              onerror: null
-            }))
+            getAll: jest.fn().mockImplementation(() => {
+              const req: any = { onsuccess: null, onerror: null, result: [] };
+              setTimeout(() => { if (req.onsuccess) req.onsuccess({ target: req }); }, 0);
+              return req;
+            }),
+            index: jest.fn().mockReturnValue({
+              getAll: jest.fn().mockImplementation(() => {
+                const req: any = { onsuccess: null, onerror: null, result: [] };
+                setTimeout(() => { if (req.onsuccess) req.onsuccess({ target: req }); }, 0);
+                return req;
+              }),
+              openCursor: jest.fn().mockImplementation(() => {
+                const req: any = { onsuccess: null, onerror: null, result: null }; // Cursor null means end
+                setTimeout(() => { if (req.onsuccess) req.onsuccess({ target: req }); }, 0);
+                return req;
+              })
+            }),
+            clear: jest.fn().mockImplementation(() => {
+              const req: any = { onsuccess: null, onerror: null };
+              setTimeout(() => { if (req.onsuccess) req.onsuccess({ target: req }); }, 0);
+              return req;
+            }),
+            add: jest.fn().mockImplementation(() => {
+              const req: any = { onsuccess: null, onerror: null };
+              setTimeout(() => { if (req.onsuccess) req.onsuccess({ target: req }); }, 0);
+              return req;
+            })
           })
         }),
         createObjectStore: jest.fn().mockReturnValue({
           createIndex: jest.fn()
-        })
+        }),
+        objectStoreNames: {
+          contains: jest.fn().mockReturnValue(false)
+        }
       }
     };
+    // Trigger open success
     setTimeout(() => {
-      if (request.onsuccess) request.onsuccess({ target: request } as any);
+      if (request.onupgradeneeded) {
+        const event: any = { target: request };
+        request.onupgradeneeded(event);
+      }
+      if (request.onsuccess) request.onsuccess({ target: request });
     }, 0);
     return request;
   })
@@ -68,7 +84,7 @@ describe('Property: Translation Service', () => {
      */
     it('Property: Translation should complete within 2 seconds', async () => {
       const service = new TranslationService();
-      
+
       const result = await service.translateText({
         text: 'Hello world',
         sourceLanguage: 'en',
@@ -85,7 +101,7 @@ describe('Property: Translation Service', () => {
 
     it('Property: Translation response should always be well-formed', async () => {
       const service = new TranslationService();
-      
+
       const result = await service.translateText({
         text: 'Test message',
         sourceLanguage: 'en',
@@ -132,7 +148,7 @@ describe('Property: Translation Service', () => {
      */
     it('Property: Low confidence translations should be flagged for review', async () => {
       const service = new TranslationService();
-      
+
       const result = await service.translateText({
         text: 'Complex technical jargon',
         sourceLanguage: 'en',
@@ -155,9 +171,9 @@ describe('Property: Translation Service', () => {
 
     it('Property: Translation should never fail completely', async () => {
       const service = new TranslationService();
-      
+
       const edgeCases = ['', '!@#$%', '123'];
-      
+
       for (const text of edgeCases) {
         const result = await service.translateText({
           text,
@@ -169,7 +185,7 @@ describe('Property: Translation Service', () => {
         // Should always return some translated text
         expect(result.translatedText).toBeDefined();
         expect(typeof result.translatedText).toBe('string');
-        
+
         // Even failed translations should return the original text as fallback
         if (result.quality === 'failed') {
           expect(result.translatedText.length).toBeGreaterThanOrEqual(0);
@@ -189,7 +205,7 @@ describe('Property: Translation Service', () => {
     it('Property: Voice translation should handle audio inputs', async () => {
       const service = new TranslationService();
       const audioBlob = new Blob(['fake audio data'], { type: 'audio/wav' });
-      
+
       const result = await service.translateVoice({
         audioData: audioBlob,
         targetLanguage: 'hi',
@@ -275,14 +291,14 @@ describe('Property: Translation Service', () => {
           (languageCode) => {
             const isSupported = isLanguageSupported(languageCode);
             const languageInfo = getLanguageInfo(languageCode as SupportedLanguage);
-            
+
             if (isSupported) {
               expect(languageInfo).toBeDefined();
               expect(languageInfo?.code).toBe(languageCode);
             } else {
               expect(languageInfo).toBeUndefined();
             }
-            
+
             return true;
           }
         ),
@@ -293,10 +309,10 @@ describe('Property: Translation Service', () => {
     it('Property: Supported languages list should be consistent', () => {
       const languages1 = getSupportedLanguages();
       const languages2 = getSupportedLanguages();
-      
+
       expect(languages1.length).toBe(languages2.length);
       expect(languages1.length).toBeGreaterThan(20);
-      
+
       languages1.forEach((lang, index) => {
         expect(lang.code).toBe(languages2[index].code);
         expect(lang.name).toBe(languages2[index].name);
@@ -336,7 +352,7 @@ describe('Property: Translation Service', () => {
       // Word count should increase with text length
       expect(shortResult.metadata.wordCount).toBeLessThan(mediumResult.metadata.wordCount);
       expect(mediumResult.metadata.wordCount).toBeLessThan(longResult.metadata.wordCount);
-      
+
       // All should complete within reasonable time
       expect(shortResult.processingTime).toBeLessThan(2000);
       expect(mediumResult.processingTime).toBeLessThan(2000);

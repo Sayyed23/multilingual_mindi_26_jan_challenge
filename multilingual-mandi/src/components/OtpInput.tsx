@@ -45,26 +45,33 @@ const OtpInput: React.FC<OtpInputProps> = ({
     }
   }, [autoFocus, disabled]);
 
-  const handleChange = (index: number, digit: string) => {
-    // Only allow single digits
-    if (digit.length > 1) {
-      digit = digit.slice(-1);
+  const handleChange = (index: number, value: string) => {
+    // Get the last character entered
+    const lastChar = value.slice(-1);
+
+    // If empty (backspace), clear it
+    if (!value) {
+      const newOtp = [...otp];
+      newOtp[index] = '';
+      setOtp(newOtp);
+      onChange(newOtp.join(''));
+      return;
     }
 
     // Only allow numeric input
-    if (digit && !/^\d$/.test(digit)) {
+    if (!/^\d$/.test(lastChar)) {
       return;
     }
 
     const newOtp = [...otp];
-    newOtp[index] = digit;
+    newOtp[index] = lastChar;
     setOtp(newOtp);
 
     const otpString = newOtp.join('');
     onChange(otpString);
 
     // Auto-focus next input
-    if (digit && index < length - 1) {
+    if (lastChar && index < length - 1) {
       inputRefs.current[index + 1]?.focus();
     }
 
@@ -78,7 +85,7 @@ const OtpInput: React.FC<OtpInputProps> = ({
     // Handle backspace
     if (e.key === 'Backspace') {
       e.preventDefault();
-      
+
       if (otp[index]) {
         // Clear current input
         handleChange(index, '');
@@ -88,7 +95,7 @@ const OtpInput: React.FC<OtpInputProps> = ({
         handleChange(index - 1, '');
       }
     }
-    
+
     // Handle arrow keys
     else if (e.key === 'ArrowLeft' && index > 0) {
       inputRefs.current[index - 1]?.focus();
@@ -96,7 +103,7 @@ const OtpInput: React.FC<OtpInputProps> = ({
     else if (e.key === 'ArrowRight' && index < length - 1) {
       inputRefs.current[index + 1]?.focus();
     }
-    
+
     // Handle paste
     else if (e.key === 'Enter' && otp.join('').length === length && onComplete) {
       onComplete(otp.join(''));
@@ -107,16 +114,16 @@ const OtpInput: React.FC<OtpInputProps> = ({
     e.preventDefault();
     const pastedData = e.clipboardData.getData('text/plain');
     const digits = pastedData.replace(/\D/g, '').slice(0, length);
-    
+
     if (digits) {
       const newOtp = digits.split('').concat(new Array(length - digits.length).fill(''));
       setOtp(newOtp);
       onChange(digits);
-      
+
       // Focus the next empty input or the last input
       const nextIndex = Math.min(digits.length, length - 1);
       inputRefs.current[nextIndex]?.focus();
-      
+
       if (digits.length === length && onComplete) {
         onComplete(digits);
       }

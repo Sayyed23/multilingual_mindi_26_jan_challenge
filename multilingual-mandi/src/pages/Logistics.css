@@ -1,0 +1,315 @@
+/* Logistics Page Styles */
+.logistics-page {
+    height: 100%;
+    color: white;
+    padding: 32px 24px;
+    /* Match header horizontal padding */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.logistics-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 40px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.logistics-header h1 {
+    margin: 0 0 8px 0;
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    background: linear-gradient(to right, #ffffff, #9db9a4);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.logistics-header p {
+    margin: 0;
+    color: #9db9a4;
+    font-size: 16px;
+}
+
+.logistics-actions {
+    display: flex;
+    gap: 16px;
+}
+
+.btn-secondary-log {
+    background-color: rgba(255, 255, 255, 0.03);
+    color: #e2e8f0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 12px 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.btn-secondary-log:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-primary-log {
+    background-color: var(--primary);
+    color: #052e16;
+    /* Darker green text for contrast */
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(19, 236, 73, 0.2);
+    transition: all 0.2s;
+}
+
+.btn-primary-log:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(19, 236, 73, 0.3);
+}
+
+.logistics-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+.stat-card-log {
+    background: linear-gradient(180deg, rgba(40, 57, 44, 0.4) 0%, rgba(20, 30, 22, 0.4) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    backdrop-filter: blur(10px);
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.stat-card-log:hover {
+    border-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.stat-icon-wrapper {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.stat-icon-wrapper.blue {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
+}
+
+.stat-icon-wrapper.amber {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.1);
+}
+
+.stat-icon-wrapper.green {
+    background: rgba(19, 236, 73, 0.15);
+    color: var(--primary);
+    box-shadow: 0 0 20px rgba(19, 236, 73, 0.1);
+}
+
+.stat-label {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    color: #9db9a4;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+
+.stat-number {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 700;
+    color: white;
+    line-height: 1;
+}
+
+.logistics-content-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+    min-height: 500px;
+}
+
+@media (max-width: 1200px) {
+    .logistics-content-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.map-section {
+    background-color: #0c140e;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    min-height: 500px;
+    position: relative;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.map-placeholder {
+    height: 100%;
+    width: 100%;
+    /* Improved grid pattern */
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.map-overlay-text {
+    text-align: center;
+    color: #9db9a4;
+    background: rgba(16, 34, 21, 0.8);
+    padding: 32px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+}
+
+.view-map-btn {
+    margin-top: 24px;
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.view-map-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.shipments-list {
+    background: linear-gradient(180deg, rgba(40, 57, 44, 0.3) 0%, rgba(20, 30, 22, 0.3) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+}
+
+.shipments-list h3 {
+    margin: 0 0 24px 0;
+    font-size: 18px;
+    color: white;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.shipments-list h3::before {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 18px;
+    background-color: var(--primary);
+    border-radius: 2px;
+}
+
+.shipment-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background-color 0.2s;
+}
+
+.shipment-item:last-child {
+    border-bottom: none;
+}
+
+.shipment-item:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+    margin: 0 -12px;
+    padding: 20px 12px;
+    border-radius: 8px;
+    border-bottom-color: transparent;
+}
+
+.shipment-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.shipment-id {
+    font-weight: 700;
+    color: white;
+    font-size: 15px;
+    font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.shipment-route {
+    color: #9db9a4;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.status-badge.in-transit {
+    background-color: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.status-badge.delayed {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.status-badge.pending {
+    background-color: rgba(148, 163, 184, 0.15);
+    color: #cbd5e1;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+}

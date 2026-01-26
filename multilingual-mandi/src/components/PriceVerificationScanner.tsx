@@ -8,8 +8,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { priceService } from '../services/priceService';
 import { PriceVerification, PriceTrend } from '../types/price';
 import PriceComparisonChart from './PriceComparisonChart';
-import HistoricalTrendDisplay from './HistoricalTrendDisplay.tsx';
-import NegotiationStrategySuggestions from './NegotiationStrategySuggestions.tsx';
+import HistoricalTrendDisplay from './HistoricalTrendDisplay';
+import NegotiationStrategySuggestions from './NegotiationStrategySuggestions';
 import './PriceVerificationScanner.css';
 
 interface PriceVerificationScannerProps {
@@ -79,7 +79,7 @@ const PriceVerificationScanner: React.FC<PriceVerificationScannerProps> = ({
         location
       );
       setVerification(result);
-      
+
       // Load historical trend if not already loaded
       if (!historicalTrend) {
         await loadHistoricalTrend();
@@ -206,7 +206,7 @@ const PriceVerificationScanner: React.FC<PriceVerificationScannerProps> = ({
                       .replace(/\s+/g, '-')
                       .replace(/-+/g, '-')
                   );
-                }}                className="commodity-input"
+                }} className="commodity-input"
               />
             </div>
           </div>
@@ -249,7 +249,7 @@ const PriceVerificationScanner: React.FC<PriceVerificationScannerProps> = ({
             <div className="verification-result">
               <div className="result-header">
                 <h3>Verification Result</h3>
-                <div 
+                <div
                   className="verdict-badge"
                   style={{ backgroundColor: getVerdictColor(verification.verdict) }}
                 >
@@ -278,7 +278,7 @@ const PriceVerificationScanner: React.FC<PriceVerificationScannerProps> = ({
               <div className="confidence-indicator">
                 <label>Verification Confidence</label>
                 <div className="confidence-bar">
-                  <div 
+                  <div
                     className="confidence-fill"
                     style={{ width: `${verification.confidence * 100}%` }}
                   ></div>

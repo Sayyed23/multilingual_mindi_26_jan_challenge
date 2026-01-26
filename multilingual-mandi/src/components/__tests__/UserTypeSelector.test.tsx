@@ -27,13 +27,13 @@ describe('UserTypeSelector', () => {
 
     expect(screen.getByText('What describes you best?')).toBeInTheDocument();
     expect(screen.getByText('Choose your role in the marketplace')).toBeInTheDocument();
-    
+
     expect(screen.getByText('Vendor')).toBeInTheDocument();
     expect(screen.getByText('I want to sell agricultural products')).toBeInTheDocument();
-    
+
     expect(screen.getByText('Buyer')).toBeInTheDocument();
     expect(screen.getByText('I want to buy agricultural products')).toBeInTheDocument();
-    
+
     expect(screen.getByText('Both')).toBeInTheDocument();
     expect(screen.getByText('I want to both buy and sell products')).toBeInTheDocument();
   });
@@ -99,7 +99,7 @@ describe('UserTypeSelector', () => {
 
   it('calls onTypeChange when vendor option is clicked', async () => {
     const user = userEvent.setup();
-    
+
     render(
       <UserTypeSelector
         selectedType="buyer"
@@ -109,7 +109,7 @@ describe('UserTypeSelector', () => {
 
     const vendorOption = screen.getByText('Vendor').closest('.type-option');
     expect(vendorOption).toBeInTheDocument();
-    
+
     await user.click(vendorOption!);
 
     expect(mockOnTypeChange).toHaveBeenCalledWith('vendor');
@@ -117,7 +117,7 @@ describe('UserTypeSelector', () => {
 
   it('calls onTypeChange when buyer option is clicked', async () => {
     const user = userEvent.setup();
-    
+
     render(
       <UserTypeSelector
         selectedType="vendor"
@@ -127,7 +127,7 @@ describe('UserTypeSelector', () => {
 
     const buyerOption = screen.getByText('Buyer').closest('.type-option');
     expect(buyerOption).toBeInTheDocument();
-    
+
     await user.click(buyerOption!);
 
     expect(mockOnTypeChange).toHaveBeenCalledWith('buyer');
@@ -135,7 +135,7 @@ describe('UserTypeSelector', () => {
 
   it('calls onTypeChange when both option is clicked', async () => {
     const user = userEvent.setup();
-    
+
     render(
       <UserTypeSelector
         selectedType="vendor"
@@ -145,7 +145,7 @@ describe('UserTypeSelector', () => {
 
     const bothOption = screen.getByText('Both').closest('.type-option');
     expect(bothOption).toBeInTheDocument();
-    
+
     await user.click(bothOption!);
 
     expect(mockOnTypeChange).toHaveBeenCalledWith('both');
@@ -153,7 +153,7 @@ describe('UserTypeSelector', () => {
 
   it('calls onTypeChange when radio button is clicked', async () => {
     const user = userEvent.setup();
-    
+
     render(
       <UserTypeSelector
         selectedType="vendor"
@@ -191,7 +191,7 @@ describe('UserTypeSelector', () => {
 
   it('disables interaction when disabled prop is true', async () => {
     const user = userEvent.setup();
-    
+
     render(
       <UserTypeSelector
         selectedType="vendor"
@@ -202,7 +202,7 @@ describe('UserTypeSelector', () => {
 
     const buyerOption = screen.getByText('Buyer').closest('.type-option');
     expect(buyerOption).toHaveClass('disabled');
-    
+
     await user.click(buyerOption!);
 
     expect(mockOnTypeChange).not.toHaveBeenCalled();
@@ -261,7 +261,7 @@ describe('UserTypeSelector', () => {
 
   it('handles keyboard navigation', async () => {
     const user = userEvent.setup();
-    
+
     render(
       <UserTypeSelector
         selectedType="vendor"
@@ -270,10 +270,10 @@ describe('UserTypeSelector', () => {
     );
 
     const buyerRadio = screen.getByRole('radio', { name: 'buyer' });
-    
+
     // Focus and press Enter/Space
     buyerRadio.focus();
-    await user.keyboard('{Enter}');
+    await user.keyboard(' ');
 
     expect(mockOnTypeChange).toHaveBeenCalledWith('buyer');
   });

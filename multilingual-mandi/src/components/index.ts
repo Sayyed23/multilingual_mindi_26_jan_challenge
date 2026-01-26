@@ -34,3 +34,6 @@ export { default as NegotiationStrategySuggestions } from './NegotiationStrategy
 export { default as PriceCard } from './PriceCard';
 export { default as PriceFilters } from './PriceFilters';
 export { default as RealTimeUpdates } from './RealTimeUpdates';
+
+// Search Components
+export { default as SearchInterface } from './SearchInterface';
