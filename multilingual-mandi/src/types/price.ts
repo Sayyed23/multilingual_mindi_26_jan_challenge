@@ -139,7 +139,11 @@ export interface PriceAlert {
   targetPrice: number;
   condition: 'above' | 'below' | 'equals';
   tolerance: number; // percentage
-  location?: Location;
+  location?: {
+    latitude: number;
+    longitude: number;
+    radius?: number;
+  };
   radius?: number; // km
   isActive: boolean;
   createdAt: Date;

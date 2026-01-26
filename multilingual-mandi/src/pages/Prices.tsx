@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { priceService } from '../services/priceService';
 import { PriceData, PriceQuery } from '../types/price';
+import PriceAnalysis from '../components/PriceAnalysis';
 
 const Prices: React.FC = () => {
   const [priceData, setPriceData] = useState<PriceData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCommodity, setSelectedCommodity] = useState<{ id: string; name: string } | null>(null);
 
   // Load initial price data
   useEffect(() => {
@@ -148,6 +150,14 @@ const Prices: React.FC = () => {
     );
   };
 
+  const handleAnalyzePrice = (commodityId: string, commodityName: string) => {
+    setSelectedCommodity({ id: commodityId, name: commodityName });
+  };
+
+  const handleCloseAnalysis = () => {
+    setSelectedCommodity(null);
+  };
+
   return (
     <div className="page-container">
       <div className="page-header">
@@ -216,6 +226,15 @@ const Prices: React.FC = () => {
                   {item.timestamp.toLocaleDateString()} {item.timestamp.toLocaleTimeString()}
                 </span>
               </div>
+              
+              <div className="price-actions">
+                <button 
+                  className="analyze-button"
+                  onClick={() => handleAnalyzePrice(item.commodityId, item.commodity)}
+                >
+                  📊 Analyze Price
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -226,6 +245,14 @@ const Prices: React.FC = () => {
           </div>
         )}
       </div>
+
+      {selectedCommodity && (
+        <PriceAnalysis
+          commodityId={selectedCommodity.id}
+          commodityName={selectedCommodity.name}
+          onClose={handleCloseAnalysis}
+        />
+      )}
 
       <style>{`
         .search-section {
@@ -405,6 +432,31 @@ const Prices: React.FC = () => {
           align-items: center;
           padding-top: 15px;
           border-top: 1px solid #eee;
+        }
+
+        .price-actions {
+          margin-top: 12px;
+          display: flex;
+          justify-content: center;
+        }
+
+        .analyze-button {
+          background-color: #28a745;
+          color: white;
+          border: none;
+          padding: 8px 16px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 0.9em;
+          font-weight: 500;
+          transition: background-color 0.2s;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .analyze-button:hover {
+          background-color: #218838;
         }
 
         .freshness-indicator {

@@ -31,6 +31,8 @@ describe('PriceService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     localStorageMock.getItem.mockReturnValue(null);
+    // Clear price alerts between tests
+    (priceService as any).priceAlerts.clear();
   });
 
   describe('queryPrices', () => {
@@ -218,6 +220,12 @@ describe('PriceService', () => {
       expect(result.fairPriceRange.lower).toBeGreaterThan(0);
       expect(result.fairPriceRange.upper).toBeGreaterThan(result.fairPriceRange.lower);
       expect(result.fairPriceRange.confidence).toBeGreaterThan(0);
+      
+      // Test enhanced features
+      expect(result.confidenceInterval).toBeDefined();
+      expect(result.confidenceInterval?.lower).toBeGreaterThan(0);
+      expect(result.confidenceInterval?.upper).toBeGreaterThan(result.confidenceInterval?.lower);
+      expect(result.confidenceInterval?.level).toBe(0.95);
     });
 
     it('should throw error when no price data is available', async () => {
@@ -620,6 +628,101 @@ describe('PriceService', () => {
 
       // Verify cache was used (check that results are consistent)
       expect(result2).toEqual(result1);
+    });
+  });
+
+  describe('price alerts', () => {
+    it('should create price alerts successfully', async () => {
+      const alert = await priceService.createPriceAlert(
+        'user-123',
+        'wheat',
+        2500,
+        'above',
+        5
+      );
+
+      expect(alert.id).toBeDefined();
+      expect(alert.userId).toBe('user-123');
+      expect(alert.commodityId).toBe('wheat');
+      expect(alert.targetPrice).toBe(2500);
+      expect(alert.condition).toBe('above');
+      expect(alert.tolerance).toBe(5);
+      expect(alert.isActive).toBe(true);
+      expect(alert.notificationSent).toBe(false);
+    });
+
+    it('should retrieve user price alerts', async () => {
+      await priceService.createPriceAlert('user-123', 'wheat', 2500, 'above');
+      await priceService.createPriceAlert('user-123', 'rice', 3000, 'below');
+
+      const alerts = priceService.getUserPriceAlerts('user-123');
+
+      expect(alerts).toHaveLength(2);
+      expect(alerts[0].commodityId).toBe('wheat');
+      expect(alerts[1].commodityId).toBe('rice');
+    });
+
+    it('should deactivate price alerts', async () => {
+      const alert = await priceService.createPriceAlert('user-123', 'wheat', 2500, 'above');
+      
+      const deactivated = priceService.deactivatePriceAlert('user-123', alert.id);
+      expect(deactivated).toBe(true);
+
+      const alerts = priceService.getUserPriceAlerts('user-123');
+      const deactivatedAlert = alerts.find(a => a.id === alert.id);
+      expect(deactivatedAlert?.isActive).toBe(false);
+    });
+
+    it('should check price alerts and trigger notifications', async () => {
+      const mockPriceData: PriceData[] = [
+        {
+          commodity: 'Wheat',
+          commodityId: 'wheat',
+          price: 2600, // Above the alert threshold
+          unit: 'quintal',
+          location: 'Delhi',
+          source: 'agmarknet',
+          timestamp: new Date(),
+          confidence: 0.9,
+          marketTrend: 'rising',
+          priceChange: { amount: 100, percentage: 4, period: '24h' }
+        }
+      ];
+
+      jest.spyOn(priceService, 'queryPrices').mockResolvedValue(mockPriceData);
+
+      await priceService.createPriceAlert('user-123', 'wheat', 2500, 'above');
+      
+      const triggeredAlerts = await priceService.checkPriceAlerts('user-123');
+
+      expect(triggeredAlerts).toHaveLength(1);
+      expect(triggeredAlerts[0].triggeredAt).toBeDefined();
+      expect(triggeredAlerts[0].notificationSent).toBe(true);
+    });
+
+    it('should not trigger alerts when conditions are not met', async () => {
+      const mockPriceData: PriceData[] = [
+        {
+          commodity: 'Wheat',
+          commodityId: 'wheat',
+          price: 2400, // Below the alert threshold
+          unit: 'quintal',
+          location: 'Delhi',
+          source: 'agmarknet',
+          timestamp: new Date(),
+          confidence: 0.9,
+          marketTrend: 'stable',
+          priceChange: { amount: 0, percentage: 0, period: '24h' }
+        }
+      ];
+
+      jest.spyOn(priceService, 'queryPrices').mockResolvedValue(mockPriceData);
+
+      await priceService.createPriceAlert('user-123', 'wheat', 2500, 'above');
+      
+      const triggeredAlerts = await priceService.checkPriceAlerts('user-123');
+
+      expect(triggeredAlerts).toHaveLength(0);
     });
   });
 });

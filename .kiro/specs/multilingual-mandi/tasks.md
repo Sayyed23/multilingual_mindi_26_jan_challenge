@@ -100,7 +100,7 @@ This implementation plan breaks down the Multilingual Mandi PWA into manageable 
     - Build price query and filtering functionality
     - _Requirements: 2.1, 2.3, 2.4_
 
-  - [-] 4.2 Implement price analysis and comparison
+  - [x] 4.2 Implement price analysis and comparison
     - Create fair price range calculation
     - Build price trend analysis functionality
     - Implement price deviation alerts
@@ -113,7 +113,7 @@ This implementation plan breaks down the Multilingual Mandi PWA into manageable 
     - **Property 6: Price Validation**
     - **Validates: Requirements 2.1, 2.2, 2.3, 2.5**
 
-  - [~] 4.4 Build price verification scanner
+  - [-] 4.4 Build price verification scanner
     - Create price comparison UI components
     - Implement price verification logic
     - Build historical price trend display

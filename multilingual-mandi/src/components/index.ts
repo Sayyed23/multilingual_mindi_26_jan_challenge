@@ -20,3 +20,6 @@ export { default as StarRating } from './StarRating';
 export { default as ReputationDisplay } from './ReputationDisplay';
 export { default as ReviewForm } from './ReviewForm';
 export { default as TransactionHistory } from './TransactionHistory';
+
+// Price Analysis Components
+export { default as PriceAnalysis } from './PriceAnalysis';
