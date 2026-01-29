@@ -1,31 +1,21 @@
 /**
  * Protected Route Component
- * Provides route protection based on authentication status
- * Supports Requirements: 4.1 - Authentication-based access control
+ * Redirects to login page if not authenticated
  */
 
 import React, { ReactNode } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import AuthModal from './AuthModal';
 import LoadingSpinner from './LoadingSpinner';
 
 interface ProtectedRouteProps {
   children: ReactNode;
-  fallback?: ReactNode;
-  requireAuth?: boolean;
-  redirectTo?: string;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
-  children,
-  fallback,
-  requireAuth = true,
-  redirectTo
-}) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
-  const [showAuthModal, setShowAuthModal] = React.useState(false);
+  const location = useLocation();
 
-  // Show loading spinner while checking authentication
   if (isLoading) {
     return (
       <div className="protected-route-loading">
@@ -35,40 +25,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  // If authentication is required but user is not authenticated
-  if (requireAuth && !isAuthenticated) {
-    // Show custom fallback if provided
-    if (fallback) {
-      return <>{fallback}</>;
-    }
-
-    // Show auth modal by default
-    return (
-      <>
-        <div className="protected-route-fallback">
-          <div className="auth-required-message">
-            <h2>Authentication Required</h2>
-            <p>Please log in to access this feature.</p>
-            <button
-              onClick={() => setShowAuthModal(true)}
-              className="auth-button"
-            >
-              Login / Register
-            </button>
-          </div>
-        </div>
-        
-        <AuthModal
-          isOpen={showAuthModal}
-          onClose={() => setShowAuthModal(false)}
-          initialMode="login"
-          onAuthSuccess={() => setShowAuthModal(false)}
-        />
-      </>
-    );
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // If authentication is not required or user is authenticated, render children
   return <>{children}</>;
 };
 

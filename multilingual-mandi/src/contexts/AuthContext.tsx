@@ -1,12 +1,50 @@
 /**
  * Authentication Context for managing user authentication state
- * Supports Requirements: 4.1 - User authentication and session management
+ * Supports simple email/password login with demo credentials
  */
 
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
-import { AuthUser, UserRegistration } from '../types/user';
-import { LoginResponse, CreateUserResponse, OtpResponse } from '../types/api';
-import { authService } from '../services/authService';
+
+// Demo user for testing
+const DEMO_USER = {
+  id: 'demo-user-1',
+  email: 'demo@mandi.com',
+  name: 'Demo User',
+  phone: '+91 9876543210',
+  userType: 'vendor' as const,
+  preferredLanguage: 'en',
+  location: {
+    mandi: 'Aurangabad Mandi',
+    state: 'Maharashtra',
+    district: 'Aurangabad'
+  },
+  isVerified: true,
+  rating: 4.8,
+  totalDeals: 47,
+  memberSince: '2024-01-15'
+};
+
+const DEMO_PASSWORD = 'password123';
+
+// Auth User Interface
+export interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
+  phone?: string;
+  userType: 'vendor' | 'buyer' | 'both';
+  preferredLanguage: string;
+  location?: {
+    mandi: string;
+    state: string;
+    district: string;
+  };
+  isVerified: boolean;
+  rating?: number;
+  totalDeals?: number;
+  memberSince?: string;
+  profilePicture?: string;
+}
 
 // Auth State Interface
 interface AuthState {
@@ -14,9 +52,6 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  otpSent: boolean;
-  otpExpiresAt: Date | null;
-  attemptsRemaining: number;
 }
 
 // Auth Actions
@@ -24,8 +59,6 @@ type AuthAction =
   | { type: 'AUTH_START' }
   | { type: 'AUTH_SUCCESS'; payload: AuthUser }
   | { type: 'AUTH_FAILURE'; payload: string }
-  | { type: 'OTP_SENT'; payload: { expiresAt: Date; attemptsRemaining: number } }
-  | { type: 'OTP_VERIFIED' }
   | { type: 'LOGOUT' }
   | { type: 'CLEAR_ERROR' }
   | { type: 'SET_LOADING'; payload: boolean };
@@ -35,10 +68,7 @@ const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
   isLoading: true,
-  error: null,
-  otpSent: false,
-  otpExpiresAt: null,
-  attemptsRemaining: 3
+  error: null
 };
 
 // Auth Reducer
@@ -57,9 +87,7 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         user: action.payload,
         isAuthenticated: true,
         isLoading: false,
-        error: null,
-        otpSent: false,
-        otpExpiresAt: null
+        error: null
       };
 
     case 'AUTH_FAILURE':
@@ -68,27 +96,7 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         user: null,
         isAuthenticated: false,
         isLoading: false,
-        error: action.payload,
-        otpSent: false,
-        otpExpiresAt: null
-      };
-
-    case 'OTP_SENT':
-      return {
-        ...state,
-        otpSent: true,
-        otpExpiresAt: action.payload.expiresAt,
-        attemptsRemaining: action.payload.attemptsRemaining,
-        isLoading: false,
-        error: null
-      };
-
-    case 'OTP_VERIFIED':
-      return {
-        ...state,
-        otpSent: false,
-        otpExpiresAt: null,
-        error: null
+        error: action.payload
       };
 
     case 'LOGOUT':
@@ -116,12 +124,9 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
 
 // Auth Context Interface
 interface AuthContextType extends AuthState {
-  requestOtp: (phoneNumber: string, purpose?: 'login' | 'registration') => Promise<void>;
-  verifyOtpAndLogin: (phoneNumber: string, otp: string) => Promise<void>;
-  registerUser: (userData: UserRegistration, otp: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
-  refreshToken: () => Promise<void>;
 }
 
 // Create Context
@@ -131,6 +136,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 interface AuthProviderProps {
   children: ReactNode;
 }
+
+// Storage key for persisting auth
+const AUTH_STORAGE_KEY = 'mandi_auth_user';
 
 // Auth Provider Component
 export function AuthProvider({ children }: AuthProviderProps) {
@@ -142,100 +150,40 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   /**
-   * Initialize authentication state from stored tokens
+   * Initialize authentication state from localStorage
    */
   const initializeAuth = async () => {
     try {
-      if (authService.isAuthenticated()) {
-        const user = authService.getCurrentUser();
-        if (user) {
-          dispatch({ 
-            type: 'AUTH_SUCCESS', 
-            payload: {
-              ...user,
-              accessToken: authService.getAccessToken() || '',
-              refreshToken: ''
-            } as AuthUser
-          });
-        } else {
-          dispatch({ type: 'SET_LOADING', payload: false });
-        }
+      const storedUser = localStorage.getItem(AUTH_STORAGE_KEY);
+      if (storedUser) {
+        const user = JSON.parse(storedUser) as AuthUser;
+        dispatch({ type: 'AUTH_SUCCESS', payload: user });
       } else {
         dispatch({ type: 'SET_LOADING', payload: false });
       }
     } catch (error) {
       console.error('Failed to initialize auth:', error);
+      localStorage.removeItem(AUTH_STORAGE_KEY);
       dispatch({ type: 'SET_LOADING', payload: false });
     }
   };
 
   /**
-   * Request OTP for phone number
+   * Login with email and password
    */
-  const requestOtp = async (
-    phoneNumber: string, 
-    purpose: 'login' | 'registration' = 'login'
-  ): Promise<void> => {
-    try {
-      dispatch({ type: 'AUTH_START' });
-      
-      const response: OtpResponse = await authService.requestOtp(phoneNumber, purpose);
-      
-      const expiresAt = new Date(Date.now() + response.expiresIn * 1000);
-      
-      dispatch({ 
-        type: 'OTP_SENT', 
-        payload: { 
-          expiresAt, 
-          attemptsRemaining: response.attemptsRemaining 
-        } 
-      });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to send OTP';
-      dispatch({ type: 'AUTH_FAILURE', payload: errorMessage });
-      throw error;
-    }
-  };
-
-  /**
-   * Verify OTP and login user
-   */
-  const verifyOtpAndLogin = async (phoneNumber: string, otp: string): Promise<void> => {
-    try {
-      dispatch({ type: 'AUTH_START' });
-      
-      const response: LoginResponse = await authService.verifyOtpAndLogin(phoneNumber, otp);
-      
-      dispatch({ type: 'OTP_VERIFIED' });
-      dispatch({ type: 'AUTH_SUCCESS', payload: response.user });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Invalid OTP';
-      dispatch({ type: 'AUTH_FAILURE', payload: errorMessage });
-      throw error;
-    }
-  };
-
-  /**
-   * Register new user
-   */
-  const registerUser = async (userData: UserRegistration, otp: string): Promise<void> => {
-    try {
-      dispatch({ type: 'AUTH_START' });
-      
-      const response: CreateUserResponse = await authService.registerUser(userData, otp);
-      
-      const authUser: AuthUser = {
-        ...response.user,
-        accessToken: response.authTokens.accessToken,
-        refreshToken: response.authTokens.refreshToken
-      };
-      
-      dispatch({ type: 'OTP_VERIFIED' });
-      dispatch({ type: 'AUTH_SUCCESS', payload: authUser });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Registration failed';
-      dispatch({ type: 'AUTH_FAILURE', payload: errorMessage });
-      throw error;
+  const login = async (email: string, password: string): Promise<void> => {
+    dispatch({ type: 'AUTH_START' });
+    
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // Check demo credentials
+    if (email.toLowerCase() === DEMO_USER.email && password === DEMO_PASSWORD) {
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(DEMO_USER));
+      dispatch({ type: 'AUTH_SUCCESS', payload: DEMO_USER });
+    } else {
+      dispatch({ type: 'AUTH_FAILURE', payload: 'Invalid email or password. Use demo@mandi.com / password123' });
+      throw new Error('Invalid credentials');
     }
   };
 
@@ -243,14 +191,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
    * Logout user
    */
   const logout = async (): Promise<void> => {
-    try {
-      await authService.logout();
-      dispatch({ type: 'LOGOUT' });
-    } catch (error) {
-      console.error('Logout error:', error);
-      // Still dispatch logout to clear local state
-      dispatch({ type: 'LOGOUT' });
-    }
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+    dispatch({ type: 'LOGOUT' });
   };
 
   /**
@@ -260,37 +202,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     dispatch({ type: 'CLEAR_ERROR' });
   };
 
-  /**
-   * Refresh authentication token
-   */
-  const refreshToken = async (): Promise<void> => {
-    try {
-      await authService.refreshAccessToken();
-      const user = authService.getCurrentUser();
-      if (user) {
-        dispatch({ 
-          type: 'AUTH_SUCCESS', 
-          payload: {
-            ...user,
-            accessToken: authService.getAccessToken() || '',
-            refreshToken: ''
-          } as AuthUser
-        });
-      }
-    } catch (error) {
-      dispatch({ type: 'LOGOUT' });
-      throw error;
-    }
-  };
-
   const contextValue: AuthContextType = {
     ...state,
-    requestOtp,
-    verifyOtpAndLogin,
-    registerUser,
+    login,
     logout,
-    clearError,
-    refreshToken
+    clearError
   };
 
   return (

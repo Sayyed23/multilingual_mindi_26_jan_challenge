@@ -117,14 +117,22 @@ export const usePriceData = (options: UsePriceDataOptions = {}): UsePriceDataRet
       // Apply client-side filters
       const filteredData = applyClientSideFilters(freshData);
 
-      if (append) {
+      // If no data returned from API, use mock data
+      if (filteredData.length === 0 && !append) {
+        const mockData = getSamplePriceData();
+        const filteredMockData = applyClientSideFilters(mockData);
+        setPriceData(filteredMockData);
+        setTotalCount(filteredMockData.length);
+        setHasMore(false);
+      } else if (append) {
         setPriceData(prev => [...prev, ...filteredData]);
+        setTotalCount(priceData.length + filteredData.length);
+        setHasMore(filteredData.length === limit);
       } else {
         setPriceData(filteredData);
+        setTotalCount(filteredData.length);
+        setHasMore(filteredData.length === limit);
       }
-
-      setTotalCount(filteredData.length);
-      setHasMore(filteredData.length === limit);
     } catch (err) {
       if (err instanceof Error && err.name === 'AbortError') {
         return; // Request was cancelled, don't update error state
@@ -135,7 +143,9 @@ export const usePriceData = (options: UsePriceDataOptions = {}): UsePriceDataRet
       
       // Fallback to sample data on error
       if (!append) {
-        setPriceData(getSamplePriceData());
+        const mockData = getSamplePriceData();
+        setPriceData(mockData);
+        setTotalCount(mockData.length);
       }
     } finally {
       setLoading(false);
@@ -174,40 +184,148 @@ export const usePriceData = (options: UsePriceDataOptions = {}): UsePriceDataRet
   // Get sample data for fallback
   const getSamplePriceData = (): PriceData[] => [
     {
-      commodity: 'Wheat',
-      commodityId: 'wheat',
+      commodity: 'Wheat (SRW)',
+      commodityId: 'wheat-srw',
       price: 2150,
       unit: 'quintal',
       location: 'Delhi Mandi',
       source: 'agmarknet',
       timestamp: new Date(),
-      confidence: 0.9,
+      confidence: 0.92,
       marketTrend: 'rising',
       priceChange: { amount: 50, percentage: 2.4, period: '24h' }
     },
     {
-      commodity: 'Rice',
-      commodityId: 'rice',
-      price: 3200,
+      commodity: 'Basmati Rice',
+      commodityId: 'basmati-rice',
+      price: 4200,
       unit: 'quintal',
       location: 'Punjab Mandi',
-      source: 'vendor_submission',
+      source: 'agmarknet',
       timestamp: new Date(),
-      confidence: 0.8,
-      marketTrend: 'falling',
-      priceChange: { amount: -40, percentage: -1.2, period: '24h' }
+      confidence: 0.88,
+      marketTrend: 'stable',
+      priceChange: { amount: -10, percentage: -0.2, period: '24h' }
     },
     {
-      commodity: 'Onion',
-      commodityId: 'onion',
-      price: 1800,
-      unit: 'quintal',
+      commodity: 'Tomatoes (Hybrid)',
+      commodityId: 'tomatoes-hybrid',
+      price: 85,
+      unit: 'kg',
       location: 'Maharashtra Mandi',
+      source: 'vendor_submission',
+      timestamp: new Date(),
+      confidence: 0.85,
+      marketTrend: 'rising',
+      priceChange: { amount: 8, percentage: 10.4, period: '24h' }
+    },
+    {
+      commodity: 'Onion (Red)',
+      commodityId: 'onion-red',
+      price: 32,
+      unit: 'kg',
+      location: 'Nasik Mandi',
+      source: 'agmarknet',
+      timestamp: new Date(),
+      confidence: 0.91,
+      marketTrend: 'falling',
+      priceChange: { amount: -5, percentage: -13.5, period: '24h' }
+    },
+    {
+      commodity: 'Potato',
+      commodityId: 'potato',
+      price: 22,
+      unit: 'kg',
+      location: 'Agra Mandi',
+      source: 'agmarknet',
+      timestamp: new Date(),
+      confidence: 0.89,
+      marketTrend: 'stable',
+      priceChange: { amount: 0, percentage: 0, period: '24h' }
+    },
+    {
+      commodity: 'Soybean',
+      commodityId: 'soybean',
+      price: 4850,
+      unit: 'quintal',
+      location: 'Indore Mandi',
+      source: 'agmarknet',
+      timestamp: new Date(),
+      confidence: 0.87,
+      marketTrend: 'rising',
+      priceChange: { amount: 120, percentage: 2.5, period: '24h' }
+    },
+    {
+      commodity: 'Cotton',
+      commodityId: 'cotton',
+      price: 6200,
+      unit: 'quintal',
+      location: 'Rajkot Mandi',
+      source: 'agmarknet',
+      timestamp: new Date(),
+      confidence: 0.84,
+      marketTrend: 'falling',
+      priceChange: { amount: -180, percentage: -2.8, period: '24h' }
+    },
+    {
+      commodity: 'Mustard',
+      commodityId: 'mustard',
+      price: 5100,
+      unit: 'quintal',
+      location: 'Jaipur Mandi',
+      source: 'vendor_submission',
+      timestamp: new Date(),
+      confidence: 0.86,
+      marketTrend: 'rising',
+      priceChange: { amount: 75, percentage: 1.5, period: '24h' }
+    },
+    {
+      commodity: 'Chickpea (Chana)',
+      commodityId: 'chickpea',
+      price: 5400,
+      unit: 'quintal',
+      location: 'Bikaner Mandi',
+      source: 'agmarknet',
+      timestamp: new Date(),
+      confidence: 0.90,
+      marketTrend: 'stable',
+      priceChange: { amount: 20, percentage: 0.4, period: '24h' }
+    },
+    {
+      commodity: 'Green Chilli',
+      commodityId: 'green-chilli',
+      price: 65,
+      unit: 'kg',
+      location: 'Guntur Mandi',
+      source: 'vendor_submission',
+      timestamp: new Date(),
+      confidence: 0.82,
+      marketTrend: 'rising',
+      priceChange: { amount: 12, percentage: 22.6, period: '24h' }
+    },
+    {
+      commodity: 'Turmeric',
+      commodityId: 'turmeric',
+      price: 8200,
+      unit: 'quintal',
+      location: 'Erode Mandi',
+      source: 'agmarknet',
+      timestamp: new Date(),
+      confidence: 0.88,
+      marketTrend: 'rising',
+      priceChange: { amount: 350, percentage: 4.5, period: '24h' }
+    },
+    {
+      commodity: 'Groundnut',
+      commodityId: 'groundnut',
+      price: 5800,
+      unit: 'quintal',
+      location: 'Junagadh Mandi',
       source: 'agmarknet',
       timestamp: new Date(),
       confidence: 0.85,
       marketTrend: 'stable',
-      priceChange: { amount: 0, percentage: 0, period: '24h' }
+      priceChange: { amount: -30, percentage: -0.5, period: '24h' }
     }
   ];
 
