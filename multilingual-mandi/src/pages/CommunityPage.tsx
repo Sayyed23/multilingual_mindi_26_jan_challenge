@@ -34,6 +34,7 @@ export const CommunityPage = () => {
 
     const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>, name: string) => {
         const target = e.target as HTMLImageElement;
+        target.onerror = null; // Prevent infinite loop if fallback also fails
         target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=f0fdf4&color=15803d&bold=true`;
     };
 

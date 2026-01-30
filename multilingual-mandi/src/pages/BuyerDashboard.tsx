@@ -12,6 +12,26 @@ import {
 } from 'lucide-react';
 
 export const BuyerDashboard = () => {
+    const handleEditReach = () => {
+        console.log("Edit Reach clicked for Modern Grains Ltd");
+        // TODO: Implement reach editing logic or navigation
+    };
+
+    const handleSearchSellers = () => {
+        console.log("Search Sellers clicked");
+        // TODO: Navigate to sellers marketplace
+    };
+
+    const handlePriceComparison = () => {
+        console.log("Price Comparison clicked");
+        // TODO: Navigate to price analytics page
+    };
+
+    const handleBulkRFQ = () => {
+        console.log("Bulk RFQ clicked");
+        // TODO: Open RFQ creation modal or page
+    };
+
     return (
         <div className="flex flex-col gap-8 w-full">
 
@@ -26,7 +46,11 @@ export const BuyerDashboard = () => {
                             <MapPin size={16} className="text-blue-600 mr-1" />
                             Regional Coverage: Western India
                         </div>
-                        <button type="button" className="text-blue-600 text-xs font-bold px-2 cursor-pointer hover:underline uppercase tracking-wide bg-transparent border-none">
+                        <button
+                            type="button"
+                            onClick={handleEditReach}
+                            className="text-blue-600 text-xs font-bold px-2 cursor-pointer hover:underline focus:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded uppercase tracking-wide bg-transparent border-none"
+                        >
                             Edit Reach
                         </button>                    </div>
                 </div>
@@ -92,7 +116,7 @@ export const BuyerDashboard = () => {
                         {/* Main Action Cards */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             {/* Search Sellers */}
-                            <button type="button" onClick={() => { }} className="bg-blue-600 text-white p-6 rounded-2xl shadow-lg shadow-blue-200 flex flex-col justify-between h-48 cursor-pointer hover:bg-blue-700 transition-colors group text-left">
+                            <button type="button" onClick={handleSearchSellers} className="bg-blue-600 text-white p-6 rounded-2xl shadow-lg shadow-blue-200 flex flex-col justify-between h-48 cursor-pointer hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors group text-left">
                                 <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
                                     <Users size={20} />
                                 </div>
@@ -101,8 +125,9 @@ export const BuyerDashboard = () => {
                                     <p className="text-xs text-blue-100 opacity-90 leading-relaxed">Find verified suppliers in your region</p>
                                 </div>
                             </button>
+
                             {/* Price Comparison */}
-                            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between h-48 cursor-pointer hover:border-blue-200 transition-colors group">
+                            <button type="button" onClick={handlePriceComparison} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between h-48 cursor-pointer hover:border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors group text-left">
                                 <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
                                     <BarChart size={20} />
                                 </div>
@@ -110,10 +135,10 @@ export const BuyerDashboard = () => {
                                     <h3 className="font-bold text-lg text-gray-900 mb-1">Price Comparison</h3>
                                     <p className="text-xs text-gray-500 leading-relaxed">Analyze market trends & history</p>
                                 </div>
-                            </div>
+                            </button>
 
                             {/* Bulk RFQ */}
-                            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between h-48 cursor-pointer hover:border-blue-200 transition-colors group">
+                            <button type="button" onClick={handleBulkRFQ} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between h-48 cursor-pointer hover:border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors group text-left">
                                 <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
                                     <FileText size={20} />
                                 </div>
@@ -121,7 +146,7 @@ export const BuyerDashboard = () => {
                                     <h3 className="font-bold text-lg text-gray-900 mb-1">Bulk RFQ</h3>
                                     <p className="text-xs text-gray-500 leading-relaxed">Request quotes from multiple sellers</p>
                                 </div>
-                            </div>
+                            </button>
                         </div>
                     </section>
 
@@ -242,10 +267,9 @@ export const BuyerDashboard = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <button type="button" aria-label="Message Seller" className="text-blue-600 hover:text-blue-700">
+                                <button type="button" aria-label="Message Seller" className="text-blue-600 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded p-1">
                                     <MessageSquare size={18} />
-                                </button>
-                            </div>
+                                </button>                            </div>
 
                             {/* Seller 2 */}
                             <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between">

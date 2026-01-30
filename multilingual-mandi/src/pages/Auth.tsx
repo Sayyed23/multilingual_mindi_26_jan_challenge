@@ -23,14 +23,20 @@ export const Auth = () => {
     const [authMode, setAuthMode] = useState<'Login' | 'SignUp'>('Login');
     const [showPassword, setShowPassword] = useState(false);
     const [selectedRole, setSelectedRole] = useState<'Farmer' | 'Buyer' | 'Agent' | null>(null);
+    const [emailError, setEmailError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
 
     const toggleAuthMode = (mode: 'Login' | 'SignUp') => {
         setAuthMode(mode);
         setSelectedRole(null);
+        setEmailError('');
+        setPasswordError('');
     };
 
     const fillDemo = (role: 'Farmer' | 'Buyer' | 'Agent') => {
         if (import.meta.env.PROD) return; // Disable in production
+        setEmailError('');
+        setPasswordError('');
         switch (role) {
             case 'Farmer':
                 setEmail('farmer@mandi.com');
@@ -129,10 +135,31 @@ export const Auth = () => {
                     <form className="px-8 pb-8 space-y-6" onSubmit={(e) => {
                         e.preventDefault();
 
-                        if (!email.trim() || !password.trim()) {
-                            // Consider showing an error message to the user
+                        let hasError = false;
+                        if (!email.trim()) {
+                            setEmailError('Email or phone is required');
+                            hasError = true;
+                        }
+                        if (!password.trim()) {
+                            setPasswordError('Password is required');
+                            hasError = true;
+                        }
+                        if (hasError) return;
+
+                        /**
+                         * [MOCK AUTHENTICATION]
+                         * For this demo version, we use simplified routing based on email strings.
+                         * In a production app, this should calls loginUser(email, password),
+                         * validates the JWT/session, and stores it in context/persistence.
+                         */
+                        if (password.length < 6) {
+                            setPasswordError('Password must be at least 6 characters');
                             return;
                         }
+
+                        // Store local session for route guards
+                        localStorage.setItem('agri_market_auth', 'true');
+                        localStorage.setItem('agri_market_user', email.toLowerCase());
 
                         if (authMode === 'SignUp') {
                             navigate('/onboarding'); // Redirect to Onboarding for new signups
@@ -143,7 +170,7 @@ export const Auth = () => {
                         if (email.toLowerCase() === 'buyer@mandi.com') {
                             navigate('/buyer/dashboard');
                         } else if (email.toLowerCase() === 'agent@mandi.com') {
-                            navigate('/agent/dashboard'); // If agent dashboard exists
+                            navigate('/agent/dashboard');
                         } else {
                             navigate('/dashboard');
                         }
@@ -156,10 +183,14 @@ export const Auth = () => {
                                 <input
                                     type="text"
                                     value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full h-14 bg-background-light border-2 border-transparent focus:border-primary rounded-xl px-4 text-lg outline-none transition-all placeholder:text-gray-400 focus:bg-white"
+                                    onChange={(e) => {
+                                        setEmail(e.target.value);
+                                        if (emailError) setEmailError('');
+                                    }}
+                                    className={`w-full h-14 bg-background-light border-2 ${emailError ? 'border-red-500' : 'border-transparent'} focus:border-primary rounded-xl px-4 text-lg outline-none transition-all placeholder:text-gray-400 focus:bg-white`}
                                     placeholder="e.g. farmer@village.com"
                                 />
+                                {emailError && <p className="text-red-500 text-xs font-bold mt-1 ml-1">{emailError}</p>}
                             </div>
                         </div>
 
@@ -181,10 +212,14 @@ export const Auth = () => {
                                 <input
                                     type={showPassword ? "text" : "password"}
                                     value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full h-14 bg-background-light border-2 border-transparent focus:border-primary rounded-xl px-4 text-lg outline-none transition-all focus:bg-white"
+                                    onChange={(e) => {
+                                        setPassword(e.target.value);
+                                        if (passwordError) setPasswordError('');
+                                    }}
+                                    className={`w-full h-14 bg-background-light border-2 ${passwordError ? 'border-red-500' : 'border-transparent'} focus:border-primary rounded-xl px-4 text-lg outline-none transition-all focus:bg-white`}
                                     placeholder="••••••••"
                                 />
+                                {passwordError && <p className="text-red-500 text-xs font-bold mt-1 ml-1">{passwordError}</p>}
                             </div>
                         </div>
 

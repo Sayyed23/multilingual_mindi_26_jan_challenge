@@ -53,6 +53,8 @@ export const AlertsPage = () => {
         }
     ]);
 
+    const [selectedTab, setSelectedTab] = useState<'Price Alert' | 'Trade Update' | 'System'>('Price Alert');
+
     const markAllAsRead = () => {
         setAlerts(prev => prev.map(alert => ({ ...alert, read: true })));
     };
@@ -75,6 +77,14 @@ export const AlertsPage = () => {
     };
 
     const unreadCount = alerts.filter(a => !a.read).length;
+
+    const counts = {
+        price: alerts.filter(a => a.type === 'Price Alert').length,
+        trade: alerts.filter(a => a.type === 'Trade Update').length,
+        system: alerts.filter(a => a.type === 'System').length,
+    };
+
+    const filteredAlerts = alerts.filter(a => a.type === selectedTab);
 
     return (
         <div className="flex flex-col gap-6 w-full h-[calc(100vh-8rem)]">
@@ -107,75 +117,123 @@ export const AlertsPage = () => {
 
                     {/* Tabs */}
                     <div className="flex bg-gray-100 p-1 rounded-xl shrink-0" role="tablist">
-                        <button role="tab" aria-selected="true" className="flex-1 bg-white shadow-sm text-gray-900 font-bold py-2.5 rounded-lg text-sm">Price Alerts (3)</button>
-                        <button role="tab" aria-selected="false" className="flex-1 text-gray-500 font-bold py-2.5 rounded-lg text-sm hover:bg-gray-200/50">Deal Updates (2)</button>
-                        <button role="tab" aria-selected="false" className="flex-1 text-gray-500 font-bold py-2.5 rounded-lg text-sm hover:bg-gray-200/50">System (1)</button>
+                        <button
+                            id="tab-price"
+                            role="tab"
+                            aria-selected={selectedTab === 'Price Alert'}
+                            aria-controls="alert-panel"
+                            onClick={() => setSelectedTab('Price Alert')}
+                            className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${selectedTab === 'Price Alert' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:bg-gray-200/50'}`}
+                        >
+                            Price Alerts ({counts.price})
+                        </button>
+                        <button
+                            id="tab-trade"
+                            role="tab"
+                            aria-selected={selectedTab === 'Trade Update'}
+                            aria-controls="alert-panel"
+                            onClick={() => setSelectedTab('Trade Update')}
+                            className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${selectedTab === 'Trade Update' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:bg-gray-200/50'}`}
+                        >
+                            Deal Updates ({counts.trade})
+                        </button>
+                        <button
+                            id="tab-system"
+                            role="tab"
+                            aria-selected={selectedTab === 'System'}
+                            aria-controls="alert-panel"
+                            onClick={() => setSelectedTab('System')}
+                            className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${selectedTab === 'System' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:bg-gray-200/50'}`}
+                        >
+                            System ({counts.system})
+                        </button>
                     </div>
-                    {/* Scrollable List */}
-                    <div className="flex-1 overflow-y-auto space-y-4 pr-2">
-                        {alerts.map((alert) => (
-                            <div
-                                key={alert.id}
-                                role="button"
-                                tabIndex={0}
-                                aria-label={`${alert.title} - ${alert.read ? 'Read' : 'Unread'}`}
-                                onClick={() => handleMarkAsRead(alert.id)}
-                                onKeyDown={(e) => handleKeyDown(e, alert.id)}
-                                className={`p-5 rounded-2xl border transition-all cursor-pointer relative group focus:outline-none focus:ring-2 focus:ring-blue-500 ${alert.urgency === 'active'
-                                    ? `bg-white border-2 ${alert.read ? 'border-gray-200 shadow-sm' : 'border-blue-500 shadow-md'}`
-                                    : alert.urgency === 'crucial'
-                                        ? `${alert.read ? 'bg-white border-gray-100 shadow-sm' : 'bg-red-50 border-red-100 shadow-sm'}`
-                                        : 'bg-white border-gray-100 shadow-sm hover:border-gray-200'
-                                    }`}
-                            >
-                                {!alert.read && (
-                                    <div className={`absolute top-5 right-5 w-2 h-2 rounded-full ${alert.urgency === 'crucial' ? 'bg-red-400' : 'bg-blue-500'}`}></div>
-                                )}
 
-                                <div className="flex items-start gap-3">
-                                    <div className="mt-0.5">
-                                        {alert.urgency === 'active' && <TrendingUp size={18} className="text-green-600" />}
-                                        {alert.urgency === 'crucial' && <AlertCircle size={20} className="text-red-500" />}
-                                        {alert.urgency === 'normal' && <CheckCircle size={20} className="text-blue-500" />}
-                                    </div>
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <h3 className={`font-bold ${alert.read ? 'text-gray-600' : 'text-gray-900'}`}>{alert.title}</h3>
+                    {/* Scrollable List */}
+                    <div
+                        id="alert-panel"
+                        role="tabpanel"
+                        aria-labelledby={`tab-${selectedTab.split(' ')[0].toLowerCase()}`}
+                        className="flex-1 overflow-y-auto space-y-4 pr-2"
+                    >
+                        {filteredAlerts.length > 0 ? (
+                            filteredAlerts.map((alert) => (
+                                <div
+                                    key={alert.id}
+                                    role="button"
+                                    tabIndex={0}
+                                    aria-label={`${alert.title} - ${alert.read ? 'Read' : 'Unread'}`}
+                                    onClick={() => handleMarkAsRead(alert.id)}
+                                    onKeyDown={(e) => handleKeyDown(e, alert.id)}
+                                    className={`p-5 rounded-2xl border transition-all cursor-pointer relative group focus:outline-none focus:ring-2 focus:ring-blue-500 ${alert.urgency === 'active'
+                                        ? `bg-white border-2 ${alert.read ? 'border-gray-200 shadow-sm' : 'border-blue-500 shadow-md'}`
+                                        : alert.urgency === 'crucial'
+                                            ? `${alert.read ? 'bg-white border-gray-100 shadow-sm' : 'bg-red-50 border-red-100 shadow-sm'}`
+                                            : 'bg-white border-gray-100 shadow-sm hover:border-gray-200'
+                                        }`}
+                                >
+                                    {!alert.read && (
+                                        <div className={`absolute top-5 right-5 w-2 h-2 rounded-full ${alert.urgency === 'crucial' ? 'bg-red-400' : 'bg-blue-500'}`}></div>
+                                    )}
+
+                                    <div className="flex items-start gap-3">
+                                        <div className="mt-0.5">
+                                            {alert.urgency === 'active' && <TrendingUp size={18} className="text-green-600" />}
+                                            {alert.urgency === 'crucial' && <AlertCircle size={20} className="text-red-500" />}
+                                            {alert.urgency === 'normal' && <CheckCircle size={20} className="text-blue-500" />}
                                         </div>
-                                        <p className="text-xs text-gray-500 font-medium mb-3">{alert.description}</p>
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <h3 className={`font-bold ${alert.read ? 'text-gray-600' : 'text-gray-900'}`}>{alert.title}</h3>
+                                            </div>
+                                            <p className="text-xs text-gray-500 font-medium mb-3">{alert.description}</p>
+
+                                            {alert.urgency === 'active' && (
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleViewPrice(alert.id);
+                                                    }}
+                                                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-xs flex items-center gap-1 transition-colors z-10 relative"
+                                                >
+                                                    View Price <ArrowRight size={14} />
+                                                </button>
+                                            )}
+                                            {alert.urgency === 'crucial' && (
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        // Handle respond action
+                                                    }}
+                                                    className="bg-white border border-red-200 text-red-600 hover:bg-red-50 font-bold py-2 px-4 rounded-lg text-xs transition-colors"
+                                                >
+                                                    Respond Now
+                                                </button>
+                                            )}
+                                            {alert.urgency === 'normal' && (
+                                                <p className="text-sm text-gray-600 mt-2">{alert.description}</p>
+                                            )}                                    </div>
 
                                         {alert.urgency === 'active' && (
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleViewPrice(alert.id);
-                                                }}
-                                                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-xs flex items-center gap-1 transition-colors z-10 relative"
-                                            >
-                                                View Price <ArrowRight size={14} />
-                                            </button>
-                                        )}
-                                        {alert.urgency === 'crucial' && (
-                                            <button className="bg-white border border-red-200 text-red-600 hover:bg-red-50 font-bold py-2 px-4 rounded-lg text-xs transition-colors">
-                                                Respond Now
-                                            </button>
-                                        )}
-                                        {alert.urgency === 'normal' && (
-                                            <p className="text-sm text-gray-600 mt-2">Your KYC documents have been verified. You can now start bidding on high-value trades.</p>
+                                            <div className="w-24 h-16 bg-blue-900/10 rounded-lg overflow-hidden shrink-0 border border-blue-100">
+                                                <svg viewBox="0 0 100 60" className="w-full h-full">
+                                                    <polyline points="0,50 20,45 40,30 60,40 80,15 100,5" fill="none" stroke="#2563eb" strokeWidth="2" />
+                                                    <polygon points="0,50 20,45 40,30 60,40 80,15 100,5 100,60 0,60" fill="#2563eb" fillOpacity="0.1" />
+                                                </svg>
+                                            </div>
                                         )}
                                     </div>
-
-                                    {alert.urgency === 'active' && (
-                                        <div className="w-24 h-16 bg-blue-900/10 rounded-lg overflow-hidden shrink-0 border border-blue-100">
-                                            <svg viewBox="0 0 100 60" className="w-full h-full">
-                                                <polyline points="0,50 20,45 40,30 60,40 80,15 100,5" fill="none" stroke="#2563eb" strokeWidth="2" />
-                                                <polygon points="0,50 20,45 40,30 60,40 80,15 100,5 100,60 0,60" fill="#2563eb" fillOpacity="0.1" />
-                                            </svg>
-                                        </div>
-                                    )}
                                 </div>
+                            ))
+                        ) : (
+                            <div className="h-full flex flex-col items-center justify-center text-center p-8 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-100">
+                                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
+                                    <Info className="text-gray-300" size={32} />
+                                </div>
+                                <h3 className="text-gray-900 font-bold mb-1">No {selectedTab}s</h3>
+                                <p className="text-gray-500 text-sm max-w-xs">You're all caught up! New notifications will appear here as they arrive.</p>
                             </div>
-                        ))}
+                        )}
                     </div>
 
                     {/* Footer Links */}

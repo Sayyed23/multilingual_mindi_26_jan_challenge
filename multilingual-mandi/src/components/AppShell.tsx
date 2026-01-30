@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
     Bell,
@@ -13,9 +14,20 @@ export const AppShell = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
+    useEffect(() => {
+        const isAuthenticated = localStorage.getItem('agri_market_auth') === 'true';
+        if (!isAuthenticated) {
+            navigate('/auth', { replace: true });
+        }
+    }, [navigate]);
+
     const isBuyer = location.pathname.startsWith('/buyer');
 
     const isActive = (path: string) => location.pathname === path;
+
+    const handleHelpClick = () => {
+        navigate('/community');
+    };
 
     // Navigation Config
     const farmerNav = [
@@ -47,12 +59,16 @@ export const AppShell = () => {
                     <div
                         className="flex items-center gap-2 text-gray-900 cursor-pointer"
                         onClick={() => navigate(isBuyer ? '/buyer/dashboard' : '/dashboard')}
-                        onKeyDown={(e) => e.key === 'Enter' && navigate(isBuyer ? '/buyer/dashboard' : '/dashboard')}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                navigate(isBuyer ? '/buyer/dashboard' : '/dashboard');
+                            }
+                        }}
                         role="button"
                         tabIndex={0}
                         aria-label="Go to dashboard"
-                    >
-                        <div className={`${logoBg} rounded-full p-1.5 text-white`}>
+                    >                        <div className={`${logoBg} rounded-full p-1.5 text-white`}>
                             {isBuyer ? <Hexagon size={20} fill="currentColor" /> : <Leaf size={20} fill="currentColor" />}
                         </div>
                         <span className="font-bold text-xl tracking-tight">AgriMarket</span>
@@ -125,7 +141,11 @@ export const AppShell = () => {
                         © 2024 AgriMarket Platform • Empowering 2M+ Farmers across India
                     </p>
                     <div className="flex items-center gap-6 text-gray-400">
-                        <button className="hover:text-gray-600 transition-colors" aria-label="Help">
+                        <button
+                            className="hover:text-gray-600 transition-colors"
+                            aria-label="Help"
+                            onClick={handleHelpClick}
+                        >
                             <HelpCircle size={20} />
                         </button>
                         {!isBuyer && (
@@ -138,6 +158,8 @@ export const AppShell = () => {
                             aria-label="Logout"
                             onClick={() => {
                                 console.log("Logging out from Footer...");
+                                localStorage.removeItem('agri_market_auth');
+                                localStorage.removeItem('agri_market_user');
                                 navigate('/auth');
                             }}
                         >

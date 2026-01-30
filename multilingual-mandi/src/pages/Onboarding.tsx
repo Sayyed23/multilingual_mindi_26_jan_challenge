@@ -50,11 +50,11 @@ export const Onboarding = () => {
     };
 
     const playAudioGuide = () => {
-        setIsPlaying(!isPlaying);
+        const newIsPlaying = !isPlaying;
+        setIsPlaying(newIsPlaying);
         // In a real app, this would control an audio object
-        console.log(isPlaying ? "Stopping audio guide..." : "Playing audio guide...");
+        console.log(newIsPlaying ? "Playing audio guide..." : "Stopping audio guide...");
     };
-
     const commodities = [
         { name: 'Wheat', icon: '🌾' },
         { name: 'Rice', icon: '🍚' },
@@ -177,7 +177,8 @@ export const Onboarding = () => {
                                 alt="Farmer"
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
-                                    (e.target as HTMLImageElement).src = 'https://ui-avatars.com/api/?name=Farmer&background=E8F5E9&color=2E7D32&bold=true';
+                                    e.currentTarget.onerror = null;
+                                    e.currentTarget.src = 'https://ui-avatars.com/api/?name=Farmer&background=E8F5E9&color=2E7D32&bold=true';
                                 }}
                             />
                         </div>
@@ -208,9 +209,10 @@ export const Onboarding = () => {
                             </div>
                         </div>
                         <div>
-                            <label className="block text-sm font-bold text-gray-500 mb-2">Secondary Language</label>
+                            <label htmlFor="secondary-language" className="block text-sm font-bold text-gray-500 mb-2">Secondary Language</label>
                             <div className="relative">
                                 <select
+                                    id="secondary-language"
                                     value={secondaryLanguage}
                                     onChange={(e) => setSecondaryLanguage(e.target.value)}
                                     className="w-full appearance-none bg-gray-100 border-none rounded-xl py-3 px-4 font-bold text-gray-900 focus:ring-2 focus:ring-green-500"
@@ -218,8 +220,7 @@ export const Onboarding = () => {
                                     <option value="Hindi (हिंदी)">Hindi (हिंदी)</option>
                                     <option value="Punjabi (ਪੰਜਾਬੀ)">Punjabi (ਪੰਜਾਬੀ)</option>
                                     <option value="Marathi (मराठी)">Marathi (मराठी)</option>
-                                </select>
-                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 pointer-events-none" />
+                                </select>                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 pointer-events-none" />
                             </div>
                         </div>
                     </div>
@@ -339,14 +340,13 @@ export const Onboarding = () => {
                     className="bg-white pl-4 pr-2 py-2 rounded-full shadow-xl border border-gray-100 flex items-center gap-3 hover:scale-105 transition-transform group focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
                     <div className="bg-green-500 p-2 rounded-full">
-                        <Volume2 className={`h-5 w-5 text-white ${isPlaying ? 'animate-none' : 'animate-pulse'}`} />
+                        <Volume2 className={`h-5 w-5 text-white ${isPlaying ? 'animate-pulse' : ''}`} />
                     </div>
                     <div className="text-left mr-2">
                         <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Need Help?</span>
                         <span className="block text-sm font-bold text-gray-900">
                             {isPlaying ? "Stop Guide" : "Play Audio Guide"}
-                        </span>
-                    </div>
+                        </span>                    </div>
                 </button>
             </div>
         </div>
