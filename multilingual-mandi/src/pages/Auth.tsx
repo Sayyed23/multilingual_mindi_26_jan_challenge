@@ -18,6 +18,8 @@ import {
 
 export const Auth = () => {
     const navigate = useNavigate();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [authMode, setAuthMode] = useState<'Login' | 'SignUp'>('Login');
     const [showPassword, setShowPassword] = useState(false);
     const [selectedRole, setSelectedRole] = useState<'Farmer' | 'Buyer' | 'Agent' | null>(null);
@@ -25,6 +27,23 @@ export const Auth = () => {
     const toggleAuthMode = (mode: 'Login' | 'SignUp') => {
         setAuthMode(mode);
         setSelectedRole(null);
+    };
+
+    const fillDemo = (role: 'Farmer' | 'Buyer' | 'Agent') => {
+        switch (role) {
+            case 'Farmer':
+                setEmail('farmer@mandi.com');
+                setPassword('pass123');
+                break;
+            case 'Buyer':
+                setEmail('buyer@mandi.com');
+                setPassword('pass123');
+                break;
+            case 'Agent':
+                setEmail('agent@mandi.com');
+                setPassword('pass123');
+                break;
+        }
     };
 
     return (
@@ -88,8 +107,8 @@ export const Auth = () => {
                             <button
                                 onClick={() => toggleAuthMode('Login')}
                                 className={`flex cursor-pointer h-full grow items-center justify-center rounded-lg px-2 text-base font-semibold transition-all ${authMode === 'Login'
-                                        ? 'bg-white shadow-sm text-[#101b0d]'
-                                        : 'text-[#599a4c] hover:text-[#101b0d]'
+                                    ? 'bg-white shadow-sm text-[#101b0d]'
+                                    : 'text-[#599a4c] hover:text-[#101b0d]'
                                     }`}
                             >
                                 Login
@@ -97,8 +116,8 @@ export const Auth = () => {
                             <button
                                 onClick={() => toggleAuthMode('SignUp')}
                                 className={`flex cursor-pointer h-full grow items-center justify-center rounded-lg px-2 text-base font-semibold transition-all ${authMode === 'SignUp'
-                                        ? 'bg-white shadow-sm text-[#101b0d]'
-                                        : 'text-[#599a4c] hover:text-[#101b0d]'
+                                    ? 'bg-white shadow-sm text-[#101b0d]'
+                                    : 'text-[#599a4c] hover:text-[#101b0d]'
                                     }`}
                             >
                                 Sign Up
@@ -107,7 +126,21 @@ export const Auth = () => {
                     </div>
 
                     {/* Input Fields */}
-                    <form className="px-8 pb-8 space-y-6" onSubmit={(e) => e.preventDefault()}>
+                    <form className="px-8 pb-8 space-y-6" onSubmit={(e) => {
+                        e.preventDefault();
+
+                        if (authMode === 'SignUp') {
+                            navigate('/onboarding'); // Redirect to Onboarding for new signups
+                            return;
+                        }
+
+                        // Login Logic
+                        if (email.toLowerCase().includes('buyer') || selectedRole === 'Buyer') {
+                            navigate('/buyer/dashboard');
+                        } else {
+                            navigate('/dashboard');
+                        }
+                    }}>
                         <div className="space-y-2">
                             <label className="text-sm font-bold text-[#101b0d] flex justify-between items-center">
                                 Email or Phone Number
@@ -116,6 +149,8 @@ export const Auth = () => {
                             <div className="relative">
                                 <input
                                     type="text"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                     className="w-full h-14 bg-background-light border-2 border-transparent focus:border-primary rounded-xl px-4 text-lg outline-none transition-all placeholder:text-gray-400 focus:bg-white"
                                     placeholder="e.g. farmer@village.com"
                                 />
@@ -139,6 +174,8 @@ export const Auth = () => {
                             <div className="relative">
                                 <input
                                     type={showPassword ? "text" : "password"}
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                     className="w-full h-14 bg-background-light border-2 border-transparent focus:border-primary rounded-xl px-4 text-lg outline-none transition-all focus:bg-white"
                                     placeholder="••••••••"
                                 />
@@ -159,6 +196,36 @@ export const Auth = () => {
                         >
                             {authMode === 'Login' ? 'Sign In Now' : 'Create Account'}
                         </button>
+
+                        {/* Demo Credentials Buttons */}
+                        {authMode === 'Login' && (
+                            <div className="pt-2 flex flex-col items-center gap-2">
+                                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Quick Demo Login</p>
+                                <div className="flex gap-2 w-full">
+                                    <button
+                                        type="button"
+                                        onClick={() => fillDemo('Farmer')}
+                                        className="flex-1 bg-green-50 hover:bg-green-100 text-green-700 text-xs font-bold py-2 rounded-lg transition-colors border border-green-200"
+                                    >
+                                        Farmer
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => fillDemo('Buyer')}
+                                        className="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold py-2 rounded-lg transition-colors border border-blue-200"
+                                    >
+                                        Buyer
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => fillDemo('Agent')}
+                                        className="flex-1 bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold py-2 rounded-lg transition-colors border border-purple-200"
+                                    >
+                                        Agent
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </form>
 
                     {/* Trust Section */}
@@ -194,8 +261,8 @@ export const Auth = () => {
                                     key={role.id}
                                     onClick={() => setSelectedRole(role.id as any)}
                                     className={`bg-white p-4 sm:p-6 rounded-xl border-2 flex flex-col items-center text-center cursor-pointer transition-all ${selectedRole === role.id
-                                            ? 'border-primary shadow-md bg-green-50'
-                                            : 'border-transparent hover:border-primary/50'
+                                        ? 'border-primary shadow-md bg-green-50'
+                                        : 'border-transparent hover:border-primary/50'
                                         }`}
                                 >
                                     <div className={`h-16 w-16 rounded-full flex items-center justify-center mb-3 ${selectedRole === role.id ? 'bg-primary text-white' : 'bg-green-100 text-green-700'
