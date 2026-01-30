@@ -1,92 +1,73 @@
-# Multilingual Mandi PWA
+# React + TypeScript + Vite
 
-AI-powered marketplace for Indian agricultural commodities that breaks language barriers and ensures price transparency.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Features
+Currently, two official plugins are available:
 
-- 🌐 **Multilingual Support**: 22+ Indian languages with real-time translation
-- 💰 **Price Intelligence**: AI-powered price discovery and market analysis
-- 🤝 **Smart Negotiation**: Cultural context-aware negotiation assistance
-- 📱 **Offline-First PWA**: Works on 2G/3G networks with offline capabilities
-- 🔐 **Trust & Verification**: Reputation system and business verification
-- 📊 **Market Analytics**: Real-time insights and trend analysis
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## Tech Stack
+## React Compiler
 
-- **Frontend**: React 18+ with TypeScript
-- **Build Tool**: Vite with PWA plugin
-- **Styling**: CSS Modules (to be added)
-- **State Management**: Context API + useReducer (to be added)
-- **Offline Storage**: IndexedDB
-- **Testing**: Jest + React Testing Library + fast-check
+The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
 
-## Getting Started
+## Expanding the ESLint configuration
 
-### Prerequisites
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-- Node.js 18+ 
-- npm or yarn
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
 
-### Installation
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
 
-```bash
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
 
-### Development Scripts
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-```bash
-# Type checking
-npm run type-check
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
 
-# Linting
-npm run lint
-npm run lint:fix
-
-# Code formatting
-npm run format
-npm run format:check
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
-
-## Project Structure
-
-```
-src/
-├── components/     # Reusable UI components
-├── pages/         # Page components
-├── services/      # API and business logic
-├── types/         # TypeScript type definitions
-├── hooks/         # Custom React hooks
-├── utils/         # Utility functions
-├── store/         # State management
-└── assets/        # Static assets
-```
-
-## Requirements
-
-This project implements the requirements defined in `.kiro/specs/multilingual-mandi/requirements.md`:
-
-1. **Multilingual Communication** - Real-time translation between 22+ Indian languages
-2. **Real-Time Price Discovery** - Market intelligence from 100+ mandis
-3. **AI-Powered Negotiation** - Smart negotiation assistance
-4. **User Authentication** - OTP-based auth with reputation system
-5. **Offline-First Architecture** - Works on poor connectivity
-6. **Price Verification Scanner** - Fair price comparison
-7. **Search and Discovery** - Multi-language commodity search
-8. **Deal Management** - Complete transaction lifecycle
-9. **Mobile-First UI** - Responsive design for all devices
-10. **Analytics and Insights** - Market intelligence and trends
-
-## License
-
-Private - All rights reserved

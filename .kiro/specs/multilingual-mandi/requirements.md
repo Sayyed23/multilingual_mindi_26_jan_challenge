@@ -2,170 +2,139 @@
 
 ## Introduction
 
-The Multilingual Mandi is a Progressive Web App (PWA) designed to democratize local trade in India by creating an AI-powered marketplace that breaks language barriers, ensures price transparency, and empowers vendors and buyers in tier 2-3 cities and rural market areas. The platform targets small-scale vendors, farmers, wholesalers, and retailers, enabling seamless communication across 22+ Indian languages while providing real-time price intelligence and AI-powered negotiation assistance.
+The Multilingual Mandi is an AI-powered progressive web application designed to modernize India's traditional mandi ecosystem by breaking language barriers, improving price transparency, and enabling fair, efficient negotiations between vendors and buyers. The platform serves as a digital bridge connecting small-scale vendors, farmers, wholesalers, retailers, and urban buyers across India's diverse linguistic landscape.
 
 ## Glossary
 
-- **Mandi**: Traditional Indian marketplace or trading center for agricultural commodities
-- **Vendor**: Small-scale seller including farmers, wholesalers, and retailers
-- **Buyer**: Individual or business purchasing goods from vendors
-- **Translation_Engine**: AI-powered system for real-time language translation with mandi-specific vocabulary
-- **Price_Oracle**: AI system that aggregates and analyzes price data from multiple sources
-- **Negotiation_Assistant**: AI system that facilitates structured bargaining between parties
-- **PWA**: Progressive Web App - web application with native app-like features
-- **GMV**: Gross Merchandise Value - total value of goods sold through the platform
-- **AGMARKNET**: Government of India's agricultural marketing information network
+- **Mandi**: Traditional wholesale market or marketplace in India where agricultural and other goods are traded
+- **PWA**: Progressive Web Application - a web application that uses modern web capabilities to deliver an app-like experience
+- **Vendor**: Small-scale sellers, farmers, wholesalers who offer goods in the mandi
+- **Buyer**: Retailers, urban consumers, bulk purchasers who seek to purchase goods
+- **Commission_Agent**: Market intermediaries who facilitate transactions between vendors and buyers
+- **Price_Discovery_Engine**: AI system that analyzes market data to determine fair price ranges
+- **Negotiation_Assistant**: AI-powered system that provides negotiation guidance and suggestions
+- **Translation_Engine**: System that handles multilingual communication and mandi-specific terminology
+- **Reputation_System**: Trust-building mechanism that tracks user transaction history and ratings
+- **Offline_Mode**: PWA capability that allows core functionality without internet connectivity
 
 ## Requirements
 
 ### Requirement 1: Multilingual Communication
 
-**User Story:** As a vendor, I want to communicate with buyers who speak different languages, so that I can expand my customer base beyond my linguistic region.
+**User Story:** As a vendor or buyer, I want to communicate in my native language, so that I can participate in trade without language barriers.
 
 #### Acceptance Criteria
 
-1. WHEN a vendor sends a message in their native language, THE Translation_Engine SHALL translate it to the buyer's preferred language within 2 seconds
-2. WHEN translating trade-specific vocabulary, THE Translation_Engine SHALL achieve greater than 95% accuracy for common mandi terms
-3. WHEN a user speaks into the voice interface, THE Translation_Engine SHALL convert speech to text and translate it to the target language
-4. WHEN translation fails or confidence is low, THE Translation_Engine SHALL flag the message for manual review
-5. THE Translation_Engine SHALL support 22 Indian languages including major dialects
+1. THE Translation_Engine SHALL support text communication in 22+ Indian languages including Hindi, Marathi, Tamil, Telugu, Bengali, Gujarati, Kannada, Malayalam, Punjabi, Odia, Assamese, and regional dialects
+2. WHEN a user sends a message in their native language, THE Translation_Engine SHALL translate it to the recipient's preferred language within 2 seconds
+3. THE Translation_Engine SHALL maintain a specialized dictionary of mandi-specific terminology and agricultural terms for accurate context-aware translation
+4. WHEN voice input is provided, THE System SHALL convert speech to text in the user's language and then translate as needed
+5. THE System SHALL preserve the original message alongside translations for verification and context
 
-### Requirement 2: Real-Time Price Discovery
+### Requirement 2: Real-time Price Discovery
 
-**User Story:** As a buyer, I want to see current market prices for commodities, so that I can make informed purchasing decisions and negotiate fairly.
-
-#### Acceptance Criteria
-
-1. WHEN a user searches for a commodity, THE Price_Oracle SHALL display current market prices from at least 100 different mandis
-2. WHEN displaying prices, THE Price_Oracle SHALL show the fair price range with confidence intervals
-3. WHEN price data is older than 24 hours, THE Price_Oracle SHALL clearly indicate the data age
-4. THE Price_Oracle SHALL integrate with AGMARKNET API to fetch official government price data
-5. WHEN vendors submit manual price updates, THE Price_Oracle SHALL validate them against market trends before acceptance
-
-### Requirement 3: AI-Powered Negotiation
-
-**User Story:** As a vendor, I want assistance during price negotiations, so that I can achieve fair deals while maintaining good relationships with buyers.
+**User Story:** As a vendor or buyer, I want access to real-time market prices, so that I can make informed trading decisions.
 
 #### Acceptance Criteria
 
-1. WHEN a negotiation begins, THE Negotiation_Assistant SHALL suggest opening offers based on current market conditions
-2. WHEN counter-offers are made, THE Negotiation_Assistant SHALL provide real-time market comparison data
-3. WHEN a deal is proposed, THE Negotiation_Assistant SHALL analyze if the price falls within fair market range
-4. THE Negotiation_Assistant SHALL translate all negotiation messages in real-time between parties
-5. WHEN negotiations stall, THE Negotiation_Assistant SHALL suggest compromise solutions based on historical successful deals
+1. THE Price_Discovery_Engine SHALL aggregate price data from multiple mandis across different regions in real-time
+2. WHEN a user searches for a commodity, THE System SHALL display current market prices, price trends over the last 7 days, and AI-calculated fair price ranges
+3. THE System SHALL update price information every 15 minutes during market hours (6 AM to 8 PM IST)
+4. WHEN displaying prices, THE System SHALL show the source mandi, timestamp, and confidence level of the price data
+5. THE Price_Discovery_Engine SHALL account for regional variations, seasonal factors, and quality grades when calculating fair price ranges
+
+### Requirement 3: AI-Powered Negotiation Support
+
+**User Story:** As a user engaged in negotiations, I want intelligent guidance, so that I can negotiate fairly and effectively.
+
+#### Acceptance Criteria
+
+1. WHEN a negotiation begins, THE Negotiation_Assistant SHALL suggest culturally appropriate opening prices based on current market data and regional norms
+2. THE Negotiation_Assistant SHALL provide real-time counter-offer suggestions that consider market prices, user history, and negotiation patterns
+3. WHEN a deal is proposed, THE System SHALL analyze the offer against market benchmarks and provide fairness assessment
+4. THE Negotiation_Assistant SHALL adapt its suggestions based on regional bargaining customs and cultural preferences
+5. THE System SHALL maintain negotiation history to improve future recommendations for each user
 
 ### Requirement 4: User Authentication and Profiles
 
-**User Story:** As a platform user, I want to create and maintain a verified digital identity, so that I can build trust with trading partners.
+**User Story:** As a platform user, I want a secure profile system, so that I can build trust and track my trading activity.
 
 #### Acceptance Criteria
 
-1. WHEN a new user registers, THE System SHALL verify their mobile number through OTP
-2. WHEN a vendor completes business verification, THE System SHALL display a verified badge on their profile
-3. THE System SHALL maintain a reputation score based on transaction history and user reviews
-4. WHEN users complete transactions, THE System SHALL allow both parties to rate and review each other
-5. THE System SHALL display transaction history and payment punctuality scores on user profiles
+1. THE System SHALL support user registration via mobile number with OTP verification
+2. WHEN creating a profile, THE System SHALL allow users to specify their role (vendor, buyer, commission agent), location, primary language, and commodity interests
+3. THE System SHALL maintain user profiles with transaction history, ratings, and verification status
+4. THE Reputation_System SHALL calculate trust scores based on completed transactions, user ratings, and profile completeness
+5. WHEN users interact, THE System SHALL display relevant reputation information to facilitate trust-building
 
 ### Requirement 5: Offline-First Architecture
 
-**User Story:** As a user in a rural area with poor connectivity, I want to access core platform features even with limited internet, so that I can continue trading regardless of network conditions.
+**User Story:** As a user in areas with poor connectivity, I want core functionality to work offline, so that I can continue trading despite network issues.
 
 #### Acceptance Criteria
 
-1. WHEN the device is offline, THE PWA SHALL allow users to browse cached price data and product listings
-2. WHEN connectivity is restored, THE PWA SHALL synchronize all offline actions with the server
-3. THE PWA SHALL function on 2G/3G networks with acceptable performance
-4. WHEN downloading the app, THE PWA SHALL have a total size of less than 5MB
-5. THE PWA SHALL cache critical data locally to enable offline functionality
+1. THE PWA SHALL cache essential data including recent price information, user profiles, and ongoing conversations for offline access
+2. WHEN offline, THE System SHALL allow users to compose messages, view cached prices, and prepare transaction details
+3. THE System SHALL queue offline actions and synchronize them when connectivity is restored
+4. WHEN network connectivity is unavailable, THE System SHALL provide SMS fallback for critical communications
+5. THE PWA SHALL implement progressive loading to minimize data usage and improve performance on slow connections
 
-### Requirement 6: Price Verification Scanner
+### Requirement 6: Search and Discovery
 
-**User Story:** As a buyer, I want to verify if quoted prices are fair compared to market rates, so that I can negotiate with confidence.
-
-#### Acceptance Criteria
-
-1. WHEN a user scans or enters a price quote, THE Price_Oracle SHALL compare it against current market rates
-2. WHEN the quoted price is significantly above market rate, THE System SHALL alert the user with percentage difference
-3. WHEN displaying price comparisons, THE System SHALL show data from at least 5 comparable mandis
-4. THE System SHALL provide historical price trends for the commodity over the past 30 days
-5. WHEN price verification is complete, THE System SHALL suggest negotiation strategies based on market position
-
-### Requirement 7: Search and Discovery
-
-**User Story:** As a buyer, I want to search for specific commodities and vendors, so that I can find the products I need efficiently.
+**User Story:** As a buyer, I want to find relevant vendors and commodities, so that I can discover trading opportunities efficiently.
 
 #### Acceptance Criteria
 
-1. WHEN a user enters a search query, THE System SHALL return results within 3 seconds
-2. THE System SHALL support search in multiple Indian languages with automatic translation
-3. WHEN displaying search results, THE System SHALL show vendor ratings, distance, and current prices
-4. THE System SHALL allow filtering by location, price range, quantity available, and vendor rating
-5. WHEN no exact matches are found, THE System SHALL suggest similar commodities or alternative vendors
+1. THE System SHALL provide search functionality for commodities, vendors, and locations with multilingual support
+2. WHEN searching, THE System SHALL return results ranked by relevance, proximity, reputation, and current availability
+3. THE System SHALL support filtering by price range, location radius, quality grade, and vendor type
+4. THE System SHALL provide commodity categorization following standard agricultural classification systems
+5. WHEN displaying search results, THE System SHALL show key information including current prices, vendor ratings, and distance
 
-### Requirement 8: Deal Management
+### Requirement 7: Transaction Management
 
-**User Story:** As a vendor, I want to track my ongoing deals and transactions, so that I can manage my business effectively.
-
-#### Acceptance Criteria
-
-1. WHEN a deal is agreed upon, THE System SHALL create a transaction record with all relevant details
-2. THE System SHALL send notifications to both parties about deal status changes
-3. WHEN payment is due, THE System SHALL remind both parties through push notifications
-4. THE System SHALL maintain a complete audit trail of all deal communications and status changes
-5. WHEN deals are completed, THE System SHALL update both parties' reputation scores based on performance
-
-### Requirement 9: Mobile-First User Interface
-
-**User Story:** As a user primarily accessing the platform on mobile devices, I want an intuitive and responsive interface, so that I can efficiently complete trading activities.
+**User Story:** As a user completing trades, I want to track and manage my transactions, so that I can maintain accurate business records.
 
 #### Acceptance Criteria
 
-1. THE PWA SHALL display correctly on screen sizes from 320px to 1920px width
-2. WHEN users navigate the app, THE PWA SHALL provide smooth transitions and responsive interactions
-3. THE PWA SHALL follow bottom navigation patterns with 5 main tabs: Home, Prices, Chats, Deals, Profile
-4. WHEN users need help, THE PWA SHALL provide contextual assistance and tutorials
-5. THE PWA SHALL support both touch and voice interactions for accessibility
+1. WHEN users agree on a deal, THE System SHALL create a transaction record with all relevant details including commodity, quantity, agreed price, and delivery terms
+2. THE System SHALL support transaction status tracking from agreement through delivery and payment
+3. THE System SHALL allow users to rate and review completed transactions
+4. THE System SHALL generate transaction summaries and basic analytics for users to track their trading activity
+5. WHEN disputes arise, THE System SHALL provide a structured process for resolution with Commission_Agent mediation
 
-### Requirement 11: Comprehensive Home Dashboard
+### Requirement 8: Regional Customization
 
-**User Story:** As a user, I want a comprehensive home dashboard that provides quick access to all key features and real-time market intelligence, so that I can efficiently manage my trading activities from a single screen.
-
-#### Acceptance Criteria
-
-1. WHEN a user accesses the home page, THE System SHALL display a dashboard with quick action widgets for Check Price, Post Listing, Start Chat, and My Deals
-2. THE System SHALL show Today's Market Snapshot with key commodity prices and trends, with links to full market reports and price alert settings
-3. WHEN displaying active deals, THE System SHALL show the latest 3 deals with quick access to view all deals
-4. WHEN showing recent chats, THE System SHALL display the latest 3 conversations with direct access to individual chats and all chats
-5. THE System SHALL provide a Market Intelligence Card showing festival alerts, weather warnings, and price forecasts with navigation to detailed pages
-6. THE System SHALL include an optional Community Feed showing vendor success stories, market news, and community posts
-7. WHEN users want to create new listings, THE System SHALL provide a comprehensive Create New Listing page with commodity selection, quantity, AI-suggested pricing, photo uploads, quality grading, and availability dates
-8. THE System SHALL offer specialized pages for Festival Forecast Analysis with upcoming festival calendar, historical price patterns, demand predictions, and reminder settings
-9. WHEN weather impacts occur, THE System SHALL provide a Weather Impact page with current warnings, affected regions map, commodity impact analysis, and sourcing recommendations
-10. THE System SHALL include a Community Feed page with filtering options for tips, news, and success stories, plus post creation capabilities
-
-### Requirement 10: Data Analytics and Insights
-
-**User Story:** As a vendor, I want insights about my trading patterns and market trends, so that I can make better business decisions.
+**User Story:** As a user from a specific region, I want the platform to understand local market practices, so that I can trade according to familiar customs.
 
 #### Acceptance Criteria
 
-1. THE System SHALL provide weekly summaries of vendor sales performance and trends
-2. WHEN generating insights, THE System SHALL compare vendor performance against market averages
-3. THE System SHALL identify optimal pricing opportunities based on historical data
-4. THE System SHALL alert vendors to seasonal demand patterns for their commodities
-5. WHEN market conditions change significantly, THE System SHALL notify relevant vendors with actionable recommendations
+1. THE System SHALL adapt user interface elements, terminology, and workflows based on the user's geographic location
+2. THE System SHALL incorporate region-specific market practices, measurement units, and quality standards
+3. THE System SHALL display prices in local currency denominations and measurement units familiar to the region
+4. THE System SHALL account for regional holidays, market days, and seasonal patterns in its recommendations
+5. THE System SHALL support local payment methods and transaction customs prevalent in each region
 
-### Requirement 12: Market Intelligence and Forecasting
+### Requirement 9: Data Security and Privacy
 
-**User Story:** As a trader, I want access to comprehensive market intelligence including festival forecasts, weather impact analysis, and community insights, so that I can make informed business decisions and plan ahead.
+**User Story:** As a platform user, I want my personal and business data to be secure, so that I can trade with confidence.
 
 #### Acceptance Criteria
 
-1. WHEN accessing Festival Forecast Analysis, THE System SHALL display an upcoming festival calendar with historical price patterns and demand predictions for the next 6 months
-2. THE System SHALL provide confidence scores above 85% for festival-related price predictions based on 3+ years of historical data
-3. WHEN weather warnings are active, THE System SHALL display a Weather Impact page with real-time affected regions map and commodity-specific impact analysis
-4. THE System SHALL provide sourcing recommendations when weather disruptions affect more than 20% of supply regions
-5. WHEN users access the Community Feed, THE System SHALL display categorized content (tips, news, success stories) with user-generated posts and expert insights
-6. THE System SHALL allow users to create and share posts with photo uploads, categorization, and community engagement features
-7. WHEN market intelligence alerts are triggered, THE System SHALL provide actionable recommendations with specific next steps for users
-8. THE System SHALL maintain a knowledge base of successful trading strategies and market patterns accessible through the community features
+1. THE System SHALL encrypt all user communications and sensitive data both in transit and at rest
+2. THE System SHALL implement role-based access controls ensuring users can only access appropriate information
+3. THE System SHALL comply with Indian data protection regulations and obtain explicit consent for data collection
+4. THE System SHALL provide users with control over their data including options to view, modify, and delete personal information
+5. THE System SHALL implement secure authentication mechanisms and session management to prevent unauthorized access
+
+### Requirement 10: Performance and Scalability
+
+**User Story:** As a user accessing the platform during peak market hours, I want fast and reliable performance, so that I don't miss trading opportunities.
+
+#### Acceptance Criteria
+
+1. THE System SHALL load core functionality within 3 seconds on 3G connections
+2. THE System SHALL handle concurrent usage by 10,000+ users during peak market hours without performance degradation
+3. THE System SHALL implement efficient caching strategies to minimize data transfer and improve response times
+4. THE System SHALL provide graceful degradation when system load is high, prioritizing core trading functions
+5. THE System SHALL maintain 99.5% uptime during market hours (6 AM to 8 PM IST)

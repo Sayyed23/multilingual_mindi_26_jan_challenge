@@ -1,396 +1,383 @@
-# Implementation Plan: Multilingual Mandi PWA
+# Implementation Plan: The Multilingual Mandi PWA
 
 ## Overview
 
-This implementation plan breaks down the Multilingual Mandi PWA into manageable tasks, following a microservices architecture with offline-first PWA design. The implementation uses TypeScript for type safety and follows an incremental approach, starting with core MVP features and building up to advanced AI-powered functionality.
-
-**Current Status:** Project foundation is complete with React PWA, comprehensive TypeScript interfaces, testing framework, authentication system, user profile management, reputation system, and translation service. The focus now shifts to implementing core business logic services (price data, deals, messaging) and connecting them to functional UI components.
+This implementation plan converts the Multilingual Mandi design into a series of incremental coding tasks. The approach prioritizes core PWA functionality, multilingual communication, and offline-first architecture while building toward the complete AI-powered mandi platform. Each task builds on previous work and includes property-based testing to ensure correctness across India's diverse linguistic and cultural landscape.
 
 ## Tasks
 
-- [x] 1. Project Foundation and Setup
-  - [x] 1.1 Initialize React PWA project with TypeScript
-    - Create React app with TypeScript template using Vite
-    - Configure PWA manifest and service worker
-    - Set up project folder structure (src/components, src/services, src/types)
-    - Configure ESLint, Prettier, and TypeScript strict mode
-    - _Requirements: 9.1, 5.4_
+- [ ] 1. Set up PWA foundation and project structure
+  - Configure service worker for offline-first architecture
+  - Set up IndexedDB for local data storage
+  - _Requirements: 5.1, 5.2, 10.3_
 
-  - [x] 1.2 Set up core TypeScript interfaces and data models
-    - Define User, Commodity, Deal, Message, and Price interfaces
-    - Create API request/response type definitions
-    - Implement type guards and validation utilities
-    - Set up shared types for the application
-    - _Requirements: 4.1, 2.1, 8.1, 1.1_
+- [ ] 2. Implement core data models and validation
+  - [ ] 2.1 Create TypeScript interfaces for all core entities
+    - Define User, Commodity, PriceRecord, Transaction, Message interfaces
+    - Implement validation functions for data integrity
+    - Create supporting data structures (Location, NegotiationContext, etc.)
+    - _Requirements: 4.2, 4.3, 7.1_
 
-  - [x] 1.3 Configure testing framework
-    - Set up Jest and React Testing Library
-    - Configure fast-check for property-based testing
-    - Create test utilities and mock data generators
-    - Set up test coverage reporting
-    - _Requirements: All (testing infrastructure)_
+  - [ ]* 2.2 Write property test for data model validation
+    - **Property 12: Profile data integrity**
+    - **Validates: Requirements 4.3, 4.5**
 
-  - [x] 1.4 Implement basic PWA shell and routing
-    - Create responsive app shell with bottom navigation
-    - Set up React Router for 5 main screens (Home, Prices, Chats, Deals, Profile)
-    - Implement basic responsive layout (320px-1920px)
-    - Add loading states and error boundaries
-    - _Requirements: 9.1, 9.2, 9.3_
+  - [ ] 2.3 Implement local storage layer with IndexedDB
+    - Create database schema for offline data storage
+    - Implement CRUD operations for all entity types
+    - Add data migration and versioning support
+    - _Requirements: 5.1, 5.3_
 
-- [x] 2. User Authentication System
-  - [x] 2.1 Implement OTP-based authentication
-    - Create authentication service with mobile number verification
-    - Implement OTP generation and validation
-    - Set up JWT token management and secure storage
-    - Build login/register UI components
-    - _Requirements: 4.1_
+  - [ ]* 2.4 Write property test for local storage operations
+    - **Property 13: Offline data caching**
+    - **Validates: Requirements 5.1**
 
-  - [ ]* 2.2 Write property test for authentication flow
-    - **Property 9: User Authentication and Verification**
+- [ ] 3. Build authentication and user management system
+  - [ ] 3.1 Implement OTP-based authentication
+    - Create mobile number registration flow
+    - Integrate OTP verification service
+    - Implement secure session management
+    - _Requirements: 4.1, 9.5_
+
+  - [ ]* 3.2 Write property test for authentication flow
+    - **Property 10: Authentication and profile creation**
     - **Validates: Requirements 4.1, 4.2**
 
-  - [x] 2.3 Build user profile management
-    - Create user profile creation and editing forms
-    - Implement profile data validation and storage
-    - Build user type selection (vendor/buyer/both)
-    - Add profile picture and basic information management
-    - _Requirements: 4.2, 4.5_
+  - [ ] 3.3 Create user profile management
+    - Build profile creation and editing interfaces
+    - Implement role-based access controls
+    - Add profile completeness tracking
+    - _Requirements: 4.2, 4.3, 9.2_
 
-  - [x] 2.4 Implement reputation system foundation
-    - Create reputation scoring data structure
-    - Build rating and review components
-    - Implement reputation display in user profiles
-    - Set up transaction history tracking
-    - _Requirements: 4.3, 4.4_
+  - [ ]* 3.4 Write property test for access control
+    - **Property 27: Data encryption and access control**
+    - **Validates: Requirements 9.1, 9.2**
 
-- [x] 3. Translation Service Implementation
-  - [x] 3.1 Complete translation service implementation
-    - Implement core translation methods with mandi-specific vocabulary
-    - Add language detection functionality with confidence scoring
-    - Build mandi-specific vocabulary dictionary and context handling
-    - Create translation caching system using IndexedDB
-    - Add translation quality assessment and fallback mechanisms
-    - _Requirements: 1.1, 1.2, 1.4_
+  - [ ] 3.5 Implement reputation system
+    - Create trust score calculation algorithms
+    - Build transaction history tracking
+    - Add verification badge system
+    - _Requirements: 4.4, 4.5_
 
-  - [x] 3.2 Implement text translation with caching
-    - Complete translation request/response handling
-    - Implement local caching for translated content using IndexedDB
-    - Add support for 22+ Indian languages
-    - Build translation quality assessment and fallback mechanisms
-    - _Requirements: 1.1, 1.2, 1.5_
+  - [ ]* 3.6 Write property test for reputation calculation
+    - **Property 11: Reputation calculation consistency**
+    - **Validates: Requirements 4.4**
 
-  - [ ]* 3.3 Write property tests for translation service
-    - **Property 1: Translation Performance and Accuracy**
-    - **Property 2: Translation Error Handling**
-    - **Validates: Requirements 1.1, 1.2, 1.4**
-    - Note: Current property tests are timing out and need optimization
+- [ ] 4. Checkpoint - Core user system validation
+  - Ensure all authentication and profile tests pass
+  - Verify offline data storage works correctly
+  - Ask the user if questions arise
 
-  - [x] 3.4 Add voice translation capabilities
-    - Integrate Web Speech API for speech-to-text
-    - Implement voice service with recording and playback
-    - Create voice translation pipeline
-    - Add voice message support infrastructure
-    - _Requirements: 1.3_
+- [ ] 5. Develop translation engine and multilingual support
+  - [ ] 5.1 Create translation service architecture
+    - Integrate Bhashini AI API for Indian languages
+    - Add Google Translate API as fallback
+    - Implement language detection service
+    - Create specialized mandi terminology dictionary
+    - _Requirements: 1.1, 1.2, 1.3_
 
-- [ ] 4. Price Data and Market Intelligence
-  - [x] 4.1 Create price data service
-    - Set up price data storage and retrieval
-    - Implement AGMARKNET API integration
-    - Create price data validation and freshness tracking
-    - Build price query and filtering functionality
-    - _Requirements: 2.1, 2.3, 2.4_
+  - [ ]* 5.2 Write property test for multilingual translation
+    - **Property 1: Multilingual translation completeness**
+    - **Validates: Requirements 1.1, 1.2, 1.5**
 
-  - [x] 4.2 Implement price analysis and comparison
-    - Create fair price range calculation
-    - Build price trend analysis functionality
-    - Implement price deviation alerts
-    - Add confidence interval calculations
-    - _Requirements: 2.1, 2.2_
+  - [ ]* 5.3 Write property test for specialized terminology
+    - **Property 2: Specialized terminology handling**
+    - **Validates: Requirements 1.3**
 
-  - [ ]* 4.3 Write property tests for price oracle
-    - **Property 4: Price Data Completeness**
-    - **Property 5: Price Data Freshness**
-    - **Property 6: Price Validation**
-    - **Validates: Requirements 2.1, 2.2, 2.3, 2.5**
+  - [ ] 5.4 Implement speech-to-text integration
+    - Integrate Soniox API for Indian language speech recognition
+    - Create voice input handling components
+    - Add text-to-speech capabilities
+    - _Requirements: 1.4_
 
-  - [x] 4.4 Build price verification scanner
-    - Create price comparison UI components
-    - Implement price verification logic
-    - Build historical price trend display
-    - Add negotiation strategy suggestions
-    - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
+  - [ ]* 5.5 Write property test for speech translation pipeline
+    - **Property 3: Speech-to-text translation pipeline**
+    - **Validates: Requirements 1.4**
 
-  - [x] 4.5 Connect price service to Prices page
-    - Replace static price data with dynamic service calls
-    - Implement search and filtering functionality
-    - Add real-time price updates
-    - Build responsive price display components
-    - _Requirements: 2.1, 7.1_
+  - [ ] 5.6 Build multilingual UI components
+    - Create language selection interface
+    - Implement dynamic text translation for UI elements
+    - Add regional customization for terminology
+    - _Requirements: 8.1, 8.3_
 
-- [ ] 5. Search and Discovery
-  - [x] 5.1 Implement commodity and vendor search
-    - Create search service with text-based search
-    - Build search UI with filters and results display
-    - Implement multilingual search capabilities
-    - Add search result ranking and relevance
-    - _Requirements: 7.1, 7.2, 7.3_
+- [ ] 6. Implement price discovery and market data system
+  - [ ] 6.1 Create price data aggregation service
+    - Build connectors for multiple mandi data sources
+    - Implement real-time data collection and processing
+    - Add data validation and outlier detection
+    - _Requirements: 2.1, 2.5_
 
-  - [ ] 5.2 Add location-based filtering
-    - Integrate location services for proximity search
-    - Implement distance-based filtering
-    - Add location picker and current location detection
-    - Build location-aware search results
-    - _Requirements: 7.4, 7.5_
+  - [ ]* 6.2 Write property test for price data aggregation
+    - **Property 4: Price data aggregation**
+    - **Validates: Requirements 2.1**
 
-  - [x]* 5.3 Write property tests for search system
-    - **Property 15: Search Performance and Results**
-    - **Property 16: Search Filtering and Fallbacks**
-    - **Validates: Requirements 7.1, 7.2, 7.3, 7.4, 7.5**
+  - [ ] 6.3 Develop AI-powered price analysis engine
+    - Implement fair price range calculation algorithms
+    - Add regional variation and seasonal factor analysis
+    - Create price trend calculation and forecasting
+    - _Requirements: 2.2, 2.5_
 
-- [ ] 6. Messaging and Communication
-  - [ ] 6.1 Build basic messaging system
-    - Create chat interface and message components
-    - Implement message storage and retrieval
-    - Build conversation list and management
-    - Add message status tracking (sent, delivered, read)
-    - _Requirements: 1.1, 8.2_
+  - [ ]* 6.4 Write property test for regional price calculation
+    - **Property 6: Regional price calculation**
+    - **Validates: Requirements 2.5**
 
-  - [ ] 6.2 Integrate translation with messaging
-    - Implement real-time message translation
-    - Add translation confidence indicators
-    - Build manual review flagging for low-confidence translations
-    - Create alternative translation suggestions
-    - _Requirements: 1.1, 1.4, 3.4_
+  - [ ] 6.5 Build price display and search interfaces
+    - Create commodity search with price information
+    - Implement price history and trend visualization
+    - Add price alert and notification system
+    - _Requirements: 2.2, 2.4, 6.1_
 
-  - [ ]* 6.3 Write property test for message translation
-    - **Property 8: Negotiation Translation Completeness**
-    - **Validates: Requirements 1.1, 3.4**
+  - [ ]* 6.6 Write property test for price information completeness
+    - **Property 5: Price information completeness**
+    - **Validates: Requirements 2.2, 2.4**
 
-  - [ ] 6.4 Add voice messaging capabilities
-    - Implement voice message recording and playback
-    - Create voice-to-text transcription
-    - Add voice message translation
-    - Build voice message UI components
-    - _Requirements: 1.3, 9.5_
+- [ ] 7. Build search and discovery functionality
+  - [ ] 7.1 Implement multilingual search engine
+    - Create search indexing for commodities, vendors, and locations
+    - Add multilingual query processing and matching
+    - Implement search result ranking algorithms
+    - _Requirements: 6.1, 6.2_
 
-  - [ ] 6.5 Connect messaging service to Chats page
-    - Replace static chat data with dynamic service calls
-    - Implement real-time message updates
-    - Add conversation management functionality
-    - Build responsive chat interface
-    - _Requirements: 8.2_
+  - [ ]* 7.2 Write property test for multilingual search
+    - **Property 17: Multilingual search functionality**
+    - **Validates: Requirements 6.1**
 
-- [ ] 7. Basic Negotiation System
-  - [ ] 7.1 Create negotiation session management
-    - Build negotiation flow and state management
-    - Implement offer and counter-offer tracking
-    - Create negotiation history and audit trails
-    - Add negotiation session UI components
-    - _Requirements: 3.1, 3.2, 3.3_
+  - [ ] 7.3 Add advanced filtering and categorization
+    - Implement commodity categorization system
+    - Create filtering by price, location, quality, vendor type
+    - Add proximity-based search and sorting
+    - _Requirements: 6.3, 6.4_
 
-  - [ ] 7.2 Implement market-based negotiation assistance
-    - Create opening offer suggestions based on market data
-    - Build real-time market comparison for counter-offers
-    - Implement fair market range analysis
-    - Add compromise solution suggestions
-    - _Requirements: 3.1, 3.2, 3.3, 3.5_
+  - [ ]* 7.4 Write property test for search filtering
+    - **Property 19: Search filtering accuracy**
+    - **Validates: Requirements 6.3**
 
-  - [ ]* 7.3 Write property tests for negotiation system
-    - **Property 7: Negotiation Intelligence**
-    - **Validates: Requirements 3.1, 3.2, 3.3**
+  - [ ] 7.5 Build search results display
+    - Create comprehensive search result cards
+    - Add vendor information and reputation display
+    - Implement distance calculation and display
+    - _Requirements: 6.5_
 
-- [ ] 8. Deal Management
-  - [ ] 8.1 Implement deal lifecycle management
-    - Create deal creation from successful negotiations
-    - Build deal status tracking and transitions
-    - Implement deal confirmation flows
-    - Add deal cancellation and dispute handling
-    - _Requirements: 8.1, 8.4_
+  - [ ]* 7.6 Write property test for search result completeness
+    - **Property 18: Search result ranking and completeness**
+    - **Validates: Requirements 6.2, 6.5**
 
-  - [ ] 8.2 Build notification system
-    - Implement basic notification infrastructure
-    - Create deal status change notifications
-    - Build payment due date reminders
-    - Add notification preferences management
-    - _Requirements: 8.2, 8.3_
+- [ ] 8. Checkpoint - Search and pricing validation
+  - Ensure all search and price discovery tests pass
+  - Verify multilingual functionality works correctly
+  - Ask the user if questions arise
 
-  - [ ]* 8.3 Write property tests for deal management
-    - **Property 17: Deal Management and Audit**
-    - **Property 18: Notification System**
-    - **Validates: Requirements 8.1, 8.2, 8.3, 8.4**
+- [ ] 9. Develop AI negotiation assistant
+  - [ ] 9.1 Create negotiation context analysis
+    - Implement market data analysis for negotiation guidance
+    - Add cultural norm and regional custom integration
+    - Create user history and pattern analysis
+    - _Requirements: 3.1, 3.4_
 
-  - [ ] 8.4 Connect deal service to Deals page
-    - Replace static deal data with dynamic service calls
-    - Implement deal status management
-    - Add deal creation and editing functionality
-    - Build responsive deal interface
-    - _Requirements: 8.1_
+  - [ ]* 9.2 Write property test for market-based suggestions
+    - **Property 7: Market-based negotiation suggestions**
+    - **Validates: Requirements 3.1, 3.2, 3.4**
 
-- [ ] 9. Offline Functionality and PWA Features
-  - [ ] 9.1 Implement offline data caching
-    - Set up IndexedDB for local data storage
-    - Create caching strategies for critical data
-    - Implement offline message queuing
-    - Build offline user profile and deal access
-    - _Requirements: 5.1, 5.5_
+  - [ ] 9.3 Build negotiation recommendation engine
+    - Implement opening price suggestion algorithms
+    - Create counter-offer analysis and recommendations
+    - Add deal fairness assessment functionality
+    - _Requirements: 3.2, 3.3_
 
-  - [ ] 9.2 Build offline-to-online synchronization
-    - Implement conflict resolution for offline changes
-    - Create sync status indicators and controls
-    - Build progressive sync with priority queuing
-    - Add manual sync triggers
-    - _Requirements: 5.2_
+  - [ ]* 9.4 Write property test for deal fairness analysis
+    - **Property 8: Deal fairness analysis**
+    - **Validates: Requirements 3.3**
 
-  - [ ]* 9.3 Write property tests for offline functionality
-    - **Property 12: Offline Functionality**
-    - **Validates: Requirements 5.1, 5.2, 5.5**
+  - [ ] 9.5 Implement negotiation history tracking
+    - Create negotiation session management
+    - Add learning algorithms for improved recommendations
+    - Build negotiation analytics and insights
+    - _Requirements: 3.5_
 
-  - [ ] 9.4 Optimize for low-bandwidth networks
-    - Implement image compression and lazy loading
-    - Create data usage optimization features
-    - Build network condition detection and adaptation
-    - Add 2G/3G performance optimization
-    - _Requirements: 5.3, 5.4_
+  - [ ]* 9.6 Write property test for negotiation history persistence
+    - **Property 9: Negotiation history persistence**
+    - **Validates: Requirements 3.5**
 
-- [ ] 10. UI Polish and Accessibility
-  - [ ] 10.1 Complete responsive design implementation
-    - Refine responsive breakpoints and layouts
-    - Implement smooth transitions and animations
-    - Add loading states and skeleton screens
-    - Optimize touch interactions for mobile
-    - _Requirements: 9.1, 9.2, 9.3_
+- [ ] 10. Build transaction management system
+  - [ ] 10.1 Create transaction lifecycle management
+    - Implement deal agreement and record creation
+    - Add transaction status tracking through all stages
+    - Create delivery and payment term management
+    - _Requirements: 7.1, 7.2_
 
-  - [ ] 10.2 Implement accessibility features
-    - Add screen reader compatibility
-    - Create keyboard navigation support
-    - Implement high contrast and large text options
-    - Build voice command recognition
-    - _Requirements: 9.4, 9.5_
+  - [ ]* 10.2 Write property test for transaction record completeness
+    - **Property 21: Transaction record completeness**
+    - **Validates: Requirements 7.1, 7.2**
 
-  - [ ]* 10.3 Write property tests for responsive design
-    - **Property 19: Responsive Design**
-    - **Property 20: Accessibility Support**
-    - **Validates: Requirements 9.1, 9.4, 9.5**
+  - [ ] 10.3 Implement rating and review system
+    - Create post-transaction rating interfaces
+    - Add review submission and display functionality
+    - Build transaction analytics and reporting
+    - _Requirements: 7.3, 7.4_
 
-- [ ] 10.5. Enhanced Home Dashboard Implementation
-  - [ ] 10.5.1 Build comprehensive dashboard widgets
-    - Create Quick Actions Widget with Check Price, Post Listing, Start Chat, My Deals buttons
-    - Implement Today's Market Snapshot with key commodity prices and trends
-    - Build Active Deals Widget showing latest 3 deals with "View All" navigation
-    - Create Recent Chats widget displaying latest 3 conversations
-    - Add Market Intelligence Card with festival alerts, weather warnings, and price forecasts
-    - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5_
+  - [ ]* 10.4 Write property test for transaction rating and analytics
+    - **Property 22: Transaction rating and analytics**
+    - **Validates: Requirements 7.3, 7.4**
 
-  - [ ] 10.5.2 Create specialized market intelligence pages
-    - Build Festival Forecast Analysis page with upcoming festival calendar and historical price patterns
-    - Implement Weather Impact page with current warnings, affected regions map, and sourcing recommendations
-    - Create Community Feed page with filtering options and post creation capabilities
-    - Add demand predictions and confidence scoring for festival forecasts
-    - _Requirements: 11.8, 11.9, 11.10, 12.1, 12.2, 12.3_
+  - [ ] 10.5 Add dispute resolution workflow
+    - Create dispute reporting and tracking system
+    - Implement commission agent mediation process
+    - Add resolution documentation and follow-up
+    - _Requirements: 7.5_
 
-  - [ ] 10.5.3 Implement Create New Listing workflow
-    - Build comprehensive listing creation form with commodity selection and quantity input
-    - Add AI-suggested pricing with market comparison data
-    - Implement photo upload functionality with image optimization
-    - Create quality grade selection with visual indicators
-    - Add availability date picker with calendar integration
-    - _Requirements: 11.7_
+  - [ ]* 10.6 Write property test for dispute resolution workflow
+    - **Property 23: Dispute resolution workflow**
+    - **Validates: Requirements 7.5**
 
-  - [ ] 10.5.4 Build community features and content management
-    - Create community post creation and editing interface
-    - Implement content categorization (tips, news, success stories)
-    - Add user engagement features (likes, comments, shares)
-    - Build content moderation and reporting system
-    - Create expert insights and knowledge base integration
-    - _Requirements: 12.5, 12.6, 12.8_
+- [ ] 11. Implement regional customization and localization
+  - [ ] 11.1 Create regional adaptation engine
+    - Implement location-based UI and workflow customization
+    - Add regional market practice integration
+    - Create measurement unit and currency localization
+    - _Requirements: 8.1, 8.2, 8.3_
 
-- [ ] 11. Analytics and Insights (MVP)
-  - [ ] 11.1 Build basic vendor analytics
-    - Create sales performance tracking
-    - Implement basic market comparison
-    - Build pricing opportunity identification
-    - Add simple reporting dashboard
-    - _Requirements: 10.1, 10.2, 10.3, 10.4_
+  - [ ]* 11.2 Write property test for regional adaptation
+    - **Property 24: Regional adaptation**
+    - **Validates: Requirements 8.1, 8.2, 8.3**
 
-  - [ ] 11.2 Implement market intelligence alerts
-    - Create market condition change detection
-    - Build basic recommendation system
-    - Implement vendor notification for opportunities
-    - Add market trend analysis
-    - _Requirements: 10.5_
+  - [ ] 11.3 Add temporal and seasonal awareness
+    - Implement regional holiday and market day tracking
+    - Add seasonal pattern analysis for recommendations
+    - Create time-zone aware scheduling and notifications
+    - _Requirements: 8.4_
 
-  - [ ]* 11.3 Write property tests for analytics system
-    - **Property 21: Analytics and Insights**
-    - **Property 22: Market Change Notifications**
-    - **Validates: Requirements 10.1, 10.2, 10.3, 10.4, 10.5**
+  - [ ]* 11.4 Write property test for regional temporal awareness
+    - **Property 25: Regional temporal awareness**
+    - **Validates: Requirements 8.4**
 
-- [ ] 11.5. Advanced Market Intelligence System
-  - [ ] 11.5.1 Implement festival forecasting engine
-    - Build festival calendar integration with regional variations
-    - Create historical price pattern analysis for festival periods
-    - Implement demand prediction algorithms with confidence scoring
-    - Add festival impact assessment for different commodity categories
-    - Build automated alert system for upcoming high-impact festivals
-    - _Requirements: 12.1, 12.2, 12.7_
+  - [ ] 11.5 Integrate regional payment methods
+    - Add support for local payment gateways
+    - Implement regional transaction customs
+    - Create payment method selection based on location
+    - _Requirements: 8.5_
 
-  - [ ] 11.5.2 Create weather impact analysis system
-    - Integrate weather API for real-time weather data
-    - Build affected regions mapping with geographic visualization
-    - Implement commodity-specific weather impact models
-    - Create sourcing recommendation engine based on weather disruptions
-    - Add supply chain risk assessment and mitigation suggestions
-    - _Requirements: 12.3, 12.4_
+  - [ ]* 11.6 Write property test for regional payment support
+    - **Property 26: Regional payment method support**
+    - **Validates: Requirements 8.5**
 
-  - [ ]* 11.5.3 Write property tests for market intelligence
-    - **Property 23: Festival Forecast Accuracy**
-    - **Property 24: Weather Impact Analysis**
-    - **Property 25: Market Intelligence Alerts**
-    - **Validates: Requirements 12.1, 12.2, 12.3, 12.4, 12.7**
+- [ ] 12. Enhance offline functionality and PWA features
+  - [ ] 12.1 Implement advanced offline capabilities
+    - Create intelligent cache management strategies
+    - Add offline message composition and queuing
+    - Implement background sync for data synchronization
+    - _Requirements: 5.2, 5.3_
 
-- [ ] 12. Integration Testing and Performance
-  - [ ] 12.1 Implement comprehensive integration tests
-    - Create end-to-end user journey tests
-    - Build cross-component integration tests
-    - Test API integration with external services
-    - Create multi-language scenario tests
-    - _Requirements: All (integration validation)_
+  - [ ]* 12.2 Write property test for offline operation capability
+    - **Property 14: Offline operation capability**
+    - **Validates: Requirements 5.2**
 
-  - [ ] 12.2 Performance testing and optimization
-    - Test application performance on various devices
-    - Optimize bundle size and loading times
-    - Test battery usage and memory consumption
-    - Validate 2G/3G network performance
-    - _Requirements: 5.3, 9.1_
+  - [ ]* 12.3 Write property test for offline synchronization
+    - **Property 15: Offline synchronization**
+    - **Validates: Requirements 5.3**
 
-- [ ] 13. Final System Integration and Deployment
-  - [ ] 13.1 Complete system integration
-    - Wire all components together
-    - Configure production build settings
-    - Set up error monitoring and logging
-    - Create deployment configuration
-    - _Requirements: All (system integration)_
+  - [ ] 12.4 Add SMS fallback communication
+    - Integrate SMS gateway for critical communications
+    - Implement automatic fallback when network unavailable
+    - Create SMS-based transaction confirmation system
+    - _Requirements: 5.4_
 
-  - [ ] 13.2 Final testing and quality assurance
-    - Run complete test suite including property tests
-    - Perform security testing and validation
-    - Conduct accessibility compliance testing
-    - Execute final performance testing
-    - _Requirements: All (quality assurance)_
+  - [ ]* 12.5 Write property test for SMS fallback activation
+    - **Property 16: SMS fallback activation**
+    - **Validates: Requirements 5.4**
 
-  - [ ] 13.3 Documentation and deployment readiness
-    - Create user documentation and help guides
-    - Build developer documentation
-    - Prepare deployment procedures
-    - Create maintenance and support documentation
-    - _Requirements: All (operational readiness)_
+  - [ ] 12.6 Optimize PWA performance and caching
+    - Implement progressive loading strategies
+    - Add intelligent resource prioritization
+    - Create performance monitoring and optimization
+    - _Requirements: 10.3_
+
+  - [ ]* 12.7 Write property test for caching efficiency
+    - **Property 30: Caching efficiency**
+    - **Validates: Requirements 10.3**
+
+- [ ] 13. Implement security and privacy features
+  - [ ] 13.1 Add comprehensive data encryption
+    - Implement end-to-end encryption for communications
+    - Add data-at-rest encryption for sensitive information
+    - Create secure key management system
+    - _Requirements: 9.1_
+
+  - [ ] 13.2 Build privacy compliance features
+    - Implement explicit consent mechanisms
+    - Add user data control interfaces (view, modify, delete)
+    - Create data export and portability features
+    - _Requirements: 9.3, 9.4_
+
+  - [ ]* 13.3 Write property test for privacy compliance
+    - **Property 28: Privacy compliance and user control**
+    - **Validates: Requirements 9.3, 9.4**
+
+  - [ ] 13.4 Enhance authentication security
+    - Add multi-factor authentication options
+    - Implement session security and timeout management
+    - Create security monitoring and breach detection
+    - _Requirements: 9.5_
+
+  - [ ]* 13.5 Write property test for authentication security
+    - **Property 29: Authentication security**
+    - **Validates: Requirements 9.5**
+
+- [ ] 14. Integration and system testing
+  - [ ] 14.1 Integrate all system components
+    - Connect translation engine with user interfaces
+    - Wire price discovery with search and negotiation systems
+    - Integrate offline sync with all data operations
+    - _Requirements: All integrated requirements_
+
+  - [ ]* 14.2 Write integration tests for core workflows
+    - Test complete user journey from registration to transaction
+    - Verify multilingual communication across all features
+    - Test offline-to-online synchronization scenarios
+
+  - [ ] 14.3 Implement error handling and recovery
+    - Add comprehensive error handling for all services
+    - Create graceful degradation for service failures
+    - Implement automatic retry and recovery mechanisms
+    - _Requirements: Error handling for all services_
+
+  - [ ]* 14.4 Write property tests for error handling
+    - Test system behavior under various failure conditions
+    - Verify graceful degradation maintains core functionality
+    - Test recovery mechanisms and data consistency
+
+- [ ] 15. Final validation and deployment preparation
+  - [ ] 15.1 Comprehensive testing and validation
+    - Run all property-based tests with full coverage
+    - Perform cross-language and cross-regional testing
+    - Validate PWA functionality across different devices and networks
+    - _Requirements: All requirements validation_
+
+  - [ ] 15.2 Performance optimization and monitoring
+    - Optimize bundle size and loading performance
+    - Add performance monitoring and analytics
+    - Create deployment configuration and CI/CD pipeline
+    - _Requirements: 10.1, 10.3_
+
+  - [ ] 15.3 Documentation and deployment readiness
+    - Create API documentation and user guides
+    - Prepare deployment configurations for production
+    - Set up monitoring and alerting systems
+    - _Requirements: System documentation and operational readiness_
+
+- [ ] 16. Final checkpoint - Complete system validation
+  - Ensure all property-based tests pass with 100+ iterations each
+  - Verify offline functionality works across all features
+  - Confirm multilingual support works for all 22+ languages
+  - Validate regional customization for target markets
+  - Ask the user if questions arise
 
 ## Notes
 
 - Tasks marked with `*` are optional and can be skipped for faster MVP development
-- Each task references specific requirements for traceability
-- Property tests validate universal correctness properties with minimum 100 iterations
-- **Current Status:** Project foundation (Tasks 1-3) is complete with comprehensive TypeScript types, authentication system, user profile management, reputation system, and translation service
-- **Next Priority:** Create price data service (Task 4.1) and messaging system (Task 6.1) to enable core business functionality
-- **Known Issues:** Translation service property tests are timing out and need optimization before proceeding
-- PWA features and offline functionality are prioritized for the target market
-- Cultural context and Indian market specifics are integrated throughout
+- Each property-based test references specific design document properties for traceability
+- Checkpoints ensure incremental validation and allow for course correction
+- Property tests validate universal correctness properties across diverse inputs
+- Unit tests validate specific examples, edge cases, and integration points
+- The implementation prioritizes offline-first PWA architecture throughout
+- Cultural sensitivity and regional customization are integrated into all user-facing features
+- Security and privacy compliance are built into the foundation rather than added later
