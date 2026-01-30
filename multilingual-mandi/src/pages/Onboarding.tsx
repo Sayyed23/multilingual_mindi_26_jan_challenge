@@ -19,6 +19,41 @@ export const Onboarding = () => {
     const [radius, setRadius] = useState(50);
     const [commMode, setCommMode] = useState<'text' | 'voice'>('text');
     const [selectedCommodities, setSelectedCommodities] = useState<string[]>(['Wheat', 'Tomato']);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [isLocating, setIsLocating] = useState(false);
+    const [secondaryLanguage, setSecondaryLanguage] = useState<string>('Hindi (हिंदी)');
+
+    const handleUseCurrentLocation = () => {
+        if (!navigator.geolocation) {
+            alert("Geolocation is not supported by your browser.");
+            return;
+        }
+
+        setIsLocating(true);
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                console.log(`Current position: ${latitude}, ${longitude}`);
+                // TODO: Implement reverse geocoding to convert coordinates to a Mandi name
+                setTimeout(() => {
+                    setSearchQuery("Indore, MP");
+                    setIsLocating(false);
+                }, 1000);
+            },
+            (error) => {
+                setIsLocating(false);
+                console.error("Error obtaining location:", error);
+                alert("Unable to retrieve your location. Please check your browser permissions.");
+            }
+        );
+    };
+
+    const playAudioGuide = () => {
+        setIsPlaying(!isPlaying);
+        // In a real app, this would control an audio object
+        console.log(isPlaying ? "Stopping audio guide..." : "Playing audio guide...");
+    };
 
     const commodities = [
         { name: 'Wheat', icon: '🌾' },
@@ -41,6 +76,19 @@ export const Onboarding = () => {
         }
     };
 
+    const handleCompleteOnboarding = () => {
+        const profileData = {
+            radius,
+            commMode,
+            selectedCommodities,
+            searchQuery,
+            secondaryLanguage
+        };
+        console.log("Onboarding Complete! Profile Data:", profileData);
+        // TODO: Persist profileData to a backend or global state
+        navigate('/dashboard');
+    };
+
     return (
         <div className="min-h-screen bg-[#F8F9FA] font-sans text-gray-900 pb-24 md:pb-0">
             {/* Header */}
@@ -50,14 +98,23 @@ export const Onboarding = () => {
                     <span className="font-bold text-xl tracking-tight">AgriMarket</span>
                 </div>
                 <div className="flex items-center gap-4">
-                    <button className="text-sm font-semibold text-gray-500 hover:text-gray-900 hidden sm:block">
+                    <button
+                        onClick={() => navigate('/dashboard')}
+                        className="text-sm font-semibold text-gray-500 hover:text-gray-900 hidden sm:block"
+                    >
                         Skip for now
                     </button>
-                    <button className="flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-gray-200 transition-colors">
+                    <button
+                        onClick={() => console.log("Language selector clicked - TODO: show modal")}
+                        className="flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-gray-200 transition-colors"
+                    >
                         <Globe className="h-4 w-4 text-gray-600" />
                         English
                     </button>
-                    <button className="bg-green-100 p-2 rounded-lg text-green-700 hover:bg-green-200 transition-colors">
+                    <button
+                        onClick={() => console.log("Analytics clicked - TODO: show insights panel")}
+                        className="bg-green-100 p-2 rounded-lg text-green-700 hover:bg-green-200 transition-colors"
+                    >
                         <BarChart3 className="h-5 w-5" />
                     </button>
                 </div>
@@ -84,9 +141,13 @@ export const Onboarding = () => {
                     <h1 className="text-3xl font-extrabold text-gray-900">Let's set up your profile</h1>
                     <div className="flex items-center justify-center gap-2 text-gray-500">
                         <p className="text-sm">Personalize your experience to get accurate price alerts.</p>
-                        <button className="flex items-center gap-1 text-green-600 font-bold text-sm hover:underline">
-                            <Volume2 className="h-4 w-4" />
-                            Play Audio
+                        <button
+                            onClick={playAudioGuide}
+                            aria-label={isPlaying ? "Stop Audio" : "Play Audio Intro"}
+                            className="flex items-center gap-1 text-green-600 font-bold text-sm hover:underline focus:outline-none focus:ring-1 focus:ring-green-500 rounded px-1"
+                        >
+                            <Volume2 className={`h-4 w-4 ${isPlaying ? 'animate-pulse' : ''}`} />
+                            {isPlaying ? "Stop Audio" : "Play Audio"}
                         </button>
                     </div>
                 </div>
@@ -103,15 +164,21 @@ export const Onboarding = () => {
                                 <span className="text-xl font-bold">Role: Farmer</span>
                             </div>
                             <p className="text-xs text-green-600 mb-4 font-medium">You will receive updates for harvesting and market selling prices.</p>
-                            <button className="bg-green-50 text-green-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-green-100 transition-colors">
+                            <button
+                                onClick={() => navigate('/auth')}
+                                className="bg-green-50 text-green-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-green-100 transition-colors"
+                            >
                                 Change Role
                             </button>
                         </div>
-                        <div className="w-24 h-24 rounded-xl overflow-hidden shadow-md">
+                        <div className="w-24 h-24 rounded-xl overflow-hidden shadow-md bg-gray-100 flex items-center justify-center">
                             <img
                                 src="https://images.unsplash.com/photo-1595661608226-e41c2c31c944?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
                                 alt="Farmer"
                                 className="w-full h-full object-cover"
+                                onError={(e) => {
+                                    (e.target as HTMLImageElement).src = 'https://ui-avatars.com/api/?name=Farmer&background=E8F5E9&color=2E7D32&bold=true';
+                                }}
                             />
                         </div>
                     </div>
@@ -143,10 +210,14 @@ export const Onboarding = () => {
                         <div>
                             <label className="block text-sm font-bold text-gray-500 mb-2">Secondary Language</label>
                             <div className="relative">
-                                <select className="w-full appearance-none bg-gray-100 border-none rounded-xl py-3 px-4 font-bold text-gray-900 focus:ring-2 focus:ring-green-500">
-                                    <option>Hindi (हिंदी)</option>
-                                    <option>Punjabi (ਪੰਜਾਬੀ)</option>
-                                    <option>Marathi (मराठी)</option>
+                                <select
+                                    value={secondaryLanguage}
+                                    onChange={(e) => setSecondaryLanguage(e.target.value)}
+                                    className="w-full appearance-none bg-gray-100 border-none rounded-xl py-3 px-4 font-bold text-gray-900 focus:ring-2 focus:ring-green-500"
+                                >
+                                    <option value="Hindi (हिंदी)">Hindi (हिंदी)</option>
+                                    <option value="Punjabi (ਪੰਜਾਬੀ)">Punjabi (ਪੰਜਾਬੀ)</option>
+                                    <option value="Marathi (मराठी)">Marathi (मराठी)</option>
                                 </select>
                                 <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 pointer-events-none" />
                             </div>
@@ -158,9 +229,14 @@ export const Onboarding = () => {
                 <section>
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="font-bold text-lg">Nearby Mandis (Markets)</h3>
-                        <button className="text-green-600 text-xs font-bold flex items-center gap-1 hover:underline">
-                            <MapPin className="h-3 w-3" />
-                            Use Current Location
+                        <button
+                            onClick={handleUseCurrentLocation}
+                            disabled={isLocating}
+                            className={`text-green-600 text-xs font-bold flex items-center gap-1 hover:underline ${isLocating ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                            <MapPin className={`h-3 w-3 ${isLocating ? 'animate-spin' : ''}`} />
+                            {isLocating ? "Detecting..." : "Use Current Location"}
+                            {/* TODO: Integrate with Google Maps API for real-time location picking */}
                         </button>
                     </div>
 
@@ -169,9 +245,12 @@ export const Onboarding = () => {
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                             <input
                                 type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder="Search by city or Mandi name"
                                 className="w-full bg-gray-50 pl-11 pr-4 py-3 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-green-500"
                             />
+                            {/* TODO: Implement Mandi search API with debounced autocomplete */}
                         </div>
 
                         <div className="relative h-48 rounded-xl overflow-hidden bg-gradient-to-br from-green-800 to-green-600 flex items-center justify-center">
@@ -240,28 +319,33 @@ export const Onboarding = () => {
                 {/* Footer Action */}
                 <div className="pt-4">
                     <button
-                        onClick={() => navigate('/dashboard')}
+                        onClick={handleCompleteOnboarding}
                         className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-green-200 transition-transform active:scale-[0.98]"
                     >
                         <span>Continue to Dashboard</span>
                         <ArrowRight className="h-5 w-5" />
                     </button>
                     <p className="text-center text-[10px] text-gray-400 mt-4">
-                        By continuing, you agree to our Terms of Service.
-                    </p>
-                </div>
+                        By continuing, you agree to our <a href="/terms" className="underline hover:text-gray-600">Terms of Service</a>.
+                    </p>                </div>
 
             </main>
 
             {/* Floating Audio Help */}
             <div className="fixed bottom-6 right-6 z-40">
-                <button className="bg-white pl-4 pr-2 py-2 rounded-full shadow-xl border border-gray-100 flex items-center gap-3 hover:scale-105 transition-transform group">
+                <button
+                    onClick={playAudioGuide}
+                    aria-label={isPlaying ? "Stop Audio Guide" : "Play Audio Guide"}
+                    className="bg-white pl-4 pr-2 py-2 rounded-full shadow-xl border border-gray-100 flex items-center gap-3 hover:scale-105 transition-transform group focus:outline-none focus:ring-2 focus:ring-green-500"
+                >
                     <div className="bg-green-500 p-2 rounded-full">
-                        <Volume2 className="h-5 w-5 text-white animate-pulse" />
+                        <Volume2 className={`h-5 w-5 text-white ${isPlaying ? 'animate-none' : 'animate-pulse'}`} />
                     </div>
                     <div className="text-left mr-2">
                         <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Need Help?</span>
-                        <span className="block text-sm font-bold text-gray-900">Play Audio Guide</span>
+                        <span className="block text-sm font-bold text-gray-900">
+                            {isPlaying ? "Stop Guide" : "Play Audio Guide"}
+                        </span>
                     </div>
                 </button>
             </div>

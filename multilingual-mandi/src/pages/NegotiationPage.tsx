@@ -23,17 +23,16 @@ export const NegotiationPage = () => {
         <div className="h-[calc(100vh-8rem)] flex gap-6">
 
             {/* Left Sidebar: Active Deals List */}
-            <div className="w-80 bg-white rounded-2xl border border-gray-100 flex flex-col hidden md:flex shrink-0">
-                <div className="p-4 border-b border-gray-100">
-                    <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-lg font-bold text-gray-900">Active Deals</h2>
-                        <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full">12 ACTIVE</span>
-                    </div>
-                    <div className="flex bg-gray-100 p-1 rounded-lg">
-                        <button className="flex-1 bg-green-500 text-white font-bold text-xs py-2 rounded-md shadow-sm">Your Turn</button>
-                        <button className="flex-1 text-gray-500 font-bold text-xs py-2 hover:bg-white/50 rounded-md">All</button>
-                    </div>
+            <div className="w-80 bg-white rounded-2xl border border-gray-100 hidden md:flex flex-col shrink-0">                <div className="p-4 border-b border-gray-100">
+                <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-bold text-gray-900">Active Deals</h2>
+                    <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full">12 ACTIVE</span>
                 </div>
+                <div className="flex bg-gray-100 p-1 rounded-lg">
+                    <button className="flex-1 bg-green-500 text-white font-bold text-xs py-2 rounded-md shadow-sm">Your Turn</button>
+                    <button className="flex-1 text-gray-500 font-bold text-xs py-2 hover:bg-white/50 rounded-md">All</button>
+                </div>
+            </div>
 
                 <div className="flex-1 overflow-y-auto">
                     {/* Deal Item 1 (Active) */}
@@ -111,8 +110,12 @@ export const NegotiationPage = () => {
                         </div>
                     </div>
                     <div className="flex items-center gap-4 text-gray-400">
-                        <Phone size={20} className="hover:text-green-600 cursor-pointer" />
-                        <MoreVertical size={20} className="hover:text-gray-600 cursor-pointer" />
+                        <button aria-label="call participant" className="hover:text-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 rounded-lg">
+                            <Phone size={20} />
+                        </button>
+                        <button aria-label="more options" className="hover:text-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300 rounded-lg">
+                            <MoreVertical size={20} />
+                        </button>
                     </div>
                 </div>
 
@@ -216,26 +219,26 @@ export const NegotiationPage = () => {
                         <button className="flex-1 bg-white border-2 border-gray-200 hover:border-gray-300 text-gray-700 font-bold py-3 rounded-xl transition-colors">
                             Make Counter-Offer
                         </button>
-                        <button className="px-4 border-2 border-red-100 text-red-500 rounded-xl hover:bg-red-50 transition-colors">
+                        <button aria-label="decline or close negotiation" className="px-4 border-2 border-red-100 text-red-500 rounded-xl hover:bg-red-50 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500">
                             <XCircle size={24} />
                         </button>
                     </div>
 
                     {/* Input Area */}
                     <div className="relative bg-gray-100 rounded-xl flex items-center p-2">
-                        <button className="p-2 text-gray-400 hover:text-green-600 transition-colors">
+                        <button aria-label="add attachment" className="p-2 text-gray-400 hover:text-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 rounded-lg">
                             <Plus size={24} />
                         </button>
                         <input
                             type="text"
                             placeholder="Type a message or use Hindi/Marathi..."
+                            aria-label="Message input"
                             className="flex-1 bg-transparent border-none focus:outline-none px-2 font-medium text-gray-700"
-                        />
-                        <div className="flex items-center gap-2 pr-2">
-                            <button className="p-2 text-gray-500 hover:text-green-600 transition-colors">
+                        />                        <div className="flex items-center gap-2 pr-2">
+                            <button aria-label="start voice message" className="p-2 text-gray-500 hover:text-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 rounded-lg">
                                 <Mic size={20} />
                             </button>
-                            <button className="p-2 text-green-600 hover:text-green-700 transition-colors">
+                            <button aria-label="send message" className="p-2 text-green-600 hover:text-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 rounded-lg">
                                 <Send size={20} />
                             </button>
                         </div>

@@ -1,9 +1,9 @@
+import { useState } from 'react';
 import {
     Users,
     Calendar,
     MessageCircle,
     Search,
-    Mic,
     TrendingUp,
     ChevronRight,
     Phone,
@@ -17,6 +17,26 @@ import {
 } from 'lucide-react';
 
 export const CommunityPage = () => {
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const handleSearch = () => {
+        if (searchQuery.trim()) {
+            console.log("Searching for:", searchQuery);
+            // TODO: Integrate with a help-center search API
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    };
+
+    const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>, name: string) => {
+        const target = e.target as HTMLImageElement;
+        target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=f0fdf4&color=15803d&bold=true`;
+    };
+
     return (
         <div className="flex flex-col lg:flex-row gap-8 w-full">
 
@@ -72,11 +92,17 @@ export const CommunityPage = () => {
                     </div>
                     <input
                         type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={handleKeyDown}
                         placeholder="Ask a question or search for help..."
                         className="flex-1 py-3 text-sm font-medium focus:outline-none text-gray-900 placeholder:text-gray-400"
                     />
-                    <button className="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2.5 rounded-lg flex items-center gap-2 transition-colors">
-                        <Mic size={18} /> Search
+                    <button
+                        onClick={handleSearch}
+                        className="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2.5 rounded-lg flex items-center gap-2 transition-colors"
+                    >
+                        <Search size={18} /> Search
                     </button>
                 </div>
 
@@ -105,7 +131,12 @@ export const CommunityPage = () => {
                     <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
                         <div className="flex items-start gap-4 mb-4">
                             <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 overflow-hidden">
-                                <img src="https://images.unsplash.com/photo-1542206395-9feb3edaa68d?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="User" className="w-full h-full object-cover" />
+                                <img
+                                    src="https://images.unsplash.com/photo-1542206395-9feb3edaa68d?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80"
+                                    alt="Rahul Deshmukh"
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => handleImageError(e, "Rahul Deshmukh")}
+                                />
                             </div>
                             <div>
                                 <h3 className="font-bold text-gray-900 text-sm">Rahul Deshmukh</h3>
@@ -137,7 +168,12 @@ export const CommunityPage = () => {
                     <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
                         <div className="flex items-start gap-4 mb-4">
                             <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 overflow-hidden">
-                                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="User" className="w-full h-full object-cover" />
+                                <img
+                                    src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80"
+                                    alt="Priya Patil"
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => handleImageError(e, "Priya Patil")}
+                                />
                             </div>
                             <div>
                                 <h3 className="font-bold text-gray-900 text-sm">Priya Patil</h3>

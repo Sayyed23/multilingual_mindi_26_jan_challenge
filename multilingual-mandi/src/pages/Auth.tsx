@@ -30,6 +30,7 @@ export const Auth = () => {
     };
 
     const fillDemo = (role: 'Farmer' | 'Buyer' | 'Agent') => {
+        if (import.meta.env.PROD) return; // Disable in production
         switch (role) {
             case 'Farmer':
                 setEmail('farmer@mandi.com');
@@ -45,7 +46,6 @@ export const Auth = () => {
                 break;
         }
     };
-
     return (
         <div className="min-h-screen bg-background-light text-[#101b0d] font-sans flex flex-col">
             {/* TopNavBar Component */}
@@ -129,19 +129,25 @@ export const Auth = () => {
                     <form className="px-8 pb-8 space-y-6" onSubmit={(e) => {
                         e.preventDefault();
 
+                        if (!email.trim() || !password.trim()) {
+                            // Consider showing an error message to the user
+                            return;
+                        }
+
                         if (authMode === 'SignUp') {
                             navigate('/onboarding'); // Redirect to Onboarding for new signups
                             return;
                         }
 
                         // Login Logic
-                        if (email.toLowerCase().includes('buyer') || selectedRole === 'Buyer') {
+                        if (email.toLowerCase() === 'buyer@mandi.com') {
                             navigate('/buyer/dashboard');
+                        } else if (email.toLowerCase() === 'agent@mandi.com') {
+                            navigate('/agent/dashboard'); // If agent dashboard exists
                         } else {
                             navigate('/dashboard');
                         }
-                    }}>
-                        <div className="space-y-2">
+                    }}>                        <div className="space-y-2">
                             <label className="text-sm font-bold text-[#101b0d] flex justify-between items-center">
                                 Email or Phone Number
                                 <Mic className="h-5 w-5 text-primary cursor-pointer hover:text-green-600" />

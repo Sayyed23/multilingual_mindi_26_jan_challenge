@@ -26,10 +26,9 @@ export const BuyerDashboard = () => {
                             <MapPin size={16} className="text-blue-600 mr-1" />
                             Regional Coverage: Western India
                         </div>
-                        <span className="text-blue-600 text-xs font-bold px-2 cursor-pointer hover:underline uppercase tracking-wide">
+                        <button type="button" className="text-blue-600 text-xs font-bold px-2 cursor-pointer hover:underline uppercase tracking-wide bg-transparent border-none">
                             Edit Reach
-                        </span>
-                    </div>
+                        </button>                    </div>
                 </div>
 
                 <div className="flex gap-4">
@@ -48,27 +47,35 @@ export const BuyerDashboard = () => {
                 </div>
             </div>
 
+            {/* Main Grid Content */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
                 {/* Left Column (Main Content) */}
                 <div className="lg:col-span-2 flex flex-col gap-8">
 
                     {/* Sourcing Insights */}
-                    <div>
+                    <section>
                         <div className="flex items-center gap-2 mb-4">
                             <TrendingUp size={20} className="text-blue-600" />
                             <h2 className="text-xl font-bold text-gray-900">Sourcing Insights</h2>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                             {/* Insight Card 1 */}
                             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                                 <div className="flex justify-between items-start mb-2">
                                     <span className="text-sm font-medium text-gray-500">Rice: Gondia Mandi</span>
                                     <span className="bg-red-50 text-red-600 text-xs font-bold px-2 py-1 rounded">-2.5%</span>
                                 </div>
-                                <h3 className="text-2xl font-bold text-gray-900 mb-1">₹3,200/quintal</h3>
-                                <p className="text-xs text-gray-400">Lowest price in the last 30 days</p>
+                                <div className="flex justify-between items-end">
+                                    <div>
+                                        <h3 className="text-2xl font-bold text-gray-900 mb-1">₹3,200/quintal</h3>
+                                        <p className="text-xs text-gray-400">Lowest price in the last 30 days</p>
+                                    </div>
+                                    <button type="button" aria-label="Message K. Singh" className="text-blue-600 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded p-1">
+                                        <MessageSquare size={18} />
+                                    </button>
+                                </div>
                             </div>
 
                             {/* Insight Card 2 */}
@@ -81,46 +88,45 @@ export const BuyerDashboard = () => {
                                 <p className="text-xs text-gray-400">Inventory cycles suggest upcoming price hike</p>
                             </div>
                         </div>
-                    </div>
 
-                    {/* Main Action Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {/* Search Sellers */}
-                        <div className="bg-blue-600 text-white p-6 rounded-2xl shadow-lg shadow-blue-200 flex flex-col justify-between h-48 cursor-pointer hover:bg-blue-700 transition-colors group">
-                            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-                                <Users size={20} />
+                        {/* Main Action Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {/* Search Sellers */}
+                            <button type="button" onClick={() => { }} className="bg-blue-600 text-white p-6 rounded-2xl shadow-lg shadow-blue-200 flex flex-col justify-between h-48 cursor-pointer hover:bg-blue-700 transition-colors group text-left">
+                                <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                                    <Users size={20} />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-lg mb-1">Search for Sellers</h3>
+                                    <p className="text-xs text-blue-100 opacity-90 leading-relaxed">Find verified suppliers in your region</p>
+                                </div>
+                            </button>
+                            {/* Price Comparison */}
+                            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between h-48 cursor-pointer hover:border-blue-200 transition-colors group">
+                                <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
+                                    <BarChart size={20} />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-lg text-gray-900 mb-1">Price Comparison</h3>
+                                    <p className="text-xs text-gray-500 leading-relaxed">Analyze market trends & history</p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 className="font-bold text-lg mb-1">Search for Sellers</h3>
-                                <p className="text-xs text-blue-100 opacity-90 leading-relaxed">Find verified suppliers in your region</p>
+
+                            {/* Bulk RFQ */}
+                            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between h-48 cursor-pointer hover:border-blue-200 transition-colors group">
+                                <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
+                                    <FileText size={20} />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-lg text-gray-900 mb-1">Bulk RFQ</h3>
+                                    <p className="text-xs text-gray-500 leading-relaxed">Request quotes from multiple sellers</p>
+                                </div>
                             </div>
                         </div>
-
-                        {/* Price Comparison */}
-                        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between h-48 cursor-pointer hover:border-blue-200 transition-colors group">
-                            <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
-                                <BarChart size={20} />
-                            </div>
-                            <div>
-                                <h3 className="font-bold text-lg text-gray-900 mb-1">Price Comparison</h3>
-                                <p className="text-xs text-gray-500 leading-relaxed">Analyze market trends & history</p>
-                            </div>
-                        </div>
-
-                        {/* Bulk RFQ */}
-                        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between h-48 cursor-pointer hover:border-blue-200 transition-colors group">
-                            <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
-                                <FileText size={20} />
-                            </div>
-                            <div>
-                                <h3 className="font-bold text-lg text-gray-900 mb-1">Bulk RFQ</h3>
-                                <p className="text-xs text-gray-500 leading-relaxed">Request quotes from multiple sellers</p>
-                            </div>
-                        </div>
-                    </div>
+                    </section>
 
                     {/* My Offers & Negotiations */}
-                    <div>
+                    <section>
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                                 <MessageSquare size={20} className="text-blue-600" />
@@ -131,7 +137,7 @@ export const BuyerDashboard = () => {
 
                         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                             {/* Offer 1 */}
-                            <div className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer border-b border-gray-100">
+                            <button type="button" className="p-4 w-full flex items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer border-b border-gray-100 bg-transparent text-left">
                                 <div className="flex items-center gap-4">
                                     <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center">
                                         <Truck size={20} className="text-gray-400" />
@@ -147,10 +153,10 @@ export const BuyerDashboard = () => {
                                     </span>
                                     <ChevronRight size={16} className="text-gray-400" />
                                 </div>
-                            </div>
+                            </button>
 
                             {/* Offer 2 */}
-                            <div className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer">
+                            <button type="button" className="p-4 w-full flex items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer bg-transparent text-left">
                                 <div className="flex items-center gap-4">
                                     <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center">
                                         <Sprout size={20} className="text-gray-400" />
@@ -166,25 +172,23 @@ export const BuyerDashboard = () => {
                                     </span>
                                     <ChevronRight size={16} className="text-gray-400" />
                                 </div>
-                            </div>
+                            </button>
                         </div>
-                    </div>
-
+                    </section>
                 </div>
 
                 {/* Right Column (Sidebar) */}
-                <div className="space-y-8">
-
+                <aside className="space-y-8">
                     {/* Market Signals */}
-                    <div>
-                        <div className="flex items-center gap-2 mb-4">
+                    <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                        <div className="flex items-center gap-2 mb-6">
                             <div className="bg-blue-100 p-1.5 rounded-full">
                                 <TrendingUp size={16} className="text-blue-600" />
                             </div>
                             <h2 className="text-lg font-bold text-gray-900">Market Signals</h2>
                         </div>
 
-                        <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm space-y-6">
+                        <div className="space-y-6">
                             {/* Signal 1 */}
                             <div className="flex gap-3">
                                 <div className="mt-1.5 w-2 h-2 rounded-full bg-blue-500 shrink-0"></div>
@@ -208,7 +212,7 @@ export const BuyerDashboard = () => {
                                 <div className="mt-1.5 w-2 h-2 rounded-full bg-green-500 shrink-0"></div>
                                 <div>
                                     <h4 className="font-bold text-sm text-gray-900">MSP Announcement Pending</h4>
-                                    <p className="text-xs text-gray-500 mt-1 leading-relaxed">Government to update pulses MSP by Friday. Watch for price volatility.</p>
+                                    <p className="text-xs text-gray-500 mt-1 leading-relaxed">Government to update pulses MSP by Friday.</p>
                                 </div>
                             </div>
                         </div>
@@ -229,7 +233,7 @@ export const BuyerDashboard = () => {
                             <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-full bg-gray-100 overflow-hidden">
-                                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="K. Singh" />
+                                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="K. Singh" className="w-full h-full object-cover" />
                                     </div>
                                     <div>
                                         <h4 className="font-bold text-sm text-gray-900">K. Singh</h4>
@@ -238,13 +242,15 @@ export const BuyerDashboard = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <MessageSquare size={18} className="text-blue-600 cursor-pointer" />
+                                <button type="button" aria-label="Message Seller" className="text-blue-600 hover:text-blue-700">
+                                    <MessageSquare size={18} />
+                                </button>
                             </div>
 
                             {/* Seller 2 */}
                             <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-green-800 text-white flex items-center justify-center text-xs font-bold">
+                                    <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
                                         RG
                                     </div>
                                     <div>
@@ -254,15 +260,15 @@ export const BuyerDashboard = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <MessageSquare size={18} className="text-blue-600 cursor-pointer" />
+                                <button type="button" aria-label="Message Seller" className="text-blue-600 hover:text-blue-700">
+                                    <MessageSquare size={18} />
+                                </button>
                             </div>
                         </div>
-
                     </div>
-
-                </div>
-
+                </aside>
             </div>
         </div>
     );
 };
+

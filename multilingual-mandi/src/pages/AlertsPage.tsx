@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Search,
     Settings,
@@ -9,15 +11,83 @@ import {
     Info
 } from 'lucide-react';
 
+interface Alert {
+    id: number;
+    title: string;
+    description: string;
+    time: string;
+    type: 'Price Alert' | 'Trade Update' | 'System';
+    read: boolean;
+    urgency: 'normal' | 'crucial' | 'active';
+}
+
 export const AlertsPage = () => {
+    const navigate = useNavigate();
+    const [alerts, setAlerts] = useState<Alert[]>([
+        {
+            id: 1,
+            title: "Wheat price reached your target of ₹2,500 at Nagpur Mandi",
+            description: "5 minutes ago • Market Alert",
+            time: "5 minutes ago",
+            type: 'Price Alert',
+            read: false,
+            urgency: 'active'
+        },
+        {
+            id: 2,
+            title: "New offer from Raj Traders for Soybeans",
+            description: "42 minutes ago • Trade Update",
+            time: "42 minutes ago",
+            type: 'Trade Update',
+            read: false,
+            urgency: 'crucial'
+        },
+        {
+            id: 3,
+            title: "Profile Verification Successful",
+            description: "2 hours ago • System",
+            time: "2 hours ago",
+            type: 'System',
+            read: true,
+            urgency: 'normal'
+        }
+    ]);
+
+    const markAllAsRead = () => {
+        setAlerts(prev => prev.map(alert => ({ ...alert, read: true })));
+    };
+
+    const handleViewPrice = (id: number) => {
+        console.log(`Viewing price for alert ${id}`);
+        // For demonstration, navigate to the price discovery or dashboard
+        navigate('/dashboard/price-discovery');
+    };
+
+    const handleMarkAsRead = (id: number) => {
+        setAlerts(prev => prev.map(a => a.id === id ? { ...a, read: true } : a));
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent, id: number) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleMarkAsRead(id);
+        }
+    };
+
+    const unreadCount = alerts.filter(a => !a.read).length;
+
     return (
         <div className="flex flex-col gap-6 w-full h-[calc(100vh-8rem)]">
 
             {/* Header */}
             <div className="flex justify-between items-center">
                 <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Alerts & Notifications</h1>
-                <button className="text-sm font-bold text-gray-500 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition-colors">
-                    Mark All as Read
+                <button
+                    onClick={markAllAsRead}
+                    disabled={unreadCount === 0}
+                    className={`text-sm font-bold bg-gray-100 px-4 py-2 rounded-lg transition-colors ${unreadCount === 0 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-200'}`}
+                >
+                    Mark All as Read {unreadCount > 0 && `(${unreadCount})`}
                 </button>
             </div>
 
@@ -31,75 +101,81 @@ export const AlertsPage = () => {
                         <input
                             type="text"
                             placeholder="Search notifications..."
+                            aria-label="Search notifications"
                             className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
-                        />
-                    </div>
+                        />                    </div>
 
                     {/* Tabs */}
-                    <div className="flex bg-gray-100 p-1 rounded-xl shrink-0">
-                        <button className="flex-1 bg-white shadow-sm text-gray-900 font-bold py-2.5 rounded-lg text-sm">Price Alerts (3)</button>
-                        <button className="flex-1 text-gray-500 font-bold py-2.5 rounded-lg text-sm hover:bg-gray-200/50">Deal Updates (2)</button>
-                        <button className="flex-1 text-gray-500 font-bold py-2.5 rounded-lg text-sm hover:bg-gray-200/50">System (1)</button>
+                    <div className="flex bg-gray-100 p-1 rounded-xl shrink-0" role="tablist">
+                        <button role="tab" aria-selected="true" className="flex-1 bg-white shadow-sm text-gray-900 font-bold py-2.5 rounded-lg text-sm">Price Alerts (3)</button>
+                        <button role="tab" aria-selected="false" className="flex-1 text-gray-500 font-bold py-2.5 rounded-lg text-sm hover:bg-gray-200/50">Deal Updates (2)</button>
+                        <button role="tab" aria-selected="false" className="flex-1 text-gray-500 font-bold py-2.5 rounded-lg text-sm hover:bg-gray-200/50">System (1)</button>
                     </div>
-
                     {/* Scrollable List */}
                     <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+                        {alerts.map((alert) => (
+                            <div
+                                key={alert.id}
+                                role="button"
+                                tabIndex={0}
+                                aria-label={`${alert.title} - ${alert.read ? 'Read' : 'Unread'}`}
+                                onClick={() => handleMarkAsRead(alert.id)}
+                                onKeyDown={(e) => handleKeyDown(e, alert.id)}
+                                className={`p-5 rounded-2xl border transition-all cursor-pointer relative group focus:outline-none focus:ring-2 focus:ring-blue-500 ${alert.urgency === 'active'
+                                    ? `bg-white border-2 ${alert.read ? 'border-gray-200 shadow-sm' : 'border-blue-500 shadow-md'}`
+                                    : alert.urgency === 'crucial'
+                                        ? `${alert.read ? 'bg-white border-gray-100 shadow-sm' : 'bg-red-50 border-red-100 shadow-sm'}`
+                                        : 'bg-white border-gray-100 shadow-sm hover:border-gray-200'
+                                    }`}
+                            >
+                                {!alert.read && (
+                                    <div className={`absolute top-5 right-5 w-2 h-2 rounded-full ${alert.urgency === 'crucial' ? 'bg-red-400' : 'bg-blue-500'}`}></div>
+                                )}
 
-                        {/* Alert 1: Price Reach (Active) */}
-                        <div className="bg-white p-5 rounded-2xl border-2 border-blue-500 shadow-md relative overflow-hidden group cursor-pointer">
-                            <div className="flex justify-between items-start gap-4">
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <TrendingUp size={18} className="text-green-600" />
-                                        <h3 className="font-bold text-gray-900">Wheat price reached your target of ₹2,500 at Nagpur Mandi</h3>
-                                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                <div className="flex items-start gap-3">
+                                    <div className="mt-0.5">
+                                        {alert.urgency === 'active' && <TrendingUp size={18} className="text-green-600" />}
+                                        {alert.urgency === 'crucial' && <AlertCircle size={20} className="text-red-500" />}
+                                        {alert.urgency === 'normal' && <CheckCircle size={20} className="text-blue-500" />}
                                     </div>
-                                    <p className="text-xs text-gray-500 font-medium mb-4">5 minutes ago • Market Alert</p>
-                                    <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-xs flex items-center gap-1 transition-colors z-10 relative">
-                                        View Price <ArrowRight size={14} />
-                                    </button>
-                                </div>
-                                <div className="w-24 h-16 bg-blue-900/10 rounded-lg overflow-hidden shrink-0 border border-blue-100">
-                                    {/* Simulated chart thumbnail */}
-                                    <svg viewBox="0 0 100 60" className="w-full h-full">
-                                        <polyline points="0,50 20,45 40,30 60,40 80,15 100,5" fill="none" stroke="#2563eb" strokeWidth="2" />
-                                        <polygon points="0,50 20,45 40,30 60,40 80,15 100,5 100,60 0,60" fill="#2563eb" fillOpacity="0.1" />
-                                    </svg>
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <h3 className={`font-bold ${alert.read ? 'text-gray-600' : 'text-gray-900'}`}>{alert.title}</h3>
+                                        </div>
+                                        <p className="text-xs text-gray-500 font-medium mb-3">{alert.description}</p>
+
+                                        {alert.urgency === 'active' && (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleViewPrice(alert.id);
+                                                }}
+                                                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-xs flex items-center gap-1 transition-colors z-10 relative"
+                                            >
+                                                View Price <ArrowRight size={14} />
+                                            </button>
+                                        )}
+                                        {alert.urgency === 'crucial' && (
+                                            <button className="bg-white border border-red-200 text-red-600 hover:bg-red-50 font-bold py-2 px-4 rounded-lg text-xs transition-colors">
+                                                Respond Now
+                                            </button>
+                                        )}
+                                        {alert.urgency === 'normal' && (
+                                            <p className="text-sm text-gray-600 mt-2">Your KYC documents have been verified. You can now start bidding on high-value trades.</p>
+                                        )}
+                                    </div>
+
+                                    {alert.urgency === 'active' && (
+                                        <div className="w-24 h-16 bg-blue-900/10 rounded-lg overflow-hidden shrink-0 border border-blue-100">
+                                            <svg viewBox="0 0 100 60" className="w-full h-full">
+                                                <polyline points="0,50 20,45 40,30 60,40 80,15 100,5" fill="none" stroke="#2563eb" strokeWidth="2" />
+                                                <polygon points="0,50 20,45 40,30 60,40 80,15 100,5 100,60 0,60" fill="#2563eb" fillOpacity="0.1" />
+                                            </svg>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
-                        </div>
-
-                        {/* Alert 2: Deal Update (Crucial) */}
-                        <div className="bg-red-50 p-5 rounded-2xl border border-red-100 shadow-sm relative group cursor-pointer">
-                            <div className="absolute top-5 right-5 w-2 h-2 bg-red-400 rounded-full"></div>
-                            <div className="flex items-start gap-3">
-                                <div className="mt-0.5">
-                                    <AlertCircle size={20} className="text-red-500" />
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-gray-900">New offer from Raj Traders for Soybeans</h3>
-                                    <p className="text-xs text-gray-500 font-medium mt-1 mb-3">42 minutes ago • Trade Update</p>
-                                    <button className="bg-white border border-red-200 text-red-600 hover:bg-red-50 font-bold py-2 px-4 rounded-lg text-xs transition-colors">
-                                        Respond Now
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Alert 3: System (Read) */}
-                        <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm cursor-pointer hover:border-gray-200">
-                            <div className="flex items-start gap-3">
-                                <div className="mt-0.5">
-                                    <CheckCircle size={20} className="text-blue-500" />
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-gray-900">Profile Verification Successful</h3>
-                                    <p className="text-xs text-gray-500 font-medium mt-1">2 hours ago • System</p>
-                                    <p className="text-sm text-gray-600 mt-2">Your KYC documents have been verified. You can now start bidding on high-value trades.</p>
-                                </div>
-                            </div>
-                        </div>
-
+                        ))}
                     </div>
 
                     {/* Footer Links */}

@@ -17,6 +17,19 @@ import { useNavigate } from 'react-router-dom';
 
 export const UserProfile = () => {
     const navigate = useNavigate();
+
+    const handleViewAllHistory = () => {
+        console.log("Viewing all history for Patil Agrotech...");
+        // TODO: Implement full history view navigation
+        // navigate('/dashboard/history');
+    };
+
+    const handleOpenMap = () => {
+        const address = "Kalmeshwar Road, Nagpur, MH 440001";
+        const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+        window.open(mapUrl, '_blank', 'noopener,noreferrer');
+    };
+
     return (
         <div className="flex flex-col lg:flex-row gap-8 w-full">
 
@@ -128,7 +141,12 @@ export const UserProfile = () => {
                 <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
                     <div className="p-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
                         <h3 className="text-lg font-bold text-gray-900">Recent Deal Volumes</h3>
-                        <button className="text-xs font-bold text-blue-600 hover:underline">View All History</button>
+                        <button
+                            onClick={handleViewAllHistory}
+                            className="text-xs font-bold text-blue-600 hover:underline"
+                        >
+                            View All History
+                        </button>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm">
@@ -231,13 +249,18 @@ export const UserProfile = () => {
                         >
                             <MessageSquare size={18} /> Start Negotiation
                         </button>
-                        <button className="w-full bg-gray-100 hover:bg-gray-200 text-gray-900 font-bold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2">
+                        <button
+                            onClick={() => { /* TODO: implement messaging */ }}
+                            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-900 font-bold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2"
+                        >
                             <MessageSquare size={18} /> Message Vendor
                         </button>
-                        <button className="w-full bg-white border-2 border-blue-100 hover:border-blue-200 text-blue-600 font-bold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm mt-2">
+                        <button
+                            onClick={() => { /* TODO: implement download */ }}
+                            className="w-full bg-white border-2 border-blue-100 hover:border-blue-200 text-blue-600 font-bold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm mt-2"
+                        >
                             <Download size={16} /> Download Trust Report
-                        </button>
-                    </div>
+                        </button>                    </div>
                 </div>
 
                 {/* Verification Status */}
@@ -297,7 +320,19 @@ export const UserProfile = () => {
                 {/* Warehouse Map */}
                 <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
                     <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Warehouse Location</h3>
-                    <div className="h-40 bg-blue-50 rounded-xl flex items-center justify-center relative overflow-hidden group cursor-pointer mb-2">
+                    <div
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Open warehouse location in Google Maps"
+                        onClick={handleOpenMap}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                handleOpenMap();
+                            }
+                        }}
+                        className="h-40 bg-blue-50 rounded-xl flex items-center justify-center relative overflow-hidden group cursor-pointer mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
                         <div className="flex flex-col items-center text-blue-300 group-hover:scale-110 transition-transform">
                             <MapPin size={32} />
                         </div>

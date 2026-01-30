@@ -44,13 +44,19 @@ export const AppShell = () => {
             <header className="bg-white px-6 py-4 shadow-sm border-b border-gray-100 flex items-center justify-between sticky top-0 z-50">
                 <div className="flex items-center gap-10">
                     {/* Logo */}
-                    <div className="flex items-center gap-2 text-gray-900 cursor-pointer" onClick={() => navigate(isBuyer ? '/buyer/dashboard' : '/dashboard')}>
+                    <div
+                        className="flex items-center gap-2 text-gray-900 cursor-pointer"
+                        onClick={() => navigate(isBuyer ? '/buyer/dashboard' : '/dashboard')}
+                        onKeyDown={(e) => e.key === 'Enter' && navigate(isBuyer ? '/buyer/dashboard' : '/dashboard')}
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Go to dashboard"
+                    >
                         <div className={`${logoBg} rounded-full p-1.5 text-white`}>
                             {isBuyer ? <Hexagon size={20} fill="currentColor" /> : <Leaf size={20} fill="currentColor" />}
                         </div>
                         <span className="font-bold text-xl tracking-tight">AgriMarket</span>
                     </div>
-
                     {/* Nav Links */}
                     <nav className="hidden md:flex items-center gap-8">
                         {currentNav.map((item) => (
@@ -75,9 +81,9 @@ export const AppShell = () => {
                         <input
                             type="text"
                             placeholder={isBuyer ? "Search commodities..." : "Search crops..."}
+                            aria-label={isBuyer ? "Search commodities" : "Search crops"}
                             className={`w-full pl-12 pr-4 py-2.5 rounded-full bg-gray-100 border-none focus:ring-2 ${ringColor} text-sm font-medium placeholder:text-gray-500`}
-                        />
-                    </div>
+                        />                    </div>
 
                     {/* Actions */}
                     <div className="flex items-center gap-4">
@@ -119,17 +125,24 @@ export const AppShell = () => {
                         © 2024 AgriMarket Platform • Empowering 2M+ Farmers across India
                     </p>
                     <div className="flex items-center gap-6 text-gray-400">
-                        <HelpCircle size={20} className="hover:text-gray-600 cursor-pointer" />
-                        {!isBuyer && <Settings size={20} className="hover:text-gray-600 cursor-pointer" onClick={() => navigate('/settings')} />}
-                        <LogOut
-                            size={20}
-                            className="hover:text-red-500 cursor-pointer transition-colors"
+                        <button className="hover:text-gray-600 transition-colors" aria-label="Help">
+                            <HelpCircle size={20} />
+                        </button>
+                        {!isBuyer && (
+                            <button className="hover:text-gray-600 transition-colors" aria-label="Settings" onClick={() => navigate('/settings')}>
+                                <Settings size={20} />
+                            </button>
+                        )}
+                        <button
+                            className="hover:text-red-500 transition-colors"
+                            aria-label="Logout"
                             onClick={() => {
-                                // Clear session logic here if needed
                                 console.log("Logging out from Footer...");
                                 navigate('/auth');
                             }}
-                        />
+                        >
+                            <LogOut size={20} />
+                        </button>
                     </div>
                 </div>
             </footer>

@@ -64,8 +64,11 @@ export const SettingsPage = () => {
 
                     <div className="space-y-1">
                         {/* Language */}
-                        <div className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors px-2 -mx-2 rounded-lg cursor-pointer">
-                            <div>
+                        <button
+                            type="button"
+                            className="w-full flex items-center justify-between py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors px-2 -mx-2 rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-green-500"
+                        >
+                            <div className="text-left">
                                 <p className="font-bold text-gray-900 text-sm">App Language</p>
                                 <p className="text-xs text-gray-500">Select your preferred language</p>
                             </div>
@@ -73,7 +76,7 @@ export const SettingsPage = () => {
                                 <span className="text-sm font-bold">English</span>
                                 <ChevronRight size={16} />
                             </div>
-                        </div>
+                        </button>
 
                         {/* Voice Output */}
                         <div className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0 px-2 -mx-2">
@@ -81,11 +84,10 @@ export const SettingsPage = () => {
                                 <p className="font-bold text-gray-900 text-sm">Voice Output (Text-to-Speech)</p>
                                 <p className="text-xs text-green-600 font-medium">Read out incoming messages</p>
                             </div>
-                            <div className="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" checked className="sr-only peer" readOnly />
+                            <div className="relative inline-flex items-center">
+                                <input type="checkbox" checked disabled className="sr-only peer" aria-label="Voice Output" />
                                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
-                            </div>
-                        </div>
+                            </div>                        </div>
 
                         {/* Dark Mode */}
                         <div className="flex items-center justify-between py-3 px-2 -mx-2 opacity-50 cursor-not-allowed">
@@ -105,28 +107,49 @@ export const SettingsPage = () => {
                     </h2>
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-gray-700">Price Alerts</span>
-                            <div className="relative inline-flex items-center cursor-pointer" onClick={() => setNotifications(p => ({ ...p, priceAlerts: !p.priceAlerts }))}>
+                            <span id="label-price-alerts" className="text-sm font-medium text-gray-700">Price Alerts</span>
+                            <button
+                                type="button"
+                                role="switch"
+                                aria-checked={notifications.priceAlerts}
+                                aria-labelledby="label-price-alerts"
+                                className="relative inline-flex items-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-green-500 rounded-full"
+                                onClick={() => setNotifications(p => ({ ...p, priceAlerts: !p.priceAlerts }))}
+                            >
                                 <div className={`w-11 h-6 rounded-full transition-colors ${notifications.priceAlerts ? 'bg-green-600' : 'bg-gray-200'}`}>
                                     <div className={`absolute top-[2px] left-[2px] bg-white border border-gray-300 rounded-full h-5 w-5 transition-transform ${notifications.priceAlerts ? 'translate-x-full border-white' : ''}`}></div>
                                 </div>
-                            </div>
+                            </button>
                         </div>
                         <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-gray-700">Deal Updates</span>
-                            <div className="relative inline-flex items-center cursor-pointer" onClick={() => setNotifications(p => ({ ...p, dealUpdates: !p.dealUpdates }))}>
+                            <span id="label-deal-updates" className="text-sm font-medium text-gray-700">Deal Updates</span>
+                            <button
+                                type="button"
+                                role="switch"
+                                aria-checked={notifications.dealUpdates}
+                                aria-labelledby="label-deal-updates"
+                                className="relative inline-flex items-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-green-500 rounded-full"
+                                onClick={() => setNotifications(p => ({ ...p, dealUpdates: !p.dealUpdates }))}
+                            >
                                 <div className={`w-11 h-6 rounded-full transition-colors ${notifications.dealUpdates ? 'bg-green-600' : 'bg-gray-200'}`}>
                                     <div className={`absolute top-[2px] left-[2px] bg-white border border-gray-300 rounded-full h-5 w-5 transition-transform ${notifications.dealUpdates ? 'translate-x-full border-white' : ''}`}></div>
                                 </div>
-                            </div>
+                            </button>
                         </div>
                         <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-gray-700">Community Messages</span>
-                            <div className="relative inline-flex items-center cursor-pointer" onClick={() => setNotifications(p => ({ ...p, community: !p.community }))}>
+                            <span id="label-community-messages" className="text-sm font-medium text-gray-700">Community Messages</span>
+                            <button
+                                type="button"
+                                role="switch"
+                                aria-checked={notifications.community}
+                                aria-labelledby="label-community-messages"
+                                className="relative inline-flex items-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-green-500 rounded-full"
+                                onClick={() => setNotifications(p => ({ ...p, community: !p.community }))}
+                            >
                                 <div className={`w-11 h-6 rounded-full transition-colors ${notifications.community ? 'bg-green-600' : 'bg-gray-200'}`}>
                                     <div className={`absolute top-[2px] left-[2px] bg-white border border-gray-300 rounded-full h-5 w-5 transition-transform ${notifications.community ? 'translate-x-full border-white' : ''}`}></div>
                                 </div>
-                            </div>
+                            </button>
                         </div>
                     </div>
                 </div>
