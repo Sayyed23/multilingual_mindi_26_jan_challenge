@@ -11,6 +11,8 @@ import { UserProfile } from './pages/UserProfile';
 import { CommunityPage } from './pages/CommunityPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { AppShell } from './components/AppShell';
+import { DatabaseDemo } from './components/DatabaseDemo';
+import { ServiceWorkerDemo } from './components/ServiceWorkerDemo';
 
 function App() {
   return (
@@ -19,6 +21,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/database-demo" element={<DatabaseDemo />} />
+        <Route path="/service-worker-demo" element={<ServiceWorkerDemo />} />
 
         {/* App Shell Layout for authenticated routes */}
         <Route element={<AppShell />}>

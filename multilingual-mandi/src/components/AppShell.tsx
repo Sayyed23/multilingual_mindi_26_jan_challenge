@@ -9,6 +9,7 @@ import {
     LogOut,
     Hexagon
 } from 'lucide-react';
+import OfflineIndicator from './OfflineIndicator';
 
 export const AppShell = () => {
     const navigate = useNavigate();
@@ -103,6 +104,9 @@ export const AppShell = () => {
 
                     {/* Actions */}
                     <div className="flex items-center gap-4">
+                        {/* Offline Indicator */}
+                        <OfflineIndicator />
+                        
                         <button
                             onClick={() => navigate('/alerts')}
                             className="p-2 text-gray-600 hover:bg-gray-100 rounded-full relative transition-colors"
