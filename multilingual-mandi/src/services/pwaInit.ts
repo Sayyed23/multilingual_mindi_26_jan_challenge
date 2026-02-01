@@ -109,12 +109,62 @@ class PWAService {
         this.registerBackgroundSync('offline-actions-sync');
       });
 
-      // Periodic price data sync
-      setInterval(() => {
-        if (navigator.onLine) {
-          this.registerBackgroundSync('price-data-sync');
+      // Periodic sync registration for different data types
+      this.setupPeriodicSync();
+
+      // Listen for sync completion messages
+      navigator.serviceWorker?.addEventListener('message', (event) => {
+        const { type, status } = event.data || {};
+        
+        if (type === 'SYNC_OFFLINE_ACTIONS') {
+          this.handleSyncMessage(type, status, event.data);
+        } else if (type === 'SYNC_PRICE_DATA') {
+          this.handleSyncMessage(type, status, event.data);
         }
-      }, 5 * 60 * 1000); // Every 5 minutes
+      });
+    }
+  }
+
+  private setupPeriodicSync(): void {
+    // Price data sync every 5 minutes when online
+    setInterval(() => {
+      if (navigator.onLine) {
+        this.registerBackgroundSync('price-data-sync');
+      }
+    }, 5 * 60 * 1000);
+
+    // Deals data sync every 10 minutes when online
+    setInterval(() => {
+      if (navigator.onLine) {
+        this.registerBackgroundSync('deals-sync');
+      }
+    }, 10 * 60 * 1000);
+
+    // Messages sync every 2 minutes when online
+    setInterval(() => {
+      if (navigator.onLine) {
+        this.registerBackgroundSync('messages-sync');
+      }
+    }, 2 * 60 * 1000);
+
+    // Cache cleanup every 30 minutes
+    setInterval(() => {
+      this.registerBackgroundSync('cache-cleanup');
+    }, 30 * 60 * 1000);
+  }
+
+  private handleSyncMessage(type: string, status: string, data: any): void {
+    switch (type) {
+      case 'SYNC_OFFLINE_ACTIONS':
+        if (status === 'completed') {
+          this.notifyOfflineSync();
+        } else if (status === 'failed') {
+          console.error('Offline sync failed:', data.error);
+        }
+        break;
+      case 'SYNC_PRICE_DATA':
+        console.log(`Price data sync: ${data.syncedCount}/${data.totalEndpoints} endpoints`);
+        break;
     }
   }
 
@@ -184,20 +234,45 @@ class PWAService {
     }
   }
 
-  async cacheUrls(urls: string[]): Promise<void> {
-    if (this.registration) {
-      this.registration.active?.postMessage({
+  // Enhanced cache management methods
+  async cacheUrls(urls: string[], cacheName?: string): Promise<void> {
+    if (this.registration?.active) {
+      this.registration.active.postMessage({
         type: 'CACHE_URLS',
-        data: { urls }
+        data: { urls, cacheName: cacheName || 'dynamic' }
       });
     }
   }
 
   async clearCache(cacheName?: string): Promise<void> {
-    if (this.registration) {
-      this.registration.active?.postMessage({
+    if (this.registration?.active) {
+      this.registration.active.postMessage({
         type: 'CLEAR_CACHE',
         data: { cacheName }
+      });
+    }
+  }
+
+  async getCacheStats(): Promise<any> {
+    if (!this.registration?.active) return null;
+
+    return new Promise((resolve) => {
+      const messageChannel = new MessageChannel();
+      
+      messageChannel.port1.onmessage = (event) => {
+        resolve(event.data);
+      };
+
+      this.registration!.active!.postMessage({
+        type: 'GET_CACHE_STATS'
+      }, [messageChannel.port2]);
+    });
+  }
+
+  async optimizeCaches(): Promise<void> {
+    if (this.registration?.active) {
+      this.registration.active.postMessage({
+        type: 'OPTIMIZE_CACHES'
       });
     }
   }
@@ -263,7 +338,7 @@ class PWAService {
     try {
       const subscription = await this.registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: this.urlBase64ToUint8Array(vapidKey)
+        applicationServerKey: this.urlBase64ToUint8Array(vapidKey) as unknown as BufferSource
       });
 
       console.log('Push subscription created:', subscription);

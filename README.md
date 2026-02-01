@@ -1,4 +1,4 @@
-# Multilingual Mandi PWA
+# AgriMandi PWA
 
 AI-powered marketplace for Indian agricultural commodities that breaks language barriers and ensures price transparency.
 

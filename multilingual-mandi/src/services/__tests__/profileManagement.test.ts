@@ -21,7 +21,7 @@ vi.mock('../../lib/firebase', () => ({
 // Mock offline sync service
 vi.mock('../offlineSync', () => ({
   offlineSyncService: {
-    getCachedData: vi.fn(),
+    getCachedEntry: vi.fn(),
     cacheData: vi.fn()
   }
 }));
@@ -55,7 +55,7 @@ describe('ProfileManagementService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     profileService = new ProfileManagementService();
-    
+
     mockUserProfile = {
       uid: 'test-user-id',
       email: 'test@example.com',
@@ -118,17 +118,23 @@ describe('ProfileManagementService', () => {
 
   describe('getUserProfile', () => {
     it('should return cached profile if available and valid', async () => {
-      mockOfflineSyncService.getCachedData.mockResolvedValue(mockUserProfile);
+      mockOfflineSyncService.getCachedEntry.mockResolvedValue({
+        key: 'profile_test-user-id',
+        data: mockUserProfile,
+        timestamp: new Date(),
+        ttl: 300000, // 5 minutes
+        version: 1
+      });
 
       const result = await profileService.getUserProfile('test-user-id');
 
       expect(result).toEqual(mockUserProfile);
-      expect(mockOfflineSyncService.getCachedData).toHaveBeenCalledWith('profile_test-user-id');
+      expect(mockOfflineSyncService.getCachedEntry).toHaveBeenCalledWith('profile_test-user-id');
       expect(mockGetDoc).not.toHaveBeenCalled();
     });
 
     it('should fetch from Firestore if not cached', async () => {
-      mockOfflineSyncService.getCachedData.mockResolvedValue(null);
+      mockOfflineSyncService.getCachedEntry.mockResolvedValue(null);
       mockDoc.mockReturnValue({} as any);
       mockGetDoc.mockResolvedValue({
         exists: (() => true) as any,
@@ -147,7 +153,7 @@ describe('ProfileManagementService', () => {
     });
 
     it('should return null if profile not found', async () => {
-      mockOfflineSyncService.getCachedData.mockResolvedValue(null);
+      mockOfflineSyncService.getCachedEntry.mockResolvedValue(null);
       mockDoc.mockReturnValue({} as any);
       mockGetDoc.mockResolvedValue({
         exists: (() => false) as any
@@ -159,7 +165,7 @@ describe('ProfileManagementService', () => {
     });
 
     it('should handle errors gracefully', async () => {
-      mockOfflineSyncService.getCachedData.mockRejectedValue(new Error('Cache error'));
+      mockOfflineSyncService.getCachedEntry.mockRejectedValue(new Error('Cache error'));
       mockGetDoc.mockRejectedValue(new Error('Firestore error'));
 
       const result = await profileService.getUserProfile('test-user-id');
@@ -412,7 +418,7 @@ describe('ProfileManagementService', () => {
       };
       vi.spyOn(profileService, 'getUserProfile').mockResolvedValue(unverifiedProfile);
 
-      const profiles = await profileService.getVisibleProfiles('test-user-id');
+      await profileService.getVisibleProfiles('test-user-id');
 
       expect(mockWhere).toHaveBeenCalledWith(
         'preferences.privacy.profileVisibility',
@@ -422,13 +428,12 @@ describe('ProfileManagementService', () => {
     });
 
     it('should apply role filter', async () => {
-      await profileService.getVisibleProfiles('test-user-id', {
+      const profiles = await profileService.getVisibleProfiles('test-user-id', {
         role: 'buyer'
       });
 
-      // Since our mock profile is a vendor, it should be filtered out
-      // This test mainly ensures the method doesn't throw
-      expect(true).toBe(true);
+      expect(Array.isArray(profiles)).toBe(true);
+      expect(mockGetDocs).toHaveBeenCalled();
     });
 
     it('should handle errors gracefully', async () => {

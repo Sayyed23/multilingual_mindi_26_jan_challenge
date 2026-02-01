@@ -133,10 +133,19 @@ class AuthenticationService implements AuthService {
         };
       }
 
-      if (!['vendor', 'buyer', 'agent'].includes(role)) {
+      if (!['vendor', 'buyer', 'agent', 'admin'].includes(role)) {
         return {
           success: false,
           error: 'Invalid user role specified'
+        };
+      }
+
+      // Check if user already exists
+      const userExists = await this.checkUserExists(email);
+      if (userExists) {
+        return {
+          success: false,
+          error: 'An account with this email already exists'
         };
       }
 
@@ -150,7 +159,15 @@ class AuthenticationService implements AuthService {
         userProfile = await this.createUserProfile(firebaseUser.uid, email, role);
       } catch (profileError) {
         // Rollback: delete the Firebase auth user
-        await firebaseUser.delete();
+        try {
+          await firebaseUser.delete();
+        } catch (deleteError) {
+          console.error('Failed to rollback user creation:', deleteError);
+          // Attach rollback error to original error to preserve context
+          if (profileError instanceof Error) {
+            (profileError as any).rollbackError = deleteError;
+          }
+        }
         throw profileError;
       }
 
@@ -196,6 +213,25 @@ class AuthenticationService implements AuthService {
     }
   }
 
+  async refreshProfile(): Promise<User | null> {
+    const firebaseUser = auth.currentUser;
+    if (!firebaseUser) {
+      this.currentUser = null;
+      this.authStateListeners.forEach(callback => callback(null));
+      return null;
+    }
+
+    try {
+      const userProfile = await this.fetchUserProfile(firebaseUser.uid);
+      this.currentUser = userProfile;
+      this.authStateListeners.forEach(callback => callback(this.currentUser));
+      return userProfile;
+    } catch (error) {
+      console.error('Error refreshing user profile:', error);
+      return null;
+    }
+  }
+
   getCurrentUser(): User | null {
     return this.currentUser;
   }
@@ -218,8 +254,8 @@ class AuthenticationService implements AuthService {
   // Helper method to check if user exists
   private async checkUserExists(email: string): Promise<boolean> {
     try {
-      // This is a simplified check - in production, you might want to use Firebase Admin SDK
-      // or a cloud function to check user existence without revealing sensitive information
+      // Check if a user document exists with this email
+      // We'll check both the users collection and userProfiles collection
       const userDoc = doc(db, 'users', email);
       const docSnap = await getDoc(userDoc);
       return docSnap.exists();
@@ -245,8 +281,9 @@ class AuthenticationService implements AuthService {
           location: data.location || this.getDefaultLocation(),
           onboardingCompleted: data.onboardingCompleted || false,
           verificationStatus: data.verificationStatus || 'unverified',
-          createdAt: data.createdAt?.toDate?.() || new Date(data.createdAt) || new Date(),
-          updatedAt: data.updatedAt?.toDate?.() || new Date(data.updatedAt) || new Date()
+
+          createdAt: this.parseTimestamp(data.createdAt),
+          updatedAt: this.parseTimestamp(data.updatedAt)
         };
       }
 
@@ -255,6 +292,30 @@ class AuthenticationService implements AuthService {
       console.error('Error fetching user profile:', error);
       return null;
     }
+  }
+
+  // Helper method to safe parse timestamps
+  private parseTimestamp(value: unknown): Date {
+    if (!value) return new Date();
+
+    // Handle Firestore Timestamp objects (have toDate method)
+    if (typeof value === 'object' && value !== null && 'toDate' in value && typeof (value as any).toDate === 'function') {
+      try {
+        return (value as any).toDate();
+      } catch (e) {
+        console.warn('Failed to convert Firestore timestamp, formatting error:', e);
+      }
+    }
+
+    // Handle strings or numbers (or Date objects)
+    const date = new Date(value as any);
+
+    // Validate result
+    if (isNaN(date.getTime())) {
+      return new Date();
+    }
+
+    return date;
   }
 
   // Helper method to create user profile document
@@ -400,6 +461,8 @@ class AuthenticationService implements AuthService {
         return 'Too many failed attempts. Please try again later';
       case 'auth/invalid-credential':
         return 'Invalid email or password';
+      case 'auth/operation-not-allowed':
+        return 'Email/Password sign-in is not enabled in the Firebase Console. Please enable it in the Authentication settings.';
       default:
         return error.message || 'An error occurred during authentication';
     }
@@ -410,7 +473,8 @@ class AuthenticationService implements AuthService {
     const roleFeatures: Record<UserRole, string[]> = {
       vendor: ['sell', 'negotiate', 'manage_inventory', 'view_prices', 'receive_orders'],
       buyer: ['buy', 'negotiate', 'search_products', 'view_prices', 'place_orders'],
-      agent: ['facilitate', 'negotiate', 'manage_deals', 'view_prices', 'commission_tracking']
+      agent: ['facilitate', 'negotiate', 'manage_deals', 'view_prices', 'commission_tracking'],
+      admin: ['manage_users', 'resolve_disputes', 'view_analytics', 'manage_platform']
     };
 
     const userFeatures = roleFeatures[userRole] || [];
@@ -422,7 +486,8 @@ class AuthenticationService implements AuthService {
     const roleFeatures: Record<UserRole, string[]> = {
       vendor: ['sell', 'negotiate', 'manage_inventory', 'view_prices', 'receive_orders'],
       buyer: ['buy', 'negotiate', 'search_products', 'view_prices', 'place_orders'],
-      agent: ['facilitate', 'negotiate', 'manage_deals', 'view_prices', 'commission_tracking']
+      agent: ['facilitate', 'negotiate', 'manage_deals', 'view_prices', 'commission_tracking'],
+      admin: ['manage_users', 'resolve_disputes', 'view_analytics', 'manage_platform']
     };
 
     return roleFeatures[role] || [];

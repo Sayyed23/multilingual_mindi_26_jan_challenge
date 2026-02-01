@@ -44,19 +44,22 @@ export const getMessagingInstance = async (): Promise<Messaging | null> => {
   return messagingInstance;
 };
 // Development mode emulator connections
-// Explicitly check for emulator usage flag from environment
 const USING_EMULATORS = import.meta.env.VITE_USE_EMULATORS === 'true';
 
+console.info(`[Firebase] Initializing. Emulator mode: ${USING_EMULATORS}`);
+
 if (USING_EMULATORS) {
-  // Connect to Firebase emulators
   try {
+    console.warn('[Firebase] Attempting to connect to local emulators...');
     connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
     connectFirestoreEmulator(db, 'localhost', 8080);
     connectFunctionsEmulator(functions, 'localhost', 5001);
-    console.log('Connected to Firebase emulators');
+    console.info('[Firebase] Successfully connected to Firebase emulators');
   } catch (error) {
-    console.error('Failed to connect to Firebase emulators:', error);
+    console.error('[Firebase] Failed to connect to Firebase emulators:', error);
   }
+} else {
+  console.info('[Firebase] Connecting to cloud project:', firebaseConfig.projectId);
 }
 
 // Export the Firebase app instance

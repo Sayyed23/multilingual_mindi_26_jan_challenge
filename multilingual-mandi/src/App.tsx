@@ -1,67 +1,135 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
+import ProtectedRoute from './components/ProtectedRoute';
+import { LanguageProvider } from './contexts/LanguageContext';
 
-const Home = () => {
-  const navigate = useNavigate();
+// Auth Pages
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import OnboardingPage from './pages/OnboardingPage';
 
-  return (
-    <div className="space-y-6">
-      <div className="vibrant-gradient p-8 rounded-3xl text-white shadow-lg">
-        <h2 className="text-3xl font-bold mb-2">Welcome to Multilingual Mandi</h2>
-        <p className="opacity-90">AI-powered marketplace connecting farmers and buyers across India.</p>
-      </div>
+// Main App Pages
+// Main App Pages
+import HomePage from './pages/HomePage';
+import ProfilePage from './pages/ProfilePage';
+import NegotiationPage from './pages/NegotiationPage';
+import DealsPage from './pages/DealsPage';
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="glass-card p-6">
-          <h3 className="text-lg font-semibold mb-2">Market Prices</h3>
-          <p className="text-slate-500 text-sm mb-4">Real-time price intelligence from 100+ mandis.</p>
-          <button
-            onClick={() => navigate('/market')}
-            className="primary-button w-full"
-          >
-            View Market
-          </button>
-        </div>
-        <div className="glass-card p-6">
-          <h3 className="text-lg font-semibold mb-2">New Negotiation</h3>
-          <p className="text-slate-500 text-sm mb-4">Start a deal with AI-powered translation.</p>
-          <button
-            onClick={() => navigate('/chats')}
-            className="primary-button w-full"
-          >
-            Start Chat
-          </button>
-        </div>
-        <div className="glass-card p-6">
-          <h3 className="text-lg font-semibold mb-2">Price Scanner</h3>
-          <p className="text-slate-500 text-sm mb-4">Scan and verify fair prices instantly.</p>
-          <button
-            onClick={() => navigate('/scanner')}
-            className="primary-button w-full"
-          >
-            Open Scanner
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
+// New Pages
+import SearchPage from './pages/SearchPage';
+import InventoryPage from './pages/InventoryPage';
+import OrdersPage from './pages/OrdersPage';
+import ChatsPage from './pages/ChatsPage';
+import NotificationsPage from './pages/NotificationsPage';
+import ScannerPage from './pages/ScannerPage';
+import PriceDiscoveryPage from './pages/PriceDiscoveryPage'; // Market Page
+import AdminDashboard from './pages/AdminDashboard'; // Admin Dashboard
+import LandingPage from './pages/LandingPage'; // Landing Page
 
 const App: React.FC = () => {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route path="market" element={<div>Market Trends (Coming Soon)</div>} />
-          <Route path="search" element={<div>Search Commodities (Coming Soon)</div>} />
-          <Route path="chats" element={<div>Your Negotiations (Coming Soon)</div>} />
-          <Route path="scanner" element={<div>Price Scanner (Coming Soon)</div>} />
-          <Route path="profile" element={<div>User Profile (Coming Soon)</div>} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <LanguageProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Public Authentication Routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
+          {/* Landing Page Route */}
+          <Route path="/" element={<LandingPage />} />
+
+          {/* Onboarding Route */}
+          <Route
+            path="/onboarding"
+            element={
+              <ProtectedRoute requireAuth={true} requireOnboarding={false}>
+                <OnboardingPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Protected App Routes */}
+          <Route
+            path="/app"
+            element={
+              <ProtectedRoute requireAuth={true} requireOnboarding={true}>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<HomePage />} />
+
+            {/* Market & Search */}
+            <Route path="market" element={<PriceDiscoveryPage />} />
+            <Route
+              path="search"
+              element={
+                <ProtectedRoute allowedRoles={['buyer', 'agent', 'vendor']}>
+                  <SearchPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="scanner" element={<ScannerPage />} />
+
+            {/* Vendor Specific */}
+            <Route
+              path="inventory"
+              element={
+                <ProtectedRoute allowedRoles={['vendor']}>
+                  <InventoryPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Buyer Specific */}
+            <Route
+              path="orders"
+              element={
+                <ProtectedRoute allowedRoles={['buyer']}>
+                  <OrdersPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Deals & Negotiations */}
+            <Route
+              path="deals"
+              element={
+                <ProtectedRoute allowedRoles={['vendor', 'buyer', 'agent']}>
+                  <DealsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="negotiations/:negotiationId?"
+              element={
+                <ProtectedRoute allowedRoles={['vendor', 'buyer', 'agent']}>
+                  <NegotiationPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="chats" element={<ChatsPage />} />
+
+            {/* User Features */}
+            <Route path="notifications" element={<NotificationsPage />} />
+            <Route path="profile" element={<ProfilePage />} />
+
+            {/* Admin Routes */}
+            <Route
+              path="admin"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </LanguageProvider>
   );
 };
 

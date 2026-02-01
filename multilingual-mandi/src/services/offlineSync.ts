@@ -9,6 +9,8 @@ import type {
   Deal,
   Message,
   User,
+  UserProfile,
+  Location,
   Notification
 } from '../types';
 
@@ -50,11 +52,12 @@ class OfflineSyncServiceImpl implements OfflineSyncService {
   private isOnlineStatus: boolean = navigator.onLine;
   private syncInProgress: boolean = false;
   private maxRetries: number = 3;
-  private retryDelay: number = 1000; // 1 second base delay
+
 
   constructor() {
     this.initializeNetworkListeners();
     this.startPeriodicSync();
+    this.startCacheManagement();
   }
 
   private initializeNetworkListeners(): void {
@@ -75,6 +78,13 @@ class OfflineSyncServiceImpl implements OfflineSyncService {
         this.syncPendingActions();
       }
     }, 30000);
+  }
+
+  private startCacheManagement(): void {
+    // Manage cache storage every 5 minutes
+    setInterval(() => {
+      this.manageCacheStorage();
+    }, 5 * 60 * 1000);
   }
 
   async cacheData(key: string, data: any, ttl?: number): Promise<void> {
@@ -123,13 +133,15 @@ class OfflineSyncServiceImpl implements OfflineSyncService {
         const entry = await table.where('key').equals(key).first();
         if (entry) {
           // Check if entry has expired
-          if (entry.ttl && Date.now() - entry.timestamp.getTime() > entry.ttl) {
+          const timestamp = entry.timestamp instanceof Date
+            ? entry.timestamp
+            : new Date(entry.timestamp);
+          if (entry.ttl && Date.now() - timestamp.getTime() > entry.ttl) {
             if (entry.id) {
               await table.delete(entry.id);
             }
             continue;
-          }
-          return entry as CacheEntry<T>;
+          } return entry as CacheEntry<T>;
         }
       }
 
@@ -226,21 +238,27 @@ class OfflineSyncServiceImpl implements OfflineSyncService {
     // Simple type detection based on data structure
     if (data.commodity && data.price) return db.priceCache;
     if (data.buyerId && data.sellerId) return db.dealCache;
+    return db.messageCache; // Default fallback
+  }
+
   private async executeAction(action: OfflineAction): Promise<SyncResult> {
-    // This is a placeholder implementation
-    // In a real implementation, this would dispatch actions to appropriate services
     try {
       switch (action.type) {
         case 'create_deal':
-          throw new Error('create_deal action not yet implemented');
+          await this.executeDealCreation(action.payload);
+          break;
         case 'send_message':
-          throw new Error('send_message action not yet implemented');
+          await this.executeMessageSend(action.payload);
+          break;
         case 'update_profile':
-          throw new Error('update_profile action not yet implemented');
+          await this.executeProfileUpdate(action.payload);
+          break;
         case 'rate_user':
-          throw new Error('rate_user action not yet implemented');
+          await this.executeUserRating(action.payload);
+          break;
         case 'create_negotiation':
-          throw new Error('create_negotiation action not yet implemented');
+          await this.executeNegotiationCreation(action.payload);
+          break;
         default:
           throw new Error(`Unknown action type: ${action.type}`);
       }
@@ -259,19 +277,60 @@ class OfflineSyncServiceImpl implements OfflineSyncService {
       };
     }
   }
-      return {
-        actionId: action.id,
-        success: true,
-        syncedAt: new Date()
-      };
-    } catch (error) {
-      return {
-        actionId: action.id,
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        syncedAt: new Date()
-      };
+
+  private async executeDealCreation(payload: any): Promise<void> {
+    // Import deal management service dynamically to avoid circular dependencies
+    // Payload is dealData, which contains metadata.createdBy
+    const createdBy = payload.metadata?.createdBy;
+    const role = (payload.buyerId === createdBy) ? 'buyer' : (payload.sellerId === createdBy ? 'vendor' : 'agent');
+
+    // Fallback if metadata missing (shouldn't happen for new deals)
+    const user = {
+      uid: createdBy || payload.buyerId || 'offline_user',
+      role: role as 'vendor' | 'buyer' | 'agent'
+    };
+
+    const { dealManagementService } = await import('./dealManagement');
+    await dealManagementService.createDeal(payload as any, user);
+  }
+
+  private async executeMessageSend(payload: any): Promise<void> {
+    // Import messaging service dynamically to avoid circular dependencies
+    const { messagingService } = await import('./messaging');
+    await messagingService.sendMessage(payload.conversationId, payload.message);
+  }
+
+  private async executeProfileUpdate(payload: any): Promise<void> {
+    // Import profile management service dynamically to avoid circular dependencies
+    const { profileManagementService } = await import('./profileManagement');
+    await profileManagementService.updateUserProfile(payload.userId, payload.updates);
+  }
+
+  private async executeUserRating(payload: any): Promise<void> {
+    // Import deal management service dynamically to avoid circular dependencies
+    const { dealCompletionManager } = await import('./dealManagement');
+    await dealCompletionManager.submitRating(payload.dealId, payload.rating);
+  }
+
+  private async executeNegotiationCreation(payload: any): Promise<void> {
+    // Import negotiation service dynamically to avoid circular dependencies
+    const { negotiationService } = await import('./negotiation');
+    // Reconstruct user from participants
+    // Typically startNegotiation sets only one participant (the creator)
+    let user = { uid: '', role: 'buyer' as any };
+
+    if (payload.participants?.buyer) {
+      user = { uid: payload.participants.buyer, role: 'buyer' };
+    } else if (payload.participants?.seller) {
+      user = { uid: payload.participants.seller, role: 'vendor' };
+    } else if (payload.participants?.agent) {
+      user = { uid: payload.participants.agent, role: 'agent' };
     }
+
+    // Default to a placeholder if empty (should check validations)
+    if (!user.uid) user = { uid: 'offline_user', role: 'buyer' };
+
+    await negotiationService.startNegotiation(payload.dealProposal, user);
   }
 
   private async updateLastSyncTime(): Promise<void> {
@@ -283,8 +342,25 @@ class OfflineSyncServiceImpl implements OfflineSyncService {
       timestamp: new Date()
     });
   }
-  private delay(ms: number): Promise<void> {
+  /*private delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }*/
+
+  private async cleanupExpiredEntries(table: Table<CacheEntry<any>>): Promise<void> {
+    try {
+      const now = Date.now();
+      const expiredEntries = await table.filter(entry => {
+        if (!entry.ttl) return false;
+        return (now - entry.timestamp.getTime()) > entry.ttl;
+      }).toArray();
+
+      if (expiredEntries.length > 0) {
+        const expiredIds = expiredEntries.map(entry => entry.id).filter(id => id !== undefined) as number[];
+        await table.bulkDelete(expiredIds);
+      }
+    } catch (error) {
+      console.error('Failed to cleanup expired entries:', error);
+    }
   }
 
   // Public utility methods
@@ -325,6 +401,126 @@ class OfflineSyncServiceImpl implements OfflineSyncService {
     } catch (error) {
       console.error('Failed to get pending actions count:', error);
       return 0;
+    }
+  }
+
+  // Specialized caching methods for different data types
+
+  async cachePriceData(commodity: string, location: Location, prices: PriceData[]): Promise<void> {
+    const key = `prices:${commodity}:${location.state}:${location.district}`;
+    await this.cacheData(key, prices, 5 * 60 * 1000); // 5 minutes TTL
+  }
+
+  async getCachedPriceData(commodity: string, location: Location): Promise<PriceData[] | null> {
+    const key = `prices:${commodity}:${location.state}:${location.district}`;
+    return await this.getCachedData<PriceData[]>(key);
+  }
+
+  async cacheUserProfile(userId: string, profile: UserProfile): Promise<void> {
+    const key = `profile:${userId}`;
+    await this.cacheData(key, profile, 30 * 60 * 1000); // 30 minutes TTL
+  }
+
+  async getCachedUserProfile(userId: string): Promise<UserProfile | null> {
+    const key = `profile:${userId}`;
+    return await this.getCachedData<UserProfile>(key);
+  }
+
+  async cacheDeals(userId: string, deals: Deal[]): Promise<void> {
+    const key = `deals:${userId}`;
+    await this.cacheData(key, deals, 10 * 60 * 1000); // 10 minutes TTL
+  }
+
+  async getCachedDeals(userId: string): Promise<Deal[] | null> {
+    const key = `deals:${userId}`;
+    return await this.getCachedData<Deal[]>(key);
+  }
+
+  async cacheMessages(conversationId: string, messages: Message[]): Promise<void> {
+    const key = `messages:${conversationId}`;
+    await this.cacheData(key, messages, 60 * 60 * 1000); // 1 hour TTL
+  }
+
+  async getCachedMessages(conversationId: string): Promise<Message[] | null> {
+    const key = `messages:${conversationId}`;
+    return await this.getCachedData<Message[]>(key);
+  }
+
+  async cacheNotifications(userId: string, notifications: Notification[]): Promise<void> {
+    const key = `notifications:${userId}`;
+    await this.cacheData(key, notifications, 15 * 60 * 1000); // 15 minutes TTL
+  }
+
+  async getCachedNotifications(userId: string): Promise<Notification[] | null> {
+    const key = `notifications:${userId}`;
+    return await this.getCachedData<Notification[]>(key);
+  }
+
+  // Sync status and indicators
+
+  async getSyncStatus(): Promise<{
+    isOnline: boolean;
+    lastSyncTime: Date | null;
+    pendingActions: number;
+    cacheSize: number;
+    syncInProgress: boolean;
+  }> {
+    return {
+      isOnline: this.isOnlineStatus,
+      lastSyncTime: await this.getLastSyncTime(),
+      pendingActions: await this.getPendingActionsCount(),
+      cacheSize: await this.getCacheSize(),
+      syncInProgress: this.syncInProgress
+    };
+  }
+
+  async forceSyncNow(): Promise<SyncResult[]> {
+    if (!this.isOnlineStatus) {
+      throw new Error('Cannot sync while offline');
+    }
+    return await this.syncPendingActions();
+  }
+
+  // Storage management for cache limits
+
+  async manageCacheStorage(): Promise<void> {
+    try {
+      const cacheSize = await this.getCacheSize();
+      const maxCacheSize = 1000; // Maximum number of cached entries
+
+      if (cacheSize > maxCacheSize) {
+        console.log('Cache size exceeded, cleaning up old entries...');
+
+        // Clean up expired entries first
+        await this.cleanupExpiredEntries(db.priceCache);
+        await this.cleanupExpiredEntries(db.dealCache);
+        await this.cleanupExpiredEntries(db.messageCache);
+        await this.cleanupExpiredEntries(db.userCache);
+        await this.cleanupExpiredEntries(db.notificationCache);
+
+        // If still over limit, remove oldest entries
+        const newCacheSize = await this.getCacheSize();
+        if (newCacheSize > maxCacheSize) {
+          await this.removeOldestEntries(maxCacheSize * 0.8); // Remove to 80% of max
+        }
+      }
+    } catch (error) {
+      console.error('Failed to manage cache storage:', error);
+    }
+  }
+
+  private async removeOldestEntries(targetSize: number): Promise<void> {
+    const tables = [db.priceCache, db.dealCache, db.messageCache, db.userCache, db.notificationCache];
+
+    for (const table of tables) {
+      const entries = await table.orderBy('timestamp').toArray();
+      const entriesToRemove = Math.max(0, entries.length - Math.floor(targetSize / tables.length));
+
+      if (entriesToRemove > 0) {
+        const oldestEntries = entries.slice(0, entriesToRemove);
+        const idsToDelete = oldestEntries.map(entry => entry.id).filter(id => id !== undefined) as number[];
+        await table.bulkDelete(idsToDelete);
+      }
     }
   }
 }

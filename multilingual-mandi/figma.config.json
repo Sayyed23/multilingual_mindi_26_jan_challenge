@@ -1,0 +1,8 @@
+{
+  "codeConnect": {
+    "parser": "react",
+    "include": ["src/components/**/*.tsx"],
+    "exclude": ["src/components/**/*.test.tsx", "src/components/__tests__/**/*"],
+    "figmaFileUrl": "https://www.figma.com/design/LuWxoSCaxmFX6xsXuathmK/flow-chart1?node-id=0-1&t=VM9Te4jkEYg5dy7g-1"
+  }
+}

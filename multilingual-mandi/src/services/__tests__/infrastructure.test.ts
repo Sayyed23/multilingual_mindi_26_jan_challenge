@@ -6,7 +6,7 @@ describe('Infrastructure Setup', () => {
   describe('Type System', () => {
     it('should create valid user objects', () => {
       const user = createMockUser();
-      
+
       expect(user).toHaveProperty('uid');
       expect(user).toHaveProperty('email');
       expect(user).toHaveProperty('role');
@@ -16,7 +16,7 @@ describe('Infrastructure Setup', () => {
 
     it('should create valid price data objects', () => {
       const priceData = createMockPriceData();
-      
+
       expect(priceData).toHaveProperty('commodity');
       expect(priceData).toHaveProperty('price');
       expect(priceData).toHaveProperty('timestamp');
@@ -45,7 +45,7 @@ describe('Infrastructure Setup', () => {
     it('should generate UUIDs', () => {
       const uuid1 = crypto.randomUUID();
       const uuid2 = crypto.randomUUID();
-      
+
       expect(typeof uuid1).toBe('string');
       expect(typeof uuid2).toBe('string');
       expect(uuid1).not.toBe(uuid2);
@@ -78,9 +78,13 @@ describe('Infrastructure Setup', () => {
     });
 
     it('should import PWA service without errors', async () => {
-      // Just test that the module can be imported
-      const pwaModule = await import('../pwaInit');
-      expect(pwaModule).toBeDefined();
+      try {
+        const pwaModule = await import('../pwaInit');
+        expect(pwaModule).toBeDefined();
+      } catch (e) {
+        console.error('PWA INIT IMPORT ERROR:', e);
+        throw e;
+      }
     });
   });
 });

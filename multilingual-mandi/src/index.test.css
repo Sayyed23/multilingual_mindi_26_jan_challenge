@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        @apply antialiased bg-gray-50 text-gray-900;
+        font-family: 'Lexend', sans-serif;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+    }
+}
+
+@layer components {
+    .glass-card {
+        @apply bg-white/90 backdrop-blur-2xl border border-white/50 shadow-2xl rounded-3xl;
+    }
+
+    .primary-button {
+        @apply w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-3.5 rounded-xl font-semibold text-sm;
+    }
+}

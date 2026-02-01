@@ -28,6 +28,7 @@ interface ProfileUpdateData {
   personalInfo?: Partial<UserProfile['personalInfo']>;
   businessInfo?: Partial<UserProfile['businessInfo']>;
   preferences?: Partial<UserProfile['preferences']>;
+  onboardingCompleted?: boolean;
 }
 
 interface ProfileValidationResult {
@@ -59,11 +60,16 @@ class ProfileManagementService {
       const offlineCacheKey = `${this.CACHE_KEY_PREFIX}${userId}`;
       const offlineEntry = await offlineSyncService.getCachedEntry<UserProfile>(offlineCacheKey);
 
-      if (offlineEntry && offlineEntry.ttl) {
+      if (offlineEntry && offlineEntry.ttl && offlineEntry.data) {
+        // Normalize timestamp to Date object
+        const timestamp = offlineEntry.timestamp instanceof Date
+          ? offlineEntry.timestamp
+          : new Date(offlineEntry.timestamp);
+
         // validate the timestamp against the same TTL logic used by isCacheValid
         const cachedProfile: CachedProfile = {
           profile: offlineEntry.data,
-          cachedAt: offlineEntry.timestamp,
+          cachedAt: timestamp,
           ttl: offlineEntry.ttl
         };
 
@@ -136,12 +142,13 @@ class ProfileManagementService {
         updatedAt: serverTimestamp()
       });
 
-      // Update basic user document if personal info changed
-      if (updateData.personalInfo?.language || updateData.personalInfo?.location) {
+      // Update basic user document if personal info changed or onboarding completed
+      if (updateData.personalInfo?.language || updateData.personalInfo?.location || updateData.onboardingCompleted !== undefined) {
         const userDoc = doc(db, 'users', userId);
         await updateDoc(userDoc, {
-          ...updateData.personalInfo.language && { language: updateData.personalInfo.language },
-          ...updateData.personalInfo.location && { location: updateData.personalInfo.location },
+          ...updateData.personalInfo?.language && { language: updateData.personalInfo.language },
+          ...updateData.personalInfo?.location && { location: updateData.personalInfo.location },
+          ...updateData.onboardingCompleted !== undefined && { onboardingCompleted: updateData.onboardingCompleted },
           updatedAt: serverTimestamp()
         });
       }
@@ -244,6 +251,19 @@ class ProfileManagementService {
       return await this.updateUserProfile(userId, { businessInfo });
     } catch (error) {
       console.error('Error updating business info:', error);
+      throw error;
+    }
+  }
+
+  // Complete onboarding process
+  async completeOnboarding(userId: string, data: ProfileUpdateData): Promise<boolean> {
+    try {
+      return await this.updateUserProfile(userId, {
+        ...data,
+        onboardingCompleted: true
+      });
+    } catch (error) {
+      console.error('Error completing onboarding:', error);
       throw error;
     }
   }

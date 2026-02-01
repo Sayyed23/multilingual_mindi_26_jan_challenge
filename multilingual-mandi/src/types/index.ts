@@ -4,7 +4,7 @@
 // User and Authentication Types
 // ============================================================================
 
-export type UserRole = 'vendor' | 'buyer' | 'agent';
+export type UserRole = 'vendor' | 'buyer' | 'agent' | 'admin';
 export type Language = 'hi' | 'en' | 'bn' | 'te' | 'mr' | 'ta' | 'gu' | 'kn' | 'ml' | 'or' | 'pa' | 'as' | 'ur' | 'sd' | 'ne' | 'ks' | 'kok' | 'mni' | 'sat' | 'doi' | 'mai' | 'bho';
 export type VerificationStatus = 'unverified' | 'pending' | 'verified' | 'rejected';
 
@@ -22,6 +22,7 @@ export interface Location {
 export interface User {
   uid: string;
   email: string;
+  name?: string;
   role: UserRole;
   language: Language;
   location: Location;
@@ -78,6 +79,22 @@ export interface TranslationResult {
   timestamp: Date;
 }
 
+export interface Conversation {
+  id: string;
+  participants: string[];
+  type: 'direct' | 'group' | 'negotiation';
+  lastMessage?: Message;
+  lastActivity: Date;
+  unreadCount?: number;
+  metadata?: {
+    dealId?: string;
+    negotiationId?: string;
+    title?: string;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface Message {
   id: string;
   conversationId: string;
@@ -88,7 +105,8 @@ export interface Message {
     originalLanguage: Language;
     translations: Partial<Record<Language, string>>;
     messageType: 'text' | 'voice' | 'image' | 'document';
-  }; metadata: {
+  };
+  metadata: {
     timestamp: Date;
     readStatus: boolean;
     translationConfidence?: number;
@@ -129,6 +147,8 @@ export interface PriceData {
   quality: QualityGrade;
   timestamp: Date;
   source: string;
+  isAISourced?: boolean;
+  location?: Location;
 }
 
 export interface PriceEntry {
@@ -568,6 +588,7 @@ export interface AuthService {
   signOut(): Promise<void>;
   getCurrentUser(): User | null;
   onAuthStateChanged(callback: (user: User | null) => void): Unsubscribe;
+  refreshProfile(): Promise<User | null>;
 }
 
 export interface TranslationService {
@@ -579,26 +600,40 @@ export interface TranslationService {
 
 export interface PriceDiscoveryService {
   getCurrentPrices(commodity: string, location?: Location): Promise<PriceData[]>;
+  getGeminiPrices(commodity: string, location?: Location): Promise<PriceData[]>;
   getHistoricalPrices(commodity: string, dateRange: DateRange): Promise<PriceHistory>;
   getPriceTrends(commodity: string): Promise<PriceTrend>;
   detectPriceAnomalies(prices: PriceData[]): PriceAnomaly[];
   subscribeToPriceUpdates(commodity: string, callback: (price: PriceData) => void): Unsubscribe;
+  getAIPriceAnalysis(commodity: string, currentPrices: PriceData[]): Promise<string>;
+  getAIPriceForecast(commodity: string, history: PriceHistory): Promise<string>;
 }
 
 export interface NegotiationService {
-  startNegotiation(deal: DealProposal): Promise<Negotiation>;
+  startNegotiation(deal: DealProposal, user: { uid: string; role: UserRole }): Promise<Negotiation>;
   sendMessage(negotiationId: string, message: Message): Promise<void>;
-  getSuggestedCounterOffer(negotiation: Negotiation, currentOffer: number): Promise<NegotiationSuggestion>;
+  getSuggestedCounterOffer(negotiation: Negotiation, currentOffer: number, userRole?: UserRole): Promise<NegotiationSuggestion>;
   getMarketComparison(commodity: string, price: number): Promise<MarketComparison>;
-  finalizeAgreement(negotiationId: string, terms: DealTerms): Promise<Deal>;
+  finalizeAgreement(negotiationId: string, terms: DealTerms, user: { uid: string; role: any }): Promise<Deal>;
+  subscribeToNegotiation(negotiationId: string, callback: (negotiation: Negotiation) => void): Unsubscribe;
+  subscribeToNegotiations(userId: string, callback: (negotiations: Negotiation[]) => void): Unsubscribe;
+}
+
+export interface MessagingService {
+  sendMessage(conversationId: string, message: Omit<Message, 'id' | 'timestamp'>): Promise<void>;
+  getMessages(conversationId: string): Promise<Message[]>;
+  createConversation(participants: string[]): Promise<Conversation>;
+  getConversations(userId: string): Promise<Conversation[]>;
+  subscribeToMessages(conversationId: string, callback: (messages: Message[]) => void): Unsubscribe;
+  subscribeToConversations(userId: string, callback: (conversations: Conversation[]) => void): Unsubscribe;
 }
 
 export interface DealManagementService {
-  createDeal(terms: DealTerms): Promise<Deal>;
+  createDeal(terms: DealTerms, user: { uid: string; role: UserRole }): Promise<Deal>;
   updateDealStatus(dealId: string, status: DealStatus): Promise<void>;
   initializePayment(dealId: string, paymentMethod: PaymentMethod): Promise<PaymentResult>;
   trackDelivery(dealId: string): Promise<DeliveryStatus>;
-  raiseDispute(dealId: string, reason: string): Promise<Dispute>;
+  raiseDispute(dealId: string, reason: string, user: { uid: string; role: string }): Promise<Dispute>;
 }
 
 export interface TrustService {
@@ -625,4 +660,398 @@ export interface NotificationService {
   subscribeToNotifications(userId: string, preferences: NotificationPreferences): Promise<void>;
   getNotificationHistory(userId: string): Promise<Notification[]>;
   markAsRead(notificationId: string): Promise<void>;
+}
+// ============================================================================
+// Design System Types
+// ============================================================================
+
+export interface DesignToken {
+  name: string;
+  value: string | number;
+  type: 'color' | 'spacing' | 'typography' | 'shadow' | 'border';
+  category: string;
+  description?: string;
+}
+
+export interface ComponentVariant {
+  name: string;
+  props: Record<string, any>;
+  figmaNodeId?: string;
+  codeExample: string;
+}
+
+export interface ComponentDefinition {
+  name: string;
+  description: string;
+  category: 'atom' | 'molecule' | 'organism' | 'template';
+  variants: ComponentVariant[];
+  props: Record<string, any>;
+  accessibility: AccessibilityRequirements;
+  figmaFileId?: string;
+}
+
+export interface AccessibilityRequirements {
+  ariaLabel?: string;
+  ariaDescribedby?: string;
+  role?: string;
+  tabIndex?: number;
+  keyboardNavigation: boolean;
+  screenReaderSupport: boolean;
+  colorContrastCompliant: boolean;
+  focusManagement: boolean;
+}
+
+// Typography System Types
+export interface TypographyProps {
+  variant: 'h1' | 'h2' | 'h3' | 'h4' | 'body' | 'caption' | 'label';
+  weight?: 'normal' | 'medium' | 'semibold' | 'bold';
+  color?: 'primary' | 'secondary' | 'muted' | 'error' | 'success' | 'warning' | 'info';
+  align?: 'left' | 'center' | 'right';
+  role?: UserRole; // For role-based color theming
+  className?: string;
+  id?: string;
+  htmlFor?: string;
+  'aria-label'?: string;
+  'aria-describedby'?: string;
+  'aria-live'?: 'polite' | 'assertive' | 'off';
+  children: React.ReactNode;
+}
+
+// Button System Types
+export interface ButtonProps {
+  variant: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
+  size: 'sm' | 'md' | 'lg';
+  role?: UserRole;
+  disabled?: boolean;
+  loading?: boolean;
+  icon?: React.ReactNode;
+  iconPosition?: 'left' | 'right';
+  fullWidth?: boolean;
+  onClick?: () => void;
+  'aria-label'?: string;
+  children: React.ReactNode;
+}
+
+// Form Component Types
+export interface InputProps {
+  type: 'text' | 'email' | 'password' | 'number' | 'tel';
+  label: string;
+  placeholder?: string;
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+  required?: boolean;
+  disabled?: boolean;
+  'aria-describedby'?: string;
+  'aria-invalid'?: boolean;
+}
+
+export interface SelectProps {
+  label: string;
+  options: Array<{ value: string; label: string }>;
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+  required?: boolean;
+  disabled?: boolean;
+  'aria-describedby'?: string;
+}
+
+// UI Theme Types
+export interface UITheme {
+  name: string;
+  colors: {
+    primary: string;
+    secondary: string;
+    background: string;
+    surface: string;
+    text: string;
+    textSecondary: string;
+    border: string;
+    error: string;
+    warning: string;
+    success: string;
+    info: string;
+  };
+  typography: {
+    fontFamily: string;
+    fontSizes: Record<string, string>;
+    fontWeights: Record<string, number>;
+    lineHeights: Record<string, number>;
+  };
+  spacing: Record<string, string>;
+  breakpoints: Record<string, string>;
+}
+
+export interface ResponsiveBreakpoint {
+  name: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+  minWidth: number;
+  maxWidth?: number;
+  columns: number;
+  gutters: number;
+}
+
+export interface AccessibilitySettings {
+  highContrast: boolean;
+  reducedMotion: boolean;
+  fontSize: 'small' | 'medium' | 'large' | 'extra-large';
+  screenReaderOptimized: boolean;
+}
+
+// Page Layout Types
+export interface PageLayout {
+  id: string;
+  name: string;
+  description: string;
+  userRoles: UserRole[];
+  sections: LayoutSection[];
+  navigation: NavigationConfig;
+  responsive: ResponsiveConfig;
+}
+
+export interface LayoutSection {
+  id: string;
+  name: string;
+  component: string;
+  props: Record<string, any>;
+  gridArea?: string;
+  responsive: {
+    [breakpoint: string]: {
+      display: boolean;
+      order?: number;
+      span?: number;
+    };
+  };
+}
+
+export interface NavigationConfig {
+  type: 'sidebar' | 'header' | 'bottom' | 'drawer';
+  items: NavigationItem[];
+  responsive: {
+    mobile: 'drawer' | 'bottom' | 'hidden';
+    tablet: 'sidebar' | 'header' | 'drawer';
+    desktop: 'sidebar' | 'header';
+  };
+}
+
+export interface NavigationItem {
+  id: string;
+  label: string;
+  path: string;
+  icon?: React.ReactNode;
+  badge?: string | number;
+  roles?: UserRole[];
+  children?: NavigationItem[];
+}
+
+export interface ResponsiveConfig {
+  breakpoints: ResponsiveBreakpoint[];
+  defaultBreakpoint: string;
+}
+
+// Form Layout Types
+export interface FormField {
+  id: string;
+  type: 'text' | 'email' | 'password' | 'number' | 'select' | 'checkbox' | 'radio' | 'textarea';
+  label: string;
+  placeholder?: string;
+  required: boolean;
+  validation: ValidationRule[];
+  accessibility: {
+    ariaLabel?: string;
+    ariaDescribedby?: string;
+    helpText?: string;
+  };
+}
+
+export interface ValidationRule {
+  type: 'required' | 'email' | 'minLength' | 'maxLength' | 'pattern' | 'custom';
+  value?: any;
+  message: string;
+}
+
+export interface FormLayout {
+  id: string;
+  name: string;
+  fields: FormField[];
+  sections?: FormSection[];
+  submitButton: ButtonConfig;
+  responsive: boolean;
+}
+
+export interface FormSection {
+  id: string;
+  title: string;
+  fields: string[];
+  collapsible?: boolean;
+  defaultExpanded?: boolean;
+}
+
+export interface ButtonConfig {
+  label: string;
+  variant: ButtonProps['variant'];
+  size: ButtonProps['size'];
+  disabled?: boolean;
+  loading?: boolean;
+}
+
+// Figma Integration Types
+export interface FigmaComponent {
+  id: string;
+  name: string;
+  description?: string;
+  figmaNodeId: string;
+  figmaFileId: string;
+  componentPath: string;
+  props: ComponentProp[];
+  variants: ComponentVariant[];
+  lastSynced: Date;
+}
+
+export interface ComponentProp {
+  name: string;
+  type: 'string' | 'boolean' | 'enum' | 'number';
+  required: boolean;
+  defaultValue?: any;
+  figmaProperty?: string;
+  description?: string;
+}
+
+export interface DesignSystemSync {
+  lastSync: Date;
+  components: FigmaComponent[];
+  tokens: DesignToken[];
+  conflicts: SyncConflict[];
+  status: 'synced' | 'pending' | 'error';
+}
+
+export interface SyncConflict {
+  type: 'component' | 'token' | 'prop';
+  componentId?: string;
+  tokenName?: string;
+  figmaValue: any;
+  codeValue: any;
+  resolution: 'figma' | 'code' | 'manual';
+}
+
+// Landing Page Component Types
+export interface HeroSectionProps {
+  title: string;
+  subtitle: string;
+  ctaButtons: Array<{
+    label: string;
+    variant: 'primary' | 'secondary';
+    role: UserRole;
+    onClick: () => void;
+  }>;
+  backgroundImage?: string;
+}
+
+export interface FeatureCardProps {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  role?: UserRole;
+}
+
+export interface TrustIndicatorsProps {
+  userCount: number;
+  transactionCount: number;
+  languages: number;
+  testimonials: Array<{
+    name: string;
+    role: string;
+    content: string;
+    rating: number;
+  }>;
+}
+
+// Dashboard Component Types
+export interface DashboardLayoutProps {
+  userRole: UserRole;
+  user: User;
+  navigation: NavigationItem[];
+  children: React.ReactNode;
+}
+
+export interface MetricCardProps {
+  title: string;
+  value: string | number;
+  change?: {
+    value: number;
+    type: 'increase' | 'decrease';
+    period: string;
+  };
+  icon: React.ReactNode;
+  color: 'green' | 'blue' | 'purple' | 'red' | 'gray';
+}
+
+export interface QuickActionProps {
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  onClick: () => void;
+  disabled?: boolean;
+}
+
+// Price Discovery Component Types
+export interface PriceChartProps {
+  data: PriceDataPoint[];
+  commodity: string;
+  region: string;
+  timeframe: '1d' | '1w' | '1m' | '3m' | '1y';
+  onTimeframeChange: (timeframe: string) => void;
+}
+
+export interface PriceDataPoint {
+  date: Date;
+  price: number;
+  volume?: number;
+}
+
+export interface PriceAlertProps {
+  commodity: string;
+  currentPrice: number;
+  targetPrice: number;
+  alertType: 'above' | 'below';
+  isActive: boolean;
+  onToggle: () => void;
+}
+
+export interface MarketSummaryProps {
+  topGainers: CommodityPrice[];
+  topLosers: CommodityPrice[];
+  mostTraded: CommodityPrice[];
+}
+
+export interface CommodityPrice {
+  commodity: string;
+  price: number;
+  change: number;
+  changePercent: number;
+}
+
+// Accessibility Component Types
+export interface ScreenReaderOnlyProps {
+  children: React.ReactNode;
+}
+
+export interface SkipLinkProps {
+  href: string;
+  children: React.ReactNode;
+}
+
+export interface LiveRegionProps {
+  politeness: 'polite' | 'assertive';
+  children: React.ReactNode;
+}
+
+export interface FocusTrapProps {
+  active: boolean;
+  children: React.ReactNode;
+}
+
+export interface FocusIndicatorProps {
+  visible: boolean;
+  className?: string;
 }

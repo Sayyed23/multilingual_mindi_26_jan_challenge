@@ -1,60 +1,101 @@
 import React from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
-import { Home, Search, MessageSquare, User, TrendingUp } from 'lucide-react';
+import { Outlet } from 'react-router-dom';
+import RoleBasedNavigation from './RoleBasedNavigation';
+import { useAuth } from '../hooks/useAuth';
+import { useLanguage } from '../contexts/LanguageContext';
+import T from './T';
+import { Volume2, VolumeX } from 'lucide-react';
+import LanguageSelector from './LanguageSelector';
+import VoiceNavigation from './VoiceNavigation';
 
 const Layout: React.FC = () => {
+    const { user } = useAuth();
+    const { voiceMode, setVoiceMode, currentLanguage, setLanguage } = useLanguage();
+
     return (
         <div className="min-h-screen bg-slate-50 pb-20 md:pb-0 md:pl-20">
-            <header className="sticky top-0 z-50 glass-card mx-4 my-2 p-4 flex justify-between items-center md:hidden">
-                <h1 className="text-xl font-bold vibrant-gradient bg-clip-text text-transparent">AgriMandi</h1>
-                <div className="flex gap-2">
-                    {/* Header Actions can go here */}
+            <VoiceNavigation />
+            <header className="sticky top-0 z-50 glass-card mx-4 my-2 p-4 flex flex-col md:flex-row justify-between items-center md:hidden gap-4">
+                <div className="flex justify-between items-center w-full">
+                    <h1 className="text-xl font-bold vibrant-gradient bg-clip-text text-transparent">
+                        <T>AgriMandi</T>
+                    </h1>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setVoiceMode(!voiceMode)}
+                            className={`p-2 rounded-lg transition-colors ${voiceMode ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}
+                            title={voiceMode ? 'Disable Voice Mode' : 'Enable Voice Mode'}
+                        >
+                            {voiceMode ? <Volume2 size={20} /> : <VolumeX size={20} />}
+                        </button>
+                        {user && (
+                            <div className="text-sm text-gray-600 capitalize bg-gray-100 px-2 py-1 rounded-md">
+                                <T>{user.role}</T>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="w-full">
+                    <LanguageSelector
+                        selectedLanguage={currentLanguage}
+                        onLanguageChange={setLanguage}
+                        className="w-full"
+                    />
                 </div>
             </header>
 
-            <nav className="hidden md:flex flex-col fixed left-0 top-0 bottom-0 w-20 bg-white border-r border-slate-200 items-center py-8 gap-8 z-50">
-                <div className="w-12 h-12 vibrant-gradient rounded-xl mb-4 flex items-center justify-center text-white font-bold">M</div>
-                <NavLink to="/" end aria-label="Home" className={({ isActive }) => `p-3 rounded-xl transition-colors ${isActive ? 'bg-emerald-50 text-emerald-600' : 'text-slate-400 hover:text-slate-600'}`}>
-                    <Home size={24} />
-                </NavLink>
-                <NavLink to="/market" aria-label="Market" className={({ isActive }) => `p-3 rounded-xl transition-colors ${isActive ? 'bg-emerald-50 text-emerald-600' : 'text-slate-400 hover:text-slate-600'}`}>
-                    <TrendingUp size={24} />
-                </NavLink>
-                <NavLink to="/search" aria-label="Search" className={({ isActive }) => `p-3 rounded-xl transition-colors ${isActive ? 'bg-emerald-50 text-emerald-600' : 'text-slate-400 hover:text-slate-600'}`}>
-                    <Search size={24} />
-                </NavLink>
-                <NavLink to="/chats" aria-label="Chats" className={({ isActive }) => `p-3 rounded-xl transition-colors ${isActive ? 'bg-emerald-50 text-emerald-600' : 'text-slate-400 hover:text-slate-600'}`}>
-                    <MessageSquare size={24} />
-                </NavLink>
-                <NavLink to="/profile" aria-label="Profile" className={({ isActive }) => `p-3 rounded-xl transition-colors ${isActive ? 'bg-emerald-50 text-emerald-600' : 'text-slate-400 hover:text-slate-600'}`}>
-                    <User size={24} />
-                </NavLink>            </nav>
+            <RoleBasedNavigation />
 
-            <main className="p-4 md:p-8 max-w-7xl mx-auto">
-                <Outlet />
+            <main className="p-4 md:p-8 max-w-7xl mx-auto relative cursor-default">
+                {/* Desktop Header */}
+                <div className="hidden md:flex justify-between items-center mb-8 bg-white/80 backdrop-blur-md p-4 rounded-2xl border border-gray-100 shadow-sm sticky top-4 z-40 transition-all hover:shadow-md">
+                    <div>
+                        <h1 className="text-2xl font-black vibrant-gradient bg-clip-text text-transparent tracking-tight">
+                            <T>AgriMandi</T>
+                        </h1>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => setVoiceMode(!voiceMode)}
+                            className={`p-2.5 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 ${voiceMode
+                                    ? 'bg-green-100 text-green-600 shadow-sm'
+                                    : 'bg-white border border-gray-200 text-gray-400 hover:border-green-400 hover:text-green-500'
+                                }`}
+                            title={voiceMode ? 'Disable Voice Mode' : 'Enable Voice Mode'}
+                        >
+                            {voiceMode ? <Volume2 size={20} /> : <VolumeX size={20} />}
+                        </button>
+
+                        <div className="w-64">
+                            <LanguageSelector
+                                selectedLanguage={currentLanguage}
+                                onLanguageChange={setLanguage}
+                                className="w-full"
+                            />
+                        </div>
+
+                        {user && (
+                            <div className="flex items-center gap-3 px-4 py-2 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-green-200 transition-colors cursor-pointer group">
+                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center text-white font-bold text-sm shadow-sm group-hover:scale-105 transition-transform">
+                                    {user.name ? user.name.charAt(0).toUpperCase() : user.role.charAt(0).toUpperCase()}
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-bold text-gray-800 leading-none group-hover:text-green-600 transition-colors">
+                                        <T>{user.name || 'User'}</T>
+                                    </span>
+                                    <span className="text-xs text-gray-500 capitalize leading-none mt-1">
+                                        <T>{user.role}</T>
+                                    </span>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+                <div className="mt-8">
+                    <Outlet />
+                </div>
             </main>
-
-            <nav className="mobile-navigation md:hidden">
-                <NavLink to="/" end className={({ isActive }) => `flex flex-col items-center gap-1 ${isActive ? 'text-emerald-600' : 'text-slate-400'}`}>                    <Home size={22} />
-                    <span className="text-[10px] font-medium">Home</span>
-                </NavLink>
-                <NavLink to="/market" className={({ isActive }) => `flex flex-col items-center gap-1 ${isActive ? 'text-emerald-600' : 'text-slate-400'}`}>
-                    <TrendingUp size={22} />
-                    <span className="text-[10px] font-medium">Market</span>
-                </NavLink>
-                <NavLink to="/search" className={({ isActive }) => `flex flex-col items-center gap-1 ${isActive ? 'text-emerald-600' : 'text-slate-400'}`}>
-                    <Search size={22} />
-                    <span className="text-[10px] font-medium">Search</span>
-                </NavLink>
-                <NavLink to="/chats" className={({ isActive }) => `flex flex-col items-center gap-1 ${isActive ? 'text-emerald-600' : 'text-slate-400'}`}>
-                    <MessageSquare size={22} />
-                    <span className="text-[10px] font-medium">Chats</span>
-                </NavLink>
-                <NavLink to="/profile" className={({ isActive }) => `flex flex-col items-center gap-1 ${isActive ? 'text-emerald-600' : 'text-slate-400'}`}>
-                    <User size={22} />
-                    <span className="text-[10px] font-medium">Profile</span>
-                </NavLink>
-            </nav>
         </div>
     );
 };

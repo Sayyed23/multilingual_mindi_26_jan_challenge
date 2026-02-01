@@ -1,0 +1,19 @@
+<svg width="192" height="192" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#059669;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#047857;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="28.799999999999997" fill="url(#grad)"/>
+  <g transform="translate(38.400000000000006, 38.400000000000006)">
+    <!-- Leaf icon representing agriculture -->
+    <path d="M57.599999999999994 19.200000000000003 Q96 9.600000000000001 115.19999999999999 57.599999999999994 Q105.60000000000001 96 57.599999999999994 86.4 Q28.799999999999997 57.599999999999994 57.599999999999994 19.200000000000003Z" fill="white" opacity="0.9"/>
+    <!-- Market/building icon -->
+    <rect x="19.200000000000003" y="67.19999999999999" width="28.799999999999997" height="48" fill="white" opacity="0.8"/>
+    <rect x="57.599999999999994" y="67.19999999999999" width="28.799999999999997" height="48" fill="white" opacity="0.8"/>
+    <rect x="96" y="67.19999999999999" width="28.799999999999997" height="48" fill="white" opacity="0.8"/>
+    <!-- Roof -->
+    <polygon points="9.600000000000001,67.19999999999999 67.19999999999999,48 124.80000000000001,67.19999999999999" fill="white" opacity="0.9"/>
+  </g>
+</svg>

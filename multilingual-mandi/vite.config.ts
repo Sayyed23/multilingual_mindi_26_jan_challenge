@@ -11,6 +11,7 @@ export default defineConfig({
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,json,woff,woff2}'],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/firestore\.googleapis\.com\/.*/i,
@@ -24,10 +25,43 @@ export default defineConfig({
             }
           },
           {
+            urlPattern: /\/api\/prices.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'mandi-prices-v1.0.0',
+              expiration: {
+                maxEntries: 200,
+                maxAgeSeconds: 5 * 60 // 5 minutes
+              }
+            }
+          },
+          {
+            urlPattern: /\/api\/deals.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'mandi-deals-v1.0.0',
+              expiration: {
+                maxEntries: 150,
+                maxAgeSeconds: 10 * 60 // 10 minutes
+              }
+            }
+          },
+          {
+            urlPattern: /\/api\/messages.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'mandi-messages-v1.0.0',
+              expiration: {
+                maxEntries: 300,
+                maxAgeSeconds: 60 * 60 // 1 hour
+              }
+            }
+          },
+          {
             urlPattern: /\/api\/.*/i,
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'api-cache',
+              cacheName: 'mandi-api-v1.0.0',
               expiration: {
                 maxEntries: 200,
                 maxAgeSeconds: 60 * 60 // 1 hour
@@ -98,6 +132,7 @@ export default defineConfig({
         ]
       }
     })
+
   ],
   server: {
     port: 3000

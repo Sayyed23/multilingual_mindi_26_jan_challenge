@@ -110,28 +110,29 @@ Object.defineProperty(globalThis, 'IDBKeyRange', {
 });
 
 // Mock Web APIs
-Object.defineProperty(globalThis, 'navigator', {
+Object.defineProperty(globalThis.navigator, 'onLine', {
+  value: true,
+  writable: true
+});
+
+Object.defineProperty(globalThis.navigator, 'serviceWorker', {
   value: {
-    ...globalThis.navigator,
-    onLine: true,
-    serviceWorker: {
-      register: vi.fn(() => Promise.resolve({
-        installing: null,
-        waiting: null,
-        active: null,
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn()
-      })),
-      ready: Promise.resolve({
-        installing: null,
-        waiting: null,
-        active: null,
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn()
-      }),
+    register: vi.fn(() => Promise.resolve({
+      installing: null,
+      waiting: null,
+      active: null,
       addEventListener: vi.fn(),
       removeEventListener: vi.fn()
-    }
+    })),
+    ready: Promise.resolve({
+      installing: null,
+      waiting: null,
+      active: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn()
+    }),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn()
   },
   writable: true
 });
@@ -183,7 +184,7 @@ Object.defineProperty(globalThis, 'PushManager', {
 // Mock crypto for UUID generation
 Object.defineProperty(globalThis, 'crypto', {
   value: {
-    randomUUID: vi.fn(() => 'test-uuid-' + Math.random().toString(36).substring(2, 11)),    getRandomValues: vi.fn((arr) => {
+    randomUUID: vi.fn(() => 'test-uuid-' + Math.random().toString(36).substring(2, 11)), getRandomValues: vi.fn((arr) => {
       for (let i = 0; i < arr.length; i++) {
         arr[i] = Math.floor(Math.random() * 256);
       }
@@ -205,7 +206,7 @@ afterAll(() => {
 beforeEach(() => {
   // Reset all mocks before each test
   vi.clearAllMocks();
-  
+
   // Reset navigator.onLine
   Object.defineProperty(navigator, 'onLine', {
     value: true,
