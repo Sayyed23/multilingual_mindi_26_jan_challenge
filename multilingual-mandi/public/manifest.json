@@ -1,15 +1,14 @@
 {
-  "name": "Multilingual Mandi - AI-Powered Marketplace",
-  "short_name": "Mandi",
-  "description": "AI-powered progressive web application for India's traditional mandi ecosystem, breaking language barriers and enabling fair trade",
+  "name": "Multilingual Mandi Platform",
+  "short_name": "AgriMandi",
+  "description": "AI-powered multilingual marketplace for agricultural commodities connecting farmers, vendors, and buyers across India",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#059669",
+  "theme_color": "#37ec13",
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "en-IN",
-  "dir": "ltr",
   "categories": ["business", "productivity", "shopping"],
   "icons": [
     {
@@ -67,21 +66,28 @@
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Home screen showing market prices and navigation"
+      "label": "Home screen showing price discovery and market trends"
     },
     {
-      "src": "/screenshots/mobile-dashboard.png",
+      "src": "/screenshots/mobile-chat.png",
       "sizes": "390x844",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Mobile dashboard with user profile and quick actions"
+      "label": "Multilingual chat interface for negotiations"
+    },
+    {
+      "src": "/screenshots/mobile-prices.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Real-time price discovery for commodities"
     }
   ],
   "shortcuts": [
     {
       "name": "Price Discovery",
       "short_name": "Prices",
-      "description": "View current market prices and trends",
+      "description": "Check current market prices",
       "url": "/prices",
       "icons": [
         {
@@ -92,26 +98,26 @@
       ]
     },
     {
-      "name": "Start Negotiation",
-      "short_name": "Negotiate",
-      "description": "Begin a new negotiation with vendors",
-      "url": "/negotiate",
+      "name": "My Deals",
+      "short_name": "Deals",
+      "description": "View active deals and negotiations",
+      "url": "/deals",
       "icons": [
         {
-          "src": "/icons/shortcut-negotiate.png",
+          "src": "/icons/shortcut-deals.png",
           "sizes": "96x96",
           "type": "image/png"
         }
       ]
     },
     {
-      "name": "My Profile",
-      "short_name": "Profile",
-      "description": "View and edit your profile",
-      "url": "/profile",
+      "name": "Messages",
+      "short_name": "Chat",
+      "description": "Multilingual chat with buyers and sellers",
+      "url": "/messages",
       "icons": [
         {
-          "src": "/icons/shortcut-profile.png",
+          "src": "/icons/shortcut-messages.png",
           "sizes": "96x96",
           "type": "image/png"
         }
@@ -125,5 +131,12 @@
   },
   "launch_handler": {
     "client_mode": "navigate-existing"
-  }
+  },
+  "handle_links": "preferred",
+  "protocol_handlers": [
+    {
+      "protocol": "web+mandi",
+      "url": "/deal?id=%s"
+    }
+  ]
 }

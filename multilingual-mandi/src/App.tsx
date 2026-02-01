@@ -1,46 +1,48 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Auth } from './pages/Auth';
-import { Home } from './pages/Home';
-import { Onboarding } from './pages/Onboarding';
-import { FarmerDashboard } from './pages/FarmerDashboard';
-import { BuyerDashboard } from './pages/BuyerDashboard';
-import { PriceDiscovery } from './pages/PriceDiscovery';
-import { NegotiationPage } from './pages/NegotiationPage';
-import { AlertsPage } from './pages/AlertsPage';
-import { UserProfile } from './pages/UserProfile';
-import { CommunityPage } from './pages/CommunityPage';
-import { SettingsPage } from './pages/SettingsPage';
-import { AppShell } from './components/AppShell';
-import { DatabaseDemo } from './components/DatabaseDemo';
-import { ServiceWorkerDemo } from './components/ServiceWorkerDemo';
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Layout from './components/Layout';
 
-function App() {
+const Home = () => (
+  <div className="space-y-6">
+    <div className="vibrant-gradient p-8 rounded-3xl text-white shadow-lg">
+      <h2 className="text-3xl font-bold mb-2">Welcome to Multilingual Mandi</h2>
+      <p className="opacity-90">AI-powered marketplace connecting farmers and buyers across India.</p>
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="glass-card p-6">
+        <h3 className="text-lg font-semibold mb-2">Market Prices</h3>
+        <p className="text-slate-500 text-sm mb-4">Real-time price intelligence from 100+ mandis.</p>
+        <button className="primary-button w-full">View Market</button>
+      </div>
+      <div className="glass-card p-6">
+        <h3 className="text-lg font-semibold mb-2">New Negotiation</h3>
+        <p className="text-slate-500 text-sm mb-4">Start a deal with AI-powered translation.</p>
+        <button className="primary-button w-full">Start Chat</button>
+      </div>
+      <div className="glass-card p-6">
+        <h3 className="text-lg font-semibold mb-2">Price Scanner</h3>
+        <p className="text-slate-500 text-sm mb-4">Scan and verify fair prices instantly.</p>
+        <button className="primary-button w-full">Open Scanner</button>
+      </div>
+    </div>
+  </div>
+);
+
+const App: React.FC = () => {
   return (
-    <Router>
+    <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/onboarding" element={<Onboarding />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/database-demo" element={<DatabaseDemo />} />
-        <Route path="/service-worker-demo" element={<ServiceWorkerDemo />} />
-
-        {/* App Shell Layout for authenticated routes */}
-        <Route element={<AppShell />}>
-          <Route path="/dashboard" element={<FarmerDashboard />} />
-          <Route path="/price-discovery" element={<PriceDiscovery />} />
-          <Route path="/dashboard/deals" element={<NegotiationPage />} />
-          <Route path="/alerts" element={<AlertsPage />} />
-          <Route path="/profile" element={<UserProfile />} />
-          <Route path="/community" element={<CommunityPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/buyer/dashboard" element={<BuyerDashboard />} />
-
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Home />} />
+          <Route path="market" element={<div>Market Trends (Coming Soon)</div>} />
+          <Route path="search" element={<div>Search Commodities (Coming Soon)</div>} />
+          <Route path="chats" element={<div>Your Negotiations (Coming Soon)</div>} />
+          <Route path="profile" element={<div>User Profile (Coming Soon)</div>} />
         </Route>
-
-        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </Router>
+    </BrowserRouter>
   );
-}
+};
 
 export default App;

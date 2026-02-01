@@ -1,80 +1,67 @@
-// Multilingual Mandi Service Worker
-// Implements offline-first PWA functionality with strategic caching
+// Service Worker for Multilingual Mandi Platform
+// Provides offline functionality, background sync, and push notifications
 
-const CACHE_NAME = 'multilingual-mandi-v1';
-const STATIC_CACHE = 'static-v1';
-const DYNAMIC_CACHE = 'dynamic-v1';
-const API_CACHE = 'api-v1';
+const CACHE_NAME = 'mandi-v1';
+const STATIC_CACHE = 'mandi-static-v1';
+const DYNAMIC_CACHE = 'mandi-dynamic-v1';
+const API_CACHE = 'mandi-api-v1';
 
-// Static assets to cache (App Shell Architecture)
+// Assets to cache immediately
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
   '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png',
-  // Vite builds will add hashed assets, we'll cache them dynamically
+  '/icons/icon-512x512.png'
 ];
 
-// API endpoints that should use network-first strategy
-const NETWORK_FIRST_PATTERNS = [
-  /\/api\/prices/,
-  /\/api\/negotiations/,
-  /\/api\/messages/,
-  /\/api\/market-data/
-];
-
-// API endpoints that should use stale-while-revalidate
-const STALE_WHILE_REVALIDATE_PATTERNS = [
-  /\/api\/users/,
-  /\/api\/profiles/,
-  /\/api\/transactions/,
-  /\/api\/history/
+// API endpoints to cache
+const API_ENDPOINTS = [
+  '/api/prices',
+  '/api/commodities',
+  '/api/mandis'
 ];
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing service worker...');
+  console.log('Service Worker: Installing...');
   
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then((cache) => {
-        console.log('[SW] Caching static assets');
+        console.log('Service Worker: Caching static assets');
         return cache.addAll(STATIC_ASSETS);
       })
       .then(() => {
-        console.log('[SW] Static assets cached successfully');
-        // Skip waiting to activate immediately
+        console.log('Service Worker: Static assets cached');
         return self.skipWaiting();
       })
       .catch((error) => {
-        console.error('[SW] Failed to cache static assets:', error);
+        console.error('Service Worker: Failed to cache static assets', error);
       })
   );
 });
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating service worker...');
+  console.log('Service Worker: Activating...');
   
   event.waitUntil(
     caches.keys()
       .then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
-            // Delete old caches that don't match current version
             if (cacheName !== STATIC_CACHE && 
                 cacheName !== DYNAMIC_CACHE && 
                 cacheName !== API_CACHE) {
-              console.log('[SW] Deleting old cache:', cacheName);
+              console.log('Service Worker: Deleting old cache', cacheName);
               return caches.delete(cacheName);
             }
           })
         );
       })
       .then(() => {
-        console.log('[SW] Service worker activated');
-        // Take control of all clients immediately
+        console.log('Service Worker: Activated');
         return self.clients.claim();
       })
   );
@@ -84,295 +71,308 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
-  
-  // Skip non-GET requests and chrome-extension requests
-  if (request.method !== 'GET' || url.protocol === 'chrome-extension:') {
+
+  // Skip non-GET requests
+  if (request.method !== 'GET') {
     return;
   }
-  
-  // Handle different types of requests with appropriate strategies
+
+  // Handle different types of requests with appropriate caching strategies
   if (isStaticAsset(request)) {
-    // Cache-First Strategy for static assets
-    event.respondWith(cacheFirstStrategy(request));
-  } else if (isNetworkFirstAPI(request)) {
-    // Network-First Strategy for real-time data
-    event.respondWith(networkFirstStrategy(request));
-  } else if (isStaleWhileRevalidateAPI(request)) {
-    // Stale-While-Revalidate for user data
-    event.respondWith(staleWhileRevalidateStrategy(request));
+    event.respondWith(cacheFirst(request, STATIC_CACHE));
+  } else if (isAPIRequest(request)) {
+    event.respondWith(networkFirstWithFallback(request, API_CACHE));
+  } else if (isNavigationRequest(request)) {
+    event.respondWith(networkFirstWithOfflineFallback(request));
   } else {
-    // Default: Cache-First for other requests
-    event.respondWith(cacheFirstStrategy(request));
+    event.respondWith(staleWhileRevalidate(request, DYNAMIC_CACHE));
   }
 });
 
-// Cache-First Strategy: Check cache first, fallback to network
-async function cacheFirstStrategy(request) {
+// Background sync for offline actions
+self.addEventListener('sync', (event) => {
+  console.log('Service Worker: Background sync triggered', event.tag);
+  
+  if (event.tag === 'offline-actions-sync') {
+    event.waitUntil(syncOfflineActions());
+  } else if (event.tag === 'price-data-sync') {
+    event.waitUntil(syncPriceData());
+  }
+});
+
+// Push notification handling
+self.addEventListener('push', (event) => {
+  console.log('Service Worker: Push notification received');
+  
+  if (!event.data) {
+    return;
+  }
+
+  const data = event.data.json();
+  const options = {
+    body: data.body,
+    icon: '/icons/icon-192x192.png',
+    badge: '/icons/badge-72x72.png',
+    tag: data.tag || 'default',
+    data: data.data || {},
+    actions: data.actions || [],
+    requireInteraction: data.requireInteraction || false,
+    silent: data.silent || false
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, options)
+  );
+});
+
+// Notification click handling
+self.addEventListener('notificationclick', (event) => {
+  console.log('Service Worker: Notification clicked', event.notification.tag);
+  
+  event.notification.close();
+
+  const clickAction = event.action;
+  const notificationData = event.notification.data;
+
+  let urlToOpen = '/';
+  
+  if (clickAction) {
+    // Handle specific action clicks
+    switch (clickAction) {
+      case 'view-deal':
+        urlToOpen = `/deals/${notificationData.dealId}`;
+        break;
+      case 'view-price':
+        urlToOpen = `/prices?commodity=${notificationData.commodity}`;
+        break;
+      case 'open-chat':
+        urlToOpen = `/messages/${notificationData.conversationId}`;
+        break;
+    }
+  } else if (notificationData.url) {
+    urlToOpen = notificationData.url;
+  }
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clientList) => {
+        // Check if app is already open
+        for (const client of clientList) {
+          if (client.url.includes(self.location.origin) && 'focus' in client) {
+            client.navigate(urlToOpen);
+            return client.focus();
+          }
+        }
+        
+        // Open new window if app is not open
+        if (clients.openWindow) {
+          return clients.openWindow(urlToOpen);
+        }
+      })
+  );
+});
+
+// Caching Strategies
+
+// Cache First - for static assets
+async function cacheFirst(request, cacheName) {
   try {
-    const cachedResponse = await caches.match(request);
+    const cache = await caches.open(cacheName);
+    const cachedResponse = await cache.match(request);
+    
     if (cachedResponse) {
-      console.log('[SW] Cache hit:', request.url);
       return cachedResponse;
     }
     
-    console.log('[SW] Cache miss, fetching from network:', request.url);
+    const networkResponse = await fetch(request);
+    if (networkResponse.ok) {
+      cache.put(request, networkResponse.clone());
+    }
+    
+    return networkResponse;
+  } catch (error) {
+    console.error('Cache First strategy failed:', error);
+    return new Response('Offline', { status: 503 });
+  }
+}
+
+// Network First with Fallback - for API requests
+async function networkFirstWithFallback(request, cacheName) {
+  try {
     const networkResponse = await fetch(request);
     
-    // Cache successful responses
+    if (networkResponse.ok) {
+      const cache = await caches.open(cacheName);
+      cache.put(request, networkResponse.clone());
+      return networkResponse;
+    }
+    
+    throw new Error('Network response not ok');
+  } catch (error) {
+    console.log('Network failed, trying cache:', error);
+    
+    const cache = await caches.open(cacheName);
+    const cachedResponse = await cache.match(request);
+    
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    
+    // Return offline fallback for API requests
+    return new Response(JSON.stringify({
+      error: 'Offline',
+      message: 'This data is not available offline',
+      cached: false
+    }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+}
+
+// Network First with Offline Fallback - for navigation requests
+async function networkFirstWithOfflineFallback(request) {
+  try {
+    const networkResponse = await fetch(request);
+    
     if (networkResponse.ok) {
       const cache = await caches.open(DYNAMIC_CACHE);
       cache.put(request, networkResponse.clone());
+      return networkResponse;
     }
     
-    return networkResponse;
+    throw new Error('Network response not ok');
   } catch (error) {
-    console.error('[SW] Cache-first strategy failed:', error);
+    console.log('Network failed for navigation, trying cache:', error);
     
-    // Return offline fallback for navigation requests
-    if (request.mode === 'navigate') {
-      const offlinePage = await caches.match('/');
-      return offlinePage || new Response('Offline', { status: 503 });
-    }
+    const cache = await caches.open(DYNAMIC_CACHE);
+    const cachedResponse = await cache.match(request);
     
-    return new Response('Network error', { status: 503 });
-  }
-}
-
-// Network-First Strategy: Try network first, fallback to cache
-async function networkFirstStrategy(request) {
-  try {
-    console.log('[SW] Network-first request:', request.url);
-    const networkResponse = await fetch(request);
-    
-    // Cache successful responses
-    if (networkResponse.ok) {
-      const cache = await caches.open(API_CACHE);
-      cache.put(request, networkResponse.clone());
-    }
-    
-    return networkResponse;
-  } catch (error) {
-    console.log('[SW] Network failed, trying cache:', request.url);
-    
-    const cachedResponse = await caches.match(request);
     if (cachedResponse) {
-      console.log('[SW] Serving from cache:', request.url);
       return cachedResponse;
     }
     
-    console.error('[SW] Network-first strategy failed:', error);
-    return new Response(JSON.stringify({ 
-      error: 'Offline', 
-      message: 'Data not available offline' 
-    }), {
-      status: 503,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    // Return offline page
+    const offlineCache = await caches.open(STATIC_CACHE);
+    return offlineCache.match('/') || new Response('Offline', { status: 503 });
   }
 }
 
-// Stale-While-Revalidate Strategy: Serve from cache, update in background
-async function staleWhileRevalidateStrategy(request) {
-  const cache = await caches.open(API_CACHE);
+// Stale While Revalidate - for dynamic content
+async function staleWhileRevalidate(request, cacheName) {
+  const cache = await caches.open(cacheName);
   const cachedResponse = await cache.match(request);
   
-  // Fetch from network in background to update cache
-  const networkResponsePromise = fetch(request)
-    .then((networkResponse) => {
-      if (networkResponse.ok) {
-        cache.put(request, networkResponse.clone());
-      }
-      return networkResponse;
-    })
-    .catch((error) => {
-      console.log('[SW] Background fetch failed:', error);
-    });
+  const fetchPromise = fetch(request).then((networkResponse) => {
+    if (networkResponse.ok) {
+      cache.put(request, networkResponse.clone());
+    }
+    return networkResponse;
+  }).catch(() => cachedResponse);
   
-  // Return cached response immediately if available
-  if (cachedResponse) {
-    console.log('[SW] Serving stale content:', request.url);
-    return cachedResponse;
-  }
-  
-  // If no cache, wait for network response
-  console.log('[SW] No cache, waiting for network:', request.url);
-  try {
-    return await networkResponsePromise;
-  } catch (error) {
-    console.error('[SW] Stale-while-revalidate failed:', error);
-    return new Response(JSON.stringify({ 
-      error: 'Offline', 
-      message: 'Data not available' 
-    }), {
-      status: 503,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  }
+  return cachedResponse || fetchPromise;
 }
 
-// Helper functions to determine request types
+// Helper Functions
+
 function isStaticAsset(request) {
   const url = new URL(request.url);
-  
-  // Static file extensions
-  const staticExtensions = ['.js', '.css', '.png', '.jpg', '.jpeg', '.svg', '.ico', '.woff', '.woff2'];
-  const hasStaticExtension = staticExtensions.some(ext => url.pathname.endsWith(ext));
-  
-  // Static paths
-  const staticPaths = ['/manifest.json', '/robots.txt', '/browserconfig.xml'];
-  const isStaticPath = staticPaths.includes(url.pathname);
-  
-  // Root path or index.html
-  const isRootOrIndex = url.pathname === '/' || url.pathname === '/index.html';
-  
-  return hasStaticExtension || isStaticPath || isRootOrIndex;
+  return url.pathname.match(/\.(js|css|png|jpg|jpeg|svg|ico|woff|woff2)$/);
 }
 
-function isNetworkFirstAPI(request) {
+function isAPIRequest(request) {
   const url = new URL(request.url);
-  return NETWORK_FIRST_PATTERNS.some(pattern => pattern.test(url.pathname));
+  return url.pathname.startsWith('/api/') || 
+         url.hostname.includes('firestore.googleapis.com') ||
+         url.hostname.includes('firebase.googleapis.com');
 }
 
-function isStaleWhileRevalidateAPI(request) {
-  const url = new URL(request.url);
-  return STALE_WHILE_REVALIDATE_PATTERNS.some(pattern => pattern.test(url.pathname));
+function isNavigationRequest(request) {
+  return request.mode === 'navigate' || 
+         (request.method === 'GET' && request.headers.get('accept').includes('text/html'));
 }
 
-// Background Sync for offline actions
-self.addEventListener('sync', (event) => {
-  console.log('[SW] Background sync triggered:', event.tag);
-  
-  if (event.tag === 'background-sync-messages') {
-    event.waitUntil(syncOfflineMessages());
-  } else if (event.tag === 'background-sync-transactions') {
-    event.waitUntil(syncOfflineTransactions());
-  }
-});
+// Background Sync Functions
 
-// Sync offline messages when connection is restored
-async function syncOfflineMessages() {
+async function syncOfflineActions() {
   try {
-    console.log('[SW] Syncing offline messages...');
+    console.log('Service Worker: Syncing offline actions...');
     
-    // Get offline messages from IndexedDB (would be implemented with actual DB)
-    const offlineMessages = await getOfflineMessages();
-    
-    for (const message of offlineMessages) {
-      try {
-        const response = await fetch('/api/messages', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(message)
-        });
-        
-        if (response.ok) {
-          await removeOfflineMessage(message.id);
-          console.log('[SW] Synced message:', message.id);
-        }
-      } catch (error) {
-        console.error('[SW] Failed to sync message:', message.id, error);
-      }
-    }
-  } catch (error) {
-    console.error('[SW] Background sync failed:', error);
-  }
-}
-
-// Sync offline transactions when connection is restored
-async function syncOfflineTransactions() {
-  try {
-    console.log('[SW] Syncing offline transactions...');
-    
-    // Get offline transactions from IndexedDB (would be implemented with actual DB)
-    const offlineTransactions = await getOfflineTransactions();
-    
-    for (const transaction of offlineTransactions) {
-      try {
-        const response = await fetch('/api/transactions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(transaction)
-        });
-        
-        if (response.ok) {
-          await removeOfflineTransaction(transaction.id);
-          console.log('[SW] Synced transaction:', transaction.id);
-        }
-      } catch (error) {
-        console.error('[SW] Failed to sync transaction:', transaction.id, error);
-      }
-    }
-  } catch (error) {
-    console.error('[SW] Background sync failed:', error);
-  }
-}
-
-// Placeholder functions for IndexedDB operations
-// These would be implemented with actual IndexedDB operations
-async function getOfflineMessages() {
-  // TODO: Implement IndexedDB query for offline messages
-  return [];
-}
-
-async function removeOfflineMessage(messageId) {
-  // TODO: Implement IndexedDB deletion for synced message
-  console.log('[SW] Would remove offline message:', messageId);
-}
-
-async function getOfflineTransactions() {
-  // TODO: Implement IndexedDB query for offline transactions
-  return [];
-}
-
-async function removeOfflineTransaction(transactionId) {
-  // TODO: Implement IndexedDB deletion for synced transaction
-  console.log('[SW] Would remove offline transaction:', transactionId);
-}
-
-// Handle push notifications (for future implementation)
-self.addEventListener('push', (event) => {
-  console.log('[SW] Push notification received');
-  
-  if (event.data) {
-    const data = event.data.json();
-    const options = {
-      body: data.body,
-      icon: '/icons/icon-192x192.png',
-      badge: '/icons/icon-72x72.png',
-      vibrate: [100, 50, 100],
-      data: data.data,
-      actions: [
-        {
-          action: 'view',
-          title: 'View',
-          icon: '/icons/action-view.png'
-        },
-        {
-          action: 'dismiss',
-          title: 'Dismiss',
-          icon: '/icons/action-dismiss.png'
-        }
-      ]
+    // This would integrate with the IndexedDB offline sync service
+    // For now, we'll just log the attempt
+    const message = {
+      type: 'SYNC_OFFLINE_ACTIONS',
+      timestamp: new Date().toISOString()
     };
     
-    event.waitUntil(
-      self.registration.showNotification(data.title, options)
-    );
+    // Notify all clients about sync attempt
+    const clients = await self.clients.matchAll();
+    clients.forEach(client => {
+      client.postMessage(message);
+    });
+    
+    console.log('Service Worker: Offline actions sync completed');
+  } catch (error) {
+    console.error('Service Worker: Failed to sync offline actions:', error);
+    throw error;
+  }
+}
+
+async function syncPriceData() {
+  try {
+    console.log('Service Worker: Syncing price data...');
+    
+    // Fetch latest price data and update cache
+    const priceEndpoints = [
+      '/api/prices/current',
+      '/api/prices/trending',
+      '/api/commodities/popular'
+    ];
+    
+    const cache = await caches.open(API_CACHE);
+    
+    for (const endpoint of priceEndpoints) {
+      try {
+        const response = await fetch(endpoint);
+        if (response.ok) {
+          await cache.put(endpoint, response.clone());
+        }
+      } catch (error) {
+        console.log(`Failed to sync ${endpoint}:`, error);
+      }
+    }
+    
+    console.log('Service Worker: Price data sync completed');
+  } catch (error) {
+    console.error('Service Worker: Failed to sync price data:', error);
+    throw error;
+  }
+}
+
+// Message handling from main thread
+self.addEventListener('message', (event) => {
+  const { type, data } = event.data;
+  
+  switch (type) {
+    case 'SKIP_WAITING':
+      self.skipWaiting();
+      break;
+    case 'CACHE_URLS':
+      cacheUrls(data.urls);
+      break;
+    case 'CLEAR_CACHE':
+      clearCache(data.cacheName);
+      break;
+    default:
+      console.log('Service Worker: Unknown message type:', type);
   }
 });
 
-// Handle notification clicks
-self.addEventListener('notificationclick', (event) => {
-  console.log('[SW] Notification clicked:', event.action);
-  
-  event.notification.close();
-  
-  if (event.action === 'view') {
-    // Open the app to the relevant page
-    event.waitUntil(
-      clients.openWindow(event.notification.data?.url || '/')
-    );
-  }
-});
+async function cacheUrls(urls) {
+  const cache = await caches.open(DYNAMIC_CACHE);
+  return cache.addAll(urls);
+}
 
-console.log('[SW] Service worker script loaded');
+async function clearCache(cacheName) {
+  return caches.delete(cacheName || DYNAMIC_CACHE);
+}
