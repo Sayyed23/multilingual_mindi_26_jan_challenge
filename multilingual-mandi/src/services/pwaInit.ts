@@ -22,13 +22,13 @@ class PWAService {
   private async initializePWA(): Promise<void> {
     // Register service worker
     await this.registerServiceWorker();
-    
+
     // Set up install prompt handling
     this.setupInstallPrompt();
-    
+
     // Set up update handling
     this.setupUpdateHandling();
-    
+
     // Initialize background sync
     this.initializeBackgroundSync();
   }
@@ -80,8 +80,11 @@ class PWAService {
   private setupUpdateHandling(): void {
     // Listen for messages from service worker
     navigator.serviceWorker?.addEventListener('message', (event) => {
-      const { type } = event.data;
-      
+      const payload = event.data;
+      if (!payload) return;
+
+      const { type } = payload;
+
       switch (type) {
         case 'SYNC_OFFLINE_ACTIONS':
           this.notifyOfflineSync();
@@ -100,12 +103,12 @@ class PWAService {
     if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
       // Background sync is supported
       console.log('Background sync supported');
-      
+
       // Register for background sync when going offline
       window.addEventListener('offline', () => {
         this.registerBackgroundSync('offline-actions-sync');
       });
-      
+
       // Periodic price data sync
       setInterval(() => {
         if (navigator.onLine) {
@@ -125,7 +128,7 @@ class PWAService {
     try {
       await this.deferredPrompt.prompt();
       const choiceResult = await this.deferredPrompt.userChoice;
-      
+
       if (choiceResult.outcome === 'accepted') {
         console.log('User accepted the install prompt');
         this.deferredPrompt = null;
@@ -147,13 +150,14 @@ class PWAService {
 
     const waitingWorker = this.registration.waiting;
     if (waitingWorker) {
+      // Listen for the new service worker to take control
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        window.location.reload();
+      }, { once: true });
+
       waitingWorker.postMessage({ type: 'SKIP_WAITING' });
-      
-      // Reload the page to use the new service worker
-      window.location.reload();
     }
   }
-
   isInstallable(): boolean {
     return this.deferredPrompt !== null;
   }
@@ -164,8 +168,8 @@ class PWAService {
 
   isInstalled(): boolean {
     return window.matchMedia('(display-mode: standalone)').matches ||
-           window.matchMedia('(display-mode: fullscreen)').matches ||
-           (window.navigator as any).standalone === true;
+      window.matchMedia('(display-mode: fullscreen)').matches ||
+      (window.navigator as any).standalone === true;
   }
 
   async registerBackgroundSync(tag: string): Promise<void> {
@@ -250,13 +254,16 @@ class PWAService {
       return null;
     }
 
+    const vapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+    if (!vapidKey) {
+      console.warn('Push notifications disabled: VITE_VAPID_PUBLIC_KEY not configured');
+      return null;
+    }
+
     try {
       const subscription = await this.registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: this.urlBase64ToUint8Array(
-          // This should be your VAPID public key
-          import.meta.env.VITE_VAPID_PUBLIC_KEY || 'demo-vapid-key'
-        ) as BufferSource
+        applicationServerKey: this.urlBase64ToUint8Array(vapidKey)
       });
 
       console.log('Push subscription created:', subscription);

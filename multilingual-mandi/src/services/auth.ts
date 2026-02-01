@@ -9,16 +9,14 @@ import {
   sendPasswordResetEmail,
   signOut as firebaseSignOut,
   onAuthStateChanged,
-  User as FirebaseUser,
-  AuthError
+  type User as FirebaseUser,
+  type AuthError
 } from 'firebase/auth';
 import {
   doc,
   setDoc,
   getDoc,
-  updateDoc,
-  serverTimestamp,
-  DocumentReference
+  serverTimestamp
 } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 import type {
@@ -30,7 +28,6 @@ import type {
   Language,
   Location,
   Unsubscribe,
-  VerificationStatus,
   NotificationPreferences,
   PrivacySettings
 } from '../types';
@@ -87,7 +84,7 @@ class AuthenticationService implements AuthService {
 
       // Fetch user profile
       const userProfile = await this.fetchUserProfile(firebaseUser.uid);
-      
+
       if (!userProfile) {
         return {
           success: false,
@@ -103,10 +100,11 @@ class AuthenticationService implements AuthService {
       };
 
     } catch (error) {
-      console.error('Sign in error:', error);
+      const authError = error as AuthError;
+      console.error('Sign in error:', authError.code);
       return {
         success: false,
-        error: this.getAuthErrorMessage(error as AuthError)
+        error: this.getAuthErrorMessage(authError)
       };
     }
   }
@@ -142,29 +140,26 @@ class AuthenticationService implements AuthService {
         };
       }
 
-      // Check if user already exists
-      const existingUser = await this.checkUserExists(email);
-      if (existingUser) {
-        return {
-          success: false,
-          error: 'An account with this email already exists'
-        };
-      }
-
       // Create Firebase user
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const firebaseUser = userCredential.user;
 
-      // Create user profile document
-      const userProfile = await this.createUserProfile(firebaseUser.uid, email, role);
-      
+      // Create user profile document - rollback auth user on failure
+      let userProfile: User;
+      try {
+        userProfile = await this.createUserProfile(firebaseUser.uid, email, role);
+      } catch (profileError) {
+        // Rollback: delete the Firebase auth user
+        await firebaseUser.delete();
+        throw profileError;
+      }
+
       this.currentUser = userProfile;
 
       return {
         success: true,
         user: userProfile
       };
-
     } catch (error) {
       console.error('Sign up error:', error);
       return {
@@ -207,7 +202,7 @@ class AuthenticationService implements AuthService {
 
   onAuthStateChanged(callback: (user: User | null) => void): Unsubscribe {
     this.authStateListeners.push(callback);
-    
+
     // Immediately call with current state
     callback(this.currentUser);
 
@@ -239,7 +234,7 @@ class AuthenticationService implements AuthService {
     try {
       const userDoc = doc(db, 'users', uid);
       const docSnap = await getDoc(userDoc);
-      
+
       if (docSnap.exists()) {
         const data = docSnap.data();
         return {
@@ -250,11 +245,11 @@ class AuthenticationService implements AuthService {
           location: data.location || this.getDefaultLocation(),
           onboardingCompleted: data.onboardingCompleted || false,
           verificationStatus: data.verificationStatus || 'unverified',
-          createdAt: data.createdAt?.toDate() || new Date(),
-          updatedAt: data.updatedAt?.toDate() || new Date()
+          createdAt: data.createdAt?.toDate?.() || new Date(data.createdAt) || new Date(),
+          updatedAt: data.updatedAt?.toDate?.() || new Date(data.updatedAt) || new Date()
         };
       }
-      
+
       return null;
     } catch (error) {
       console.error('Error fetching user profile:', error);
@@ -267,7 +262,7 @@ class AuthenticationService implements AuthService {
     try {
       const defaultLocation = this.getDefaultLocation();
       const defaultLanguage: Language = 'en';
-      
+
       const userProfile: User = {
         uid,
         email,
@@ -398,7 +393,7 @@ class AuthenticationService implements AuthService {
       case 'auth/email-already-in-use':
         return 'An account with this email already exists';
       case 'auth/weak-password':
-        return 'Password should be at least 6 characters';
+        return 'Password should be at least 8 characters';
       case 'auth/network-request-failed':
         return 'Network error. Please check your connection';
       case 'auth/too-many-requests':

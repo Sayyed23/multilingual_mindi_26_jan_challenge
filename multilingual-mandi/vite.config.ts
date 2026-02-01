@@ -24,17 +24,6 @@ export default defineConfig({
             }
           },
           {
-            urlPattern: /^https:\/\/firebase\.googleapis\.com\/.*/i,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'firebase-auth-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 2 // 2 hours
-              }
-            }
-          },
-          {
             urlPattern: /\/api\/.*/i,
             handler: 'NetworkFirst',
             options: {
@@ -51,7 +40,7 @@ export default defineConfig({
         name: 'Multilingual Mandi Platform',
         short_name: 'AgriMandi',
         description: 'AI-powered multilingual marketplace for agricultural commodities connecting farmers, vendors, and buyers across India',
-        theme_color: '#37ec13',
+        theme_color: '#059669',
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait-primary',

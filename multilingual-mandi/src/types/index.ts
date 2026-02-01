@@ -86,10 +86,9 @@ export interface Message {
   content: {
     originalText: string;
     originalLanguage: Language;
-    translations: Map<Language, string>;
+    translations: Partial<Record<Language, string>>;
     messageType: 'text' | 'voice' | 'image' | 'document';
-  };
-  metadata: {
+  }; metadata: {
     timestamp: Date;
     readStatus: boolean;
     translationConfidence?: number;
@@ -253,8 +252,11 @@ export interface Deal {
   sellerId: string;
   commodity: string;
   quantity: number;
+  unit: string;
   agreedPrice: number;
+  quality: QualityGrade;
   deliveryTerms: DeliveryTerms;
+  paymentTerms: PaymentTerms;
   status: DealStatus;
   createdAt: Date;
   updatedAt: Date;
@@ -511,6 +513,7 @@ export interface SyncResult {
 }
 
 export interface CacheEntry<T> {
+  id?: number;
   key: string;
   data: T;
   timestamp: Date;
@@ -609,9 +612,10 @@ export interface TrustService {
 export interface OfflineSyncService {
   cacheData(key: string, data: any, ttl?: number): Promise<void>;
   getCachedData<T>(key: string): Promise<T | null>;
+  getCachedEntry<T>(key: string): Promise<CacheEntry<T> | null>;
   queueAction(action: OfflineAction): Promise<void>;
   syncPendingActions(): Promise<SyncResult[]>;
-  getLastSyncTime(): Date | null;
+  getLastSyncTime(): Promise<Date | null>;
   isOnline(): boolean;
 }
 

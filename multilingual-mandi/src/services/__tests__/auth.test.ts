@@ -17,7 +17,6 @@ vi.mock('firebase/firestore', () => ({
   doc: vi.fn(),
   getDoc: vi.fn(),
   setDoc: vi.fn(),
-  updateDoc: vi.fn(),
   serverTimestamp: vi.fn(() => ({ seconds: Date.now() / 1000 }))
 }));
 
@@ -38,8 +37,7 @@ import {
 import {
   doc,
   getDoc,
-  setDoc,
-  serverTimestamp
+  setDoc
 } from 'firebase/firestore';
 
 const mockSignInWithEmailAndPassword = vi.mocked(signInWithEmailAndPassword);
@@ -50,7 +48,6 @@ const mockOnAuthStateChanged = vi.mocked(onAuthStateChanged);
 const mockGetDoc = vi.mocked(getDoc);
 const mockSetDoc = vi.mocked(setDoc);
 const mockDoc = vi.mocked(doc);
-const mockServerTimestamp = vi.mocked(serverTimestamp);
 
 describe('AuthenticationService', () => {
   let authService: AuthenticationService;
@@ -67,18 +64,18 @@ describe('AuthenticationService', () => {
   describe('signIn', () => {
     it('should successfully sign in with valid credentials', async () => {
       const mockUser = createMockUser();
-      const mockFirebaseUser = { uid: mockUser.uid };
-      
-      mockSignInWithEmailAndPassword.mockResolvedValue({ user: mockFirebaseUser });
-      mockDoc.mockReturnValue('mock-doc-ref');
+      const mockFirebaseUser = { uid: mockUser.uid } as any;
+
+      mockSignInWithEmailAndPassword.mockResolvedValue({ user: mockFirebaseUser } as any);
+      mockDoc.mockReturnValue({} as any);
       mockGetDoc.mockResolvedValue({
-        exists: () => true,
+        exists: (() => true) as any,
         data: () => ({
           ...mockUser,
           createdAt: { toDate: () => mockUser.createdAt },
           updatedAt: { toDate: () => mockUser.updatedAt }
         })
-      });
+      } as any);
 
       const result = await authService.signIn('test@example.com', 'password123');
 
@@ -122,12 +119,12 @@ describe('AuthenticationService', () => {
 
   describe('signUp', () => {
     it('should successfully create a new user account', async () => {
-      const mockFirebaseUser = { uid: 'new-user-id' };
+      const mockFirebaseUser = { uid: 'new-user-id' } as any;
       const role: UserRole = 'vendor';
-      
-      mockCreateUserWithEmailAndPassword.mockResolvedValue({ user: mockFirebaseUser });
-      mockDoc.mockReturnValue('mock-doc-ref');
-      mockGetDoc.mockResolvedValue({ exists: () => false }); // User doesn't exist
+
+      mockCreateUserWithEmailAndPassword.mockResolvedValue({ user: mockFirebaseUser } as any);
+      mockDoc.mockReturnValue({} as any);
+      mockGetDoc.mockResolvedValue({ exists: (() => false) as any } as any); // User doesn't exist
       mockSetDoc.mockResolvedValue(undefined);
 
       const result = await authService.signUp('newuser@example.com', 'password123', role);
@@ -161,7 +158,7 @@ describe('AuthenticationService', () => {
     });
 
     it('should fail if user already exists', async () => {
-      mockGetDoc.mockResolvedValue({ exists: () => true }); // User exists
+      mockGetDoc.mockResolvedValue({ exists: (() => true) as any } as any); // User exists
 
       const result = await authService.signUp('existing@example.com', 'password123', 'vendor');
 
@@ -230,17 +227,28 @@ describe('AuthenticationService', () => {
       expect(callback).toHaveBeenCalledWith(null); // Initial call with current state
     });
 
-    it('should unsubscribe auth state listener', () => {
+    it('should unsubscribe auth state listener', async () => {
       const callback = vi.fn();
       const unsubscribe = authService.onAuthStateChanged(callback);
 
+      // Initial call with current state (null)
       expect(callback).toHaveBeenCalledTimes(1);
-      
+      expect(callback).toHaveBeenCalledWith(null);
+
+      // Get the internal handler registered with Firebase
+      const authStateHandler = mockOnAuthStateChanged.mock.calls[0][1] as any;
+
+      // Simulate auth state change
+      await authStateHandler(null); // Explicitly trigger with null
+      expect(callback).toHaveBeenCalledTimes(2);
+
       unsubscribe();
-      
-      // Callback should not be called again after unsubscribe
-      // This is tested by checking the internal listeners array is modified
-      expect(typeof unsubscribe).toBe('function');
+
+      // Trigger another change after unsubscription
+      await authStateHandler(null);
+
+      // Should NOT be called again
+      expect(callback).toHaveBeenCalledTimes(2);
     });
   });
 

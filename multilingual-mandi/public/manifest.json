@@ -5,11 +5,15 @@
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#37ec13",
+  "theme_color": "#059669",
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "en-IN",
-  "categories": ["business", "productivity", "shopping"],
+  "categories": [
+    "business",
+    "productivity",
+    "shopping"
+  ],
   "icons": [
     {
       "src": "/icons/icon-72x72.png",

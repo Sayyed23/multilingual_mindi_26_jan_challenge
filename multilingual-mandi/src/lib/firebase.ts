@@ -26,41 +26,36 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const functions = getFunctions(app);
 export const storage = getStorage(app);
-export const analytics = getAnalytics(app);
-
+export let analytics: ReturnType<typeof getAnalytics> | null = null;
+if (typeof window !== 'undefined') {
+  analytics = getAnalytics(app);
+}
 // Initialize Firebase Cloud Messaging (FCM) if supported
-let messaging: any = null;
-isSupported().then((supported) => {
+import type { Messaging } from 'firebase/messaging';
+
+let messagingInstance: Messaging | null = null;
+
+export const getMessagingInstance = async (): Promise<Messaging | null> => {
+  if (messagingInstance) return messagingInstance;
+  const supported = await isSupported();
   if (supported) {
-    messaging = getMessaging(app);
+    messagingInstance = getMessaging(app);
   }
-});
-
-export { messaging };
-
+  return messagingInstance;
+};
 // Development mode emulator connections
-if (import.meta.env.DEV) {
-  // Connect to Firebase emulators in development
+// Explicitly check for emulator usage flag from environment
+const USING_EMULATORS = import.meta.env.VITE_USE_EMULATORS === 'true';
+
+if (USING_EMULATORS) {
+  // Connect to Firebase emulators
   try {
-    // Auth emulator - check if already connected
-    const authConfig = auth.config as any;
-    if (!authConfig.emulator) {
-      connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
-    }
-
-    // Firestore emulator - check if already connected
-    const dbConfig = db as any;
-    if (!dbConfig._delegate?._databaseId?.projectId?.includes('localhost')) {
-      connectFirestoreEmulator(db, 'localhost', 8080);
-    }
-
-    // Functions emulator
-    if (!functions.app.options.projectId?.includes('localhost')) {
-      connectFunctionsEmulator(functions, 'localhost', 5001);
-    }
+    connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
+    connectFirestoreEmulator(db, 'localhost', 8080);
+    connectFunctionsEmulator(functions, 'localhost', 5001);
+    console.log('Connected to Firebase emulators');
   } catch (error) {
-    // Emulators might already be connected or not available
-    console.log('Firebase emulators connection status:', error);
+    console.error('Failed to connect to Firebase emulators:', error);
   }
 }
 

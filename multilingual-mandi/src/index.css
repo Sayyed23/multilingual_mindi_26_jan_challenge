@@ -46,12 +46,17 @@ body {
   border: none;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .primary-button:hover {
   background-color: var(--primary-hover);
   transform: translateY(-1px);
+}
+
+.primary-button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
 .vibrant-gradient {
@@ -70,6 +75,7 @@ h1, h2, h3 {
   right: 0;
   background: var(--card-bg);
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid var(--border);
   display: flex;
   justify-content: space-around;

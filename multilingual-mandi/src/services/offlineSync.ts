@@ -1,9 +1,9 @@
 // Offline Sync Service with IndexedDB Integration
 import Dexie, { type Table } from 'dexie';
-import type { 
-  OfflineAction, 
-  SyncResult, 
-  CacheEntry, 
+import type {
+  OfflineAction,
+  SyncResult,
+  CacheEntry,
   OfflineSyncService,
   PriceData,
   Deal,
@@ -20,16 +20,16 @@ class MandiDatabase extends Dexie {
   messageCache!: Table<CacheEntry<Message>>;
   userCache!: Table<CacheEntry<User>>;
   notificationCache!: Table<CacheEntry<Notification>>;
-  
+
   // Offline action queue
   actionQueue!: Table<OfflineAction>;
-  
+
   // Sync metadata
-  syncMetadata!: Table<{ key: string; value: any; timestamp: Date }>;
+  syncMetadata!: Table<{ id?: number; key: string; value: any; timestamp: Date }>;
 
   constructor() {
     super('MandiOfflineDB');
-    
+
     this.version(1).stores({
       priceCache: '++id, key, timestamp, ttl',
       dealCache: '++id, key, timestamp, ttl',
@@ -78,19 +78,24 @@ class OfflineSyncServiceImpl implements OfflineSyncService {
   }
 
   async cacheData(key: string, data: any, ttl?: number): Promise<void> {
-    const cacheEntry: CacheEntry<any> = {
-      key,
-      data,
-      timestamp: new Date(),
-      ttl,
-      version: 1
-    };
-
     try {
       // Determine which cache table to use based on data type
       const table = this.getCacheTable(data);
+
+      // Find existing entry to update
+      const existing = await table.where('key').equals(key).first();
+
+      const cacheEntry: CacheEntry<any> = {
+        id: existing?.id, // Preserve id if exists for update
+        key,
+        data,
+        timestamp: new Date(),
+        ttl,
+        version: (existing?.version ?? 0) + 1
+      };
+
       await table.put(cacheEntry);
-      
+
       // Clean up expired entries
       await this.cleanupExpiredEntries(table);
     } catch (error) {
@@ -98,8 +103,12 @@ class OfflineSyncServiceImpl implements OfflineSyncService {
       throw new Error(`Failed to cache data for key: ${key}`);
     }
   }
-
   async getCachedData<T>(key: string): Promise<T | null> {
+    const entry = await this.getCachedEntry<T>(key);
+    return entry ? entry.data : null;
+  }
+
+  async getCachedEntry<T>(key: string): Promise<CacheEntry<T> | null> {
     try {
       // Search across all cache tables
       const tables = [
@@ -115,16 +124,18 @@ class OfflineSyncServiceImpl implements OfflineSyncService {
         if (entry) {
           // Check if entry has expired
           if (entry.ttl && Date.now() - entry.timestamp.getTime() > entry.ttl) {
-            await table.delete(entry.key);
+            if (entry.id) {
+              await table.delete(entry.id);
+            }
             continue;
           }
-          return entry.data as T;
+          return entry as CacheEntry<T>;
         }
       }
 
       return null;
     } catch (error) {
-      console.error('Failed to retrieve cached data:', error);
+      console.error('Failed to retrieve cached entry:', error);
       return null;
     }
   }
@@ -148,12 +159,12 @@ class OfflineSyncServiceImpl implements OfflineSyncService {
 
     try {
       const pendingActions = await db.actionQueue.orderBy('timestamp').toArray();
-      
+
       for (const action of pendingActions) {
         try {
           const result = await this.executeAction(action);
           results.push(result);
-          
+
           if (result.success) {
             await db.actionQueue.delete(action.id);
           } else {
@@ -166,7 +177,7 @@ class OfflineSyncServiceImpl implements OfflineSyncService {
             } else {
               // Update retry count and add delay
               await db.actionQueue.put(action);
-              await this.delay(this.retryDelay * action.retryCount);
+              // Retry will happen on next sync cycle
             }
           }
         } catch (error) {
@@ -182,7 +193,7 @@ class OfflineSyncServiceImpl implements OfflineSyncService {
 
       // Update last sync time
       await this.updateLastSyncTime();
-      
+
     } catch (error) {
       console.error('Sync process failed:', error);
     } finally {
@@ -192,10 +203,17 @@ class OfflineSyncServiceImpl implements OfflineSyncService {
     return results;
   }
 
-  getLastSyncTime(): Date | null {
-    // This will be implemented to retrieve from syncMetadata table
-    // For now, return current time as placeholder
-    return new Date();
+  async getLastSyncTime(): Promise<Date | null> {
+    try {
+      const entry = await db.syncMetadata.where('key').equals('lastSyncTime').first();
+      if (entry && entry.value) {
+        return new Date(entry.value);
+      }
+      return null;
+    } catch (error) {
+      console.error('Failed to get last sync time:', error);
+      return null;
+    }
   }
 
   isOnline(): boolean {
@@ -208,45 +226,21 @@ class OfflineSyncServiceImpl implements OfflineSyncService {
     // Simple type detection based on data structure
     if (data.commodity && data.price) return db.priceCache;
     if (data.buyerId && data.sellerId) return db.dealCache;
-    if (data.senderId && data.receiverId) return db.messageCache;
-    if (data.uid && data.email) return db.userCache;
-    if (data.userId && data.type) return db.notificationCache;
-    
-    // Default to a generic cache (use priceCache as fallback)
-    return db.priceCache;
-  }
-
-  private async cleanupExpiredEntries(table: Table<CacheEntry<any>>): Promise<void> {
-    const now = Date.now();
-    const expiredEntries = await table
-      .filter(entry => entry.ttl !== undefined && (now - entry.timestamp.getTime()) > entry.ttl)
-      .toArray();
-    
-    for (const entry of expiredEntries) {
-      await table.delete(entry.key);
-    }
-  }
-
   private async executeAction(action: OfflineAction): Promise<SyncResult> {
     // This is a placeholder implementation
     // In a real implementation, this would dispatch actions to appropriate services
     try {
       switch (action.type) {
         case 'create_deal':
-          // Would call DealManagementService.createDeal(action.payload)
-          break;
+          throw new Error('create_deal action not yet implemented');
         case 'send_message':
-          // Would call messaging service
-          break;
+          throw new Error('send_message action not yet implemented');
         case 'update_profile':
-          // Would call user profile service
-          break;
+          throw new Error('update_profile action not yet implemented');
         case 'rate_user':
-          // Would call trust service
-          break;
+          throw new Error('rate_user action not yet implemented');
         case 'create_negotiation':
-          // Would call negotiation service
-          break;
+          throw new Error('create_negotiation action not yet implemented');
         default:
           throw new Error(`Unknown action type: ${action.type}`);
       }
@@ -265,15 +259,30 @@ class OfflineSyncServiceImpl implements OfflineSyncService {
       };
     }
   }
+      return {
+        actionId: action.id,
+        success: true,
+        syncedAt: new Date()
+      };
+    } catch (error) {
+      return {
+        actionId: action.id,
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        syncedAt: new Date()
+      };
+    }
+  }
 
   private async updateLastSyncTime(): Promise<void> {
+    const existing = await db.syncMetadata.where('key').equals('lastSyncTime').first();
     await db.syncMetadata.put({
+      id: existing?.id,
       key: 'lastSyncTime',
       value: new Date(),
       timestamp: new Date()
     });
   }
-
   private delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
@@ -302,7 +311,7 @@ class OfflineSyncServiceImpl implements OfflineSyncService {
         db.userCache.count(),
         db.notificationCache.count()
       ]);
-      
+
       return counts.reduce((total, count) => total + count, 0);
     } catch (error) {
       console.error('Failed to get cache size:', error);

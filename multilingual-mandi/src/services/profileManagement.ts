@@ -11,21 +11,17 @@ import {
   collection,
   query,
   where,
-  getDocs,
-  setDoc
+  getDocs
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { offlineSyncService } from './offlineSync';
 import type {
   UserProfile,
-  User,
   Language,
   Location,
   NotificationPreferences,
   PrivacySettings,
-  VerificationStatus,
-  UserRole,
-  TransactionSummary
+  UserRole
 } from '../types';
 
 interface ProfileUpdateData {
@@ -61,10 +57,20 @@ class ProfileManagementService {
 
       // Check offline cache
       const offlineCacheKey = `${this.CACHE_KEY_PREFIX}${userId}`;
-      const offlineCached = await offlineSyncService.getCachedData<UserProfile>(offlineCacheKey);
-      if (offlineCached) {
-        this.updateMemoryCache(userId, offlineCached);
-        return offlineCached;
+      const offlineEntry = await offlineSyncService.getCachedEntry<UserProfile>(offlineCacheKey);
+
+      if (offlineEntry && offlineEntry.ttl) {
+        // validate the timestamp against the same TTL logic used by isCacheValid
+        const cachedProfile: CachedProfile = {
+          profile: offlineEntry.data,
+          cachedAt: offlineEntry.timestamp,
+          ttl: offlineEntry.ttl
+        };
+
+        if (this.isCacheValid(cachedProfile)) {
+          this.updateMemoryCache(userId, offlineEntry.data);
+          return offlineEntry.data;
+        }
       }
 
       // Fetch from Firestore
@@ -283,15 +289,17 @@ class ProfileManagementService {
       if (filters) {
         profiles = profiles.filter(profile => {
           if (filters.role && profile.role !== filters.role) return false;
-          
+
           if (filters.location) {
-            const locationMatch = Object.entries(filters.location).every(([key, value]) => 
+            if (!profile.personalInfo?.location) return false;
+            const locationMatch = Object.entries(filters.location).every(([key, value]) =>
               profile.personalInfo.location[key as keyof Location] === value
             );
             if (!locationMatch) return false;
           }
 
           if (filters.commodities && filters.commodities.length > 0) {
+            if (!profile.businessInfo?.commodities) return false;
             const hasMatchingCommodity = filters.commodities.some(commodity =>
               profile.businessInfo.commodities.includes(commodity)
             );
@@ -324,7 +332,7 @@ class ProfileManagementService {
     try {
       const profileDoc = doc(db, 'userProfiles', userId);
       const docSnap = await getDoc(profileDoc);
-      
+
       if (docSnap.exists()) {
         const data = docSnap.data();
         return {
@@ -333,7 +341,7 @@ class ProfileManagementService {
           updatedAt: data.updatedAt?.toDate() || new Date()
         } as UserProfile;
       }
-      
+
       return null;
     } catch (error) {
       console.error('Error fetching profile from Firestore:', error);
@@ -414,14 +422,14 @@ class ProfileManagementService {
   }
 
   private isValidPhone(phone: string): boolean {
-    // Basic phone validation - can be enhanced based on requirements
-    const phoneRegex = /^[+]?[\d\s\-\(\)]{10,15}$/;
-    return phoneRegex.test(phone.trim());
+    // Strip formatting characters, validate digit count
+    const digitsOnly = phone.replace(/[\s\-\(\)]/g, '');
+    const phoneRegex = /^\+?\d{10,15}$/;
+    return phoneRegex.test(digitsOnly);
   }
-
   private isValidLanguage(language: Language): boolean {
     const validLanguages: Language[] = [
-      'hi', 'en', 'bn', 'te', 'mr', 'ta', 'gu', 'kn', 'ml', 'or', 'pa', 
+      'hi', 'en', 'bn', 'te', 'mr', 'ta', 'gu', 'kn', 'ml', 'or', 'pa',
       'as', 'ur', 'sd', 'ne', 'ks', 'kok', 'mni', 'sat', 'doi', 'mai', 'bho'
     ];
     return validLanguages.includes(language);

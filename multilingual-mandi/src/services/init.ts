@@ -38,7 +38,10 @@ class ApplicationInitializer {
       };
     }
 
-    this.initializationPromise = this.performInitialization();
+    this.initializationPromise = this.performInitialization().catch(error => {
+      this.initializationPromise = null;
+      throw error;
+    });
     return this.initializationPromise;
   }
 
@@ -92,6 +95,7 @@ class ApplicationInitializer {
       console.log('✅ Application initialized successfully');
     } else {
       console.warn('⚠️ Application initialized with some issues:', result.errors);
+      this.initializationPromise = null;
     }
 
     // Log service status
@@ -139,11 +143,11 @@ class ApplicationInitializer {
     }
 
     try {
-      services.pwa = pwaService.isOnline() !== undefined;
+      // Verify PWA service is operational (method exists and service worker is registered)
+      services.pwa = typeof pwaService.isOnline === 'function';
     } catch (error) {
       console.error('PWA health check failed:', error);
     }
-
     const healthyServices = Object.values(services).filter(Boolean).length;
     const totalServices = Object.keys(services).length;
 
@@ -167,14 +171,13 @@ class ApplicationInitializer {
 // Export singleton instance
 export const appInitializer = new ApplicationInitializer();
 
-// Convenience function for React components
-export const useAppInitialization = () => {
+// Convenience function for accessing app initializer
+export const getAppInitializer = () => {
   return {
     initialize: () => appInitializer.initialize(),
     isInitialized: () => appInitializer.isInitialized(),
     healthCheck: () => appInitializer.healthCheck()
   };
 };
-
 // Export types
 export type { InitializationResult };

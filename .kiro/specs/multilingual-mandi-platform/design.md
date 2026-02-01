@@ -170,8 +170,7 @@ interface DealManagementService {
   updateDealStatus(dealId: string, status: DealStatus): Promise<void>
   initializePayment(dealId: string, paymentMethod: PaymentMethod): Promise<PaymentResult>
   trackDelivery(dealId: string): Promise<DeliveryStatus>
-  raiseDdispute(dealId: string, reason: string): Promise<Dispute>
-}
+  raiseDispute(dealId: string, reason: string): Promise<Dispute>}
 
 interface Deal {
   id: string
